@@ -28,11 +28,11 @@ Every pattern and body of a transformation is an expression. All expressions can
 
 Tampio supports two kinds of expressions: _words_ and _function calls_. A word is simply a word in the source code.
 
-There are three types of function calls: genetive calls, essive calls, binary operators. Each function call has a unique syntax.
+There are three types of function calls: genitive calls, essive calls, binary operators. Each function call has a unique syntax.
 
-Genetive calls have form `argumentin funktio`, where `argumentti` is the argument and `funktio` is the name of the function. The argument must be in the genetive case. These calls can only have one argument and have the highest precedence. When the expression is inflected, it is the name of the function that is inflected.
+Genitive calls have form `argumentin funktio`, where `argumentti` is the argument and `funktio` is the name of the function. The argument must be in the genitive case. These calls can only have one argument and have the highest precedence. When the expression is inflected, it is the name of the function that is inflected.
 
-Essive calls can have either one or two arguments. They have form `argumentti funktiona [argumentilla]` where the optional last argument must be inflected in a case that is not nominative, genetive or essive. Essive calls are right-associative, meaning that eg. `a f:nä b:llä g:nä` means `f(a,g(b))` in pseudocode.
+Essive calls can have either one or two arguments. They have form `argumentti funktiona [argumentilla]` where the optional last argument must be inflected in a case that is not nominative, genitive or essive. Essive calls are right-associative, meaning that eg. `a f:nä b:llä g:nä` means `f(a,g(b))` in pseudocode.
 
 There are two binary operators in addition to conjunctions in the language: `plus` and `miinus`. Their first operand must be in the nominative case and the second is inflected in the case of the expression.
 
@@ -45,8 +45,8 @@ The conjunctions `ja`, `tai` and `sekä` have usually the same precedence as oth
 
 |Precedence   |Name                   |Syntax        |Pseudocode |Inflected word|Notes|
 |-------------|-----------------------|--------------|-----------|--------------|-----|
-|1            |Genetive               |`a:n f`       |`f(a)`     |`f`           |     |
-|2            |Essive                 |`a f:nä b:llä`|`f(a,b)`   |`a`           |The case of `b` may vary, but must not be nominative, genetive or essive|
+|1            |Genitive               |`a:n f`       |`f(a)`     |`f`           |     |
+|2            |Essive                 |`a f:nä b:llä`|`f(a,b)`   |`a`           |The case of `b` may vary, but must not be nominative, genitive or essive|
 |3            |Binary operator        |`a plus b`    |`plus(a,b)`|`b`           |Available operators: `plus`, `miinus`|
 |3<sup>a</sup>|Conjunction<sup>b</sup>|`a ja b`      |`ja(a,b)`  |`a` and `b`   |Available conjunctions: `ja`, `sekä`, `tai`|
 
@@ -61,7 +61,7 @@ In Finnish nouns are inflected in [cases][wp-case]. There are a few of them, lis
 |Case       |Suffix|Example     |Notes      |
 |-----------|------|------------|-----------|
 |Nominative |-     |kissa       |           |
-|Genetive   |-n    |kissa*n*    |           |
+|Genitive   |-n    |kissa*n*    |           |
 |Partitive  |-A    |kissa*a*    |           |
 |Essive     |-nA   |kissa*na*   |           |
 |Translative|-ksi  |kissa*ksi*  |           |
