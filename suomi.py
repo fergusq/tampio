@@ -195,11 +195,17 @@ def as2w(w):
 	return sorted(w, key=lambda a: 1 if a is Noun else 0)[0]
 
 class EqTree:
-	def __init__(self, left, right):
+	def __init__(self, op, left, right):
+		self.op = op
 		self.left = left
 		self.right = right
 	def str(self):
-		return self.left.str() + " = " + self.right.str()
+		if self.query():
+			return self.left.str()
+		elif self.op == "#olla":
+			return self.left.str() + " = " + self.right.str()
+		elif self.op == "#esittää":
+			return self.left.str() + ' = "' + self.right.str() + '"'
 	def query(self):
 		return self.right == None
 
@@ -210,16 +216,16 @@ def parseEq(words, allowQueries):
 		sys.stderr.write("Syntax error: illegal case (" + left.str() + ")\n")
 		raise(StopEvaluation())
 	if len(words) == 0 and allowQueries:
-		return EqTree(left, None)
+		return EqTree("", left, None)
 	w = next(words)
-	if w.str() != "#olla":
-		sys.stderr.write("Syntax error: expected #olla (at " + w.str() + ")\n")
+	if w.str() not in ["#olla", "#esittää"]:
+		sys.stderr.write("Syntax error: expected 'on' or 'esitetään' (at " + w.str() + ")\n")
 		raise(StopEvaluation())
 	c, right = parsePattern(words)
 	if c != "nimento":
 		sys.stderr.write("Syntax error: illegal case (" + right.str() + ")\n")
 		raise(StopEvaluation())
-	return EqTree(left, right)
+	return EqTree(w.str(), left, right)
 
 class VarTree:
 	def __init__(self, name):
@@ -273,7 +279,7 @@ class CallTree:
 		return False, {}
 	def inflect(self, case):
 		if self in REPRS:
-			return '"' + inflect(REPRS[self], case) + '"'
+			return '"' + REPRS[self].inflect(case) + '"'
 		if self.head.str() in ["&ja", "&sekä", "&tai"]:
 			return self.args[0].inflect(case) + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if self.head.str() in [".ynnä", "$plus", "$miinus"]:
@@ -358,24 +364,6 @@ def parseEssive(root, words, allowFullPattern):
 				return root
 	return root
 
-CONST_ONE = CallTree(VarTree("$seuraaja"), [VarTree("$nolla")], "", ["omanto"])
-CONST_TWO = CallTree(VarTree("$seuraaja"), [CONST_ONE], "", ["omanto"])
-CONST_THREE = CallTree(VarTree("$seuraaja"), [CONST_TWO], "", ["omanto"])
-CONST_FOUR = CallTree(VarTree("$seuraaja"), [CONST_THREE], "", ["omanto"])
-CONST_FIVE = CallTree(VarTree("$seuraaja"), [CONST_FOUR], "", ["omanto"])
-CONST_SIX = CallTree(VarTree("$seuraaja"), [CONST_FIVE], "", ["omanto"])
-
-REPRS = {
-	CONST_ONE: '$yksi',
-	CONST_TWO: '$kaksi',
-	CONST_THREE: '$kolme',
-	CONST_FOUR: '$neljä',
-	CONST_FIVE: '$viisi',
-	CONST_SIX: '$kuusi'
-}
-
-print(CONST_ONE.inflect("nimento"))
-
 stack = []
 
 class StopEvaluation(Exception):
@@ -422,7 +410,7 @@ def evals_(tree, subs={}):
 					break
 		if a is None:
 			if isinstance(tree, CallTree):
-				a = CallTree(evals(tree.head, subs), [evals(arg, subs) for arg in tree.args], tree.headInfl, tree.argInfls)
+				a = CallTree(evals_(tree.head, subs), [evals_(arg, subs) for arg in tree.args], tree.headInfl, tree.argInfls)
 			else:
 				a = tree
 	except Exception as e:
@@ -432,6 +420,7 @@ def evals_(tree, subs={}):
 	return a
 
 DEFS = []
+REPRS = {}
 
 def evalFile(filename):
 	with open(filename) as f:
@@ -448,8 +437,10 @@ def evalLine(line, allowQueries=False):
 	#print(eq.str())
 	if eq.query():
 		return evals(eq.left)
-	else:
+	elif eq.op == "#olla":
 		DEFS += [eq]
+	elif eq.op == "#esittää":
+		REPRS[evals(eq.left)] = eq.right
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 evalFile(os.path.join(SCRIPT_DIR, 'std.suomi'))
