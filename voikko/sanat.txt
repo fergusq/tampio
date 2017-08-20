@@ -35477,3 +35477,6 @@ Züri=ch;subst-kalsium
 Öölanti;subst-risti-av1
 ööli;subst-risti
 seuraaja;subst-koira
+yksi;subst-kaksi
+kaksi;subst-kaksi
+kolme;subst-kolme

@@ -1607,6 +1607,45 @@ instruktiivi_mon	0	n	s	ps=f
 end: rules
 end: class
 
+# Kotus 31
+class: 31
+sm-class: kaksi
+match-word: (?:ksi)
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	ksi	hte	s	ps=r
+genetiivi	ksi	hden	w
+partitiivi	ksi	hta	s
+translatiivi	ksi	hdeksi	w	ps=f
+translatiivi	ksi	hdekse	w	ps=r
+essiivi		ksi	htena	s
+inessiivi	ksi	hdessa	w
+elatiivi	ksi	hdesta	w
+illatiivi	ksi	hteen	s
+adessiivi	ksi	hdella	w
+ablatiivi	ksi	hdelta	w
+allatiivi	ksi	hdelle	w
+abessiivi	ksi	hdetta	w	ps=f
+nominatiivi_mon	ksi	hdet	s	ps=f
+genetiivi_mon	0	en	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
 
 # Kotus 32 ien
 class: 32
@@ -2216,5 +2255,44 @@ komitatiivi_mon	0	ine	s	ps=r
 komitatiivi_mon	0	eine	s	ps=r
 instruktiivi_mon	0	in	s	ps=f
 instruktiivi_mon	0	ein	s	ps=f
+end: rules
+end: class
+
+# Kotus 90 kolme
+class: 90
+sm-class: kolme
+match-word: kolme
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi	0	n	s
+partitiivi	0	a	s
+translatiivi	0	ksi	s	ps=f
+translatiivi	0	kse	s	ps=r
+essiivi		0	na	s
+inessiivi	0	ssa	s
+elatiivi	0	sta	s
+illatiivi	0	en	s
+adessiivi	0	lla	s
+ablatiivi	0	lta	s
+allatiivi	0	lle	s
+abessiivi	0	tta	s	ps=f
+nominatiivi_mon	0	t	s	ps=f
+genetiivi_mon	e	ien	s
+partitiivi_mon	e	ia	s
+translatiivi_mon	e	iksi	s	ps=f
+translatiivi_mon	e	ikse	s	ps=r
+essiivi_mon	e	ina	s
+inessiivi_mon	e	issa	s
+elatiivi_mon	e	ista	s
+illatiivi_mon	e	iin	s
+adessiivi_mon	e	illa	s
+ablatiivi_mon	e	ilta	s
+allatiivi_mon	e	ille	s
+abessiivi_mon	e	itta	s	ps=f
+komitatiivi_mon	e	ine	s	ps=r
+instruktiivi_mon	e	in	s	ps=f
 end: rules
 end: class
