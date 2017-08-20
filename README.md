@@ -37,7 +37,7 @@ Genitive calls have form `argumentin funktio`, where `argumentti` is the argumen
 
 Essive calls can have either one or two arguments. They have form `argumentti funktiona [argumentilla]` where the optional last argument must be inflected in a case that is not nominative, genitive or essive. Essive calls are right-associative, meaning that eg. `a f:nä b:llä g:nä` means `f(a,g(b))` in pseudocode.
 
-There are two binary operators in addition to conjunctions in the language: `plus` and `miinus`. Their first operand must be in the nominative case and the second is inflected in the case of the expression.
+There are three binary operators in addition to conjunctions in the language: `plus`, `ynnä` and `miinus`. Their first operand must be in the nominative case and the second is inflected in the case of the expression.
 
 The conjunctions `ja`, `tai` and `sekä` have usually the same precedence as other binary operators. They require that the first operand is in the same case as the second is. This can lead to situations where the conjunctions actually have a very high precedence:
 
@@ -50,7 +50,7 @@ The conjunctions `ja`, `tai` and `sekä` have usually the same precedence as oth
 |-------------|-----------------------|--------------|-----------|--------------|-----|
 |1            |Genitive               |`a:n f`       |`f(a)`     |`f`           |     |
 |2            |Essive                 |`a f:nä b:llä`|`f(a,b)`   |`a`           |The case of `b` may vary, but must not be nominative, genitive or essive|
-|3            |Binary operator        |`a plus b`    |`plus(a,b)`|`b`           |Available operators: `plus`, `miinus`|
+|3            |Binary operator        |`a plus b`    |`plus(a,b)`|`b`           |Available operators: `plus`, `ynnä`, `miinus`|
 |3<sup>a</sup>|Conjunction<sup>b</sup>|`a ja b`      |`ja(a,b)`  |`a` and `b`   |Available conjunctions: `ja`, `sekä`, `tai`|
 
 <sup>a</sup>The precedence level of a conjunction depends on the cases of the operands, as both operands must share the same case.
