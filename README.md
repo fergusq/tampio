@@ -10,15 +10,18 @@ Tampio is a purely functional programming language designed to resemble written 
 
 A transformation definition consists of _pattern_ and _body_, separated by the `on` keyword. For example:
 
-    kissan nimi on maija
-    tulos on kissan nimi
+    >>> kissan nimi on maija
+    >>> tulos on kissan nimi
+    >>> tulos
+    maija
 
 The above program declares that `kissan nimi` is transformed to `maija` and `tulos` is transformed to `kissan nimi`. Using these rules, `tulos` evaluates to `maija`.
 
 The patterns can contain variables, that match to all expressions.
 
-    x:n nimi on maija
-    tulos on koiran nimi
+    >>> x:n nimi on maija
+    >>> koiran nimi
+    maija
 
 Here, `koiran nimi` matches `x:n nimi` and evaluates to `maija`.
 
@@ -41,7 +44,7 @@ The conjunctions `ja`, `tai` and `sekä` have usually the same precedence as oth
     a f:nä b:llä ja c     = ja(f(a,b),c)
     a f:nä b:llä ja c:llä = f(a,ja(b,c))
 
-## Syntax cheat sheet
+### Syntax cheat sheet
 
 |Precedence   |Name                   |Syntax        |Pseudocode |Inflected word|Notes|
 |-------------|-----------------------|--------------|-----------|--------------|-----|
@@ -53,6 +56,37 @@ The conjunctions `ja`, `tai` and `sekä` have usually the same precedence as oth
 <sup>a</sup>The precedence level of a conjunction depends on the cases of the operands, as both operands must share the same case.
 
 <sup>b</sup>Conjunctions are a special type of binary operator that require that the operands always are in the same case. Other binary operators require that the first operand is in the nominative case.
+
+## Evaluation
+
+An expression is evaluated in the following steps:
+
+1. The expression is matches against every pattern in the current file, from up to down. The expression is substituted with the first matching expression.
+2. If no expression matches, apply steps 1 and 2 (but not step 3) to each nested expression.
+3. Repeat steps 1 and 2 until the expression and nested expressions do not match any pattern.
+
+For example, given the following definitions, `nollan seuraaja plus nollan seuraaja` is evaluated as shown.
+
+    nolla plus x on x                          # def 1
+    x:n seuraaja plus y on x plus y:n seuraaja # def 2
+    
+    nollan seuraaja plus nollan seuraaja
+    # (step 1) matches def 2 (x:n seuraaja plus y)
+    # (step 3) repeat
+    x plus y:n seuraaja
+    # (step 1) does not match
+    # (step 2) evaluate x and y:n seuraaja (x = nolla, y = nollan seuraaja)
+    # (step 3) repeat
+    nolla plus nollan seuraajan seuraaja
+    # (step 1) matches def 1 (nolla plus x)
+    # (step 3) repeat
+    x
+    # (step 1) matches (x = nollan seuraajan seuraaja)
+    # (step 3) repeat
+    nollan seuraajan seuraaja
+    # (step 1) does not match
+    # (step 2) no nested expression matches
+    # (step 3) no need to repeat, stop evaluation
 
 ## Finnish declension
 
