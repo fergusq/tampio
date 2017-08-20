@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, traceback, argparse, operator
+import os, sys, traceback, argparse, operator
 from voikko.libvoikko import Voikko, Token
 from voikko.inflect_word import inflect_word
 
@@ -150,6 +150,8 @@ def lexLine(line):
 				alternatives += [Conj(bf)]
 			#else:
 			#	print("Unknown word:", bf, analysis)
+		else:
+			alternatives += [Noun(word, "nimento", "singular")]
 		output += [alternatives]
 	return output
 
@@ -224,6 +226,8 @@ class VarTree:
 		self.name = name
 	def __eq__(self, tree):
 		return type(tree) == VarTree and self.name == tree.name
+	def __hash__(self):
+		return hash(self.name)
 	def str(self):
 		return self.name
 	def match(self, tree, subs):
@@ -243,7 +247,9 @@ class CallTree:
 		self.headInfl = headInfl
 		self.argInfls = argInfls
 	def __eq__(self, tree):
-		return type(tree) == CallTree and self.head == tree.head and self.args == tree.args
+		return type(tree) == CallTree and self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
+	def __hash__(self):
+		return hash(self.head) + sum([hash(a) for a in self.args]) + hash(self.headInfl) + sum([hash(ai) for ai in self.argInfls])
 	def str(self):
 		return self.head.str() + "(" + ", ".join([arg.str() for arg in self.args]) + ")"
 	def match(self, tree, subs0):
@@ -266,6 +272,8 @@ class CallTree:
 			return True, subs
 		return False, {}
 	def inflect(self, case):
+		if self in REPRS:
+			return '"' + inflect(REPRS[self], case) + '"'
 		if self.head.str() in ["&ja", "&sekä", "&tai"]:
 			return self.args[0].inflect(case) + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if self.head.str() in [".ynnä", "$plus", "$miinus"]:
@@ -350,6 +358,24 @@ def parseEssive(root, words, allowFullPattern):
 				return root
 	return root
 
+CONST_ONE = CallTree(VarTree("$seuraaja"), [VarTree("$nolla")], "", ["omanto"])
+CONST_TWO = CallTree(VarTree("$seuraaja"), [CONST_ONE], "", ["omanto"])
+CONST_THREE = CallTree(VarTree("$seuraaja"), [CONST_TWO], "", ["omanto"])
+CONST_FOUR = CallTree(VarTree("$seuraaja"), [CONST_THREE], "", ["omanto"])
+CONST_FIVE = CallTree(VarTree("$seuraaja"), [CONST_FOUR], "", ["omanto"])
+CONST_SIX = CallTree(VarTree("$seuraaja"), [CONST_FIVE], "", ["omanto"])
+
+REPRS = {
+	CONST_ONE: '$yksi',
+	CONST_TWO: '$kaksi',
+	CONST_THREE: '$kolme',
+	CONST_FOUR: '$neljä',
+	CONST_FIVE: '$viisi',
+	CONST_SIX: '$kuusi'
+}
+
+print(CONST_ONE.inflect("nimento"))
+
 stack = []
 
 class StopEvaluation(Exception):
@@ -407,6 +433,11 @@ def evals_(tree, subs={}):
 
 DEFS = []
 
+def evalFile(filename):
+	with open(filename) as f:
+		for line in f:
+			evalLine(line)
+
 def evalLine(line, allowQueries=False):
 	global DEFS
 	output = lexLine(line)
@@ -420,15 +451,16 @@ def evalLine(line, allowQueries=False):
 	else:
 		DEFS += [eq]
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+evalFile(os.path.join(SCRIPT_DIR, 'std.suomi'))
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Interpret code.')
 	parser.add_argument('filename', type=str, nargs='?',
 		help='source code file')
 	args = parser.parse_args()
 	if args.filename:
-		with open(args.filename) as f:
-			for line in f:
-				evalLine(line)
+		evalFile(args.filename)
 		print(evals(VarTree("$tulos"), {}).inflect("nimento"))
 	else:
 		print("""Tampio Interpreter
