@@ -9,23 +9,38 @@ x kerrottuna nollalla on nolla
 x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
 
 # vakioita
-yksi on nollan seuraaja
-kaksi on yhden seuraaja
-kolme on kahden seuraaja
-neljä on kolmen seuraaja
-viisi on neljän seuraaja
-kuusi on viiden seuraaja
+1 on nollan seuraaja
+2 on 1:n seuraaja
+3 on 2:n seuraaja
+4 on 3:n seuraaja
+5 on 4:n seuraaja
+6 on 5:n seuraaja
+7 on 6:n seuraaja
+8 on 7:n seuraaja
+9 on 8:n seuraaja
+10 on 9:n seuraaja
+
+yksi on 1
+kaksi on 2
+kolme on 3
+neljä on 4
+viisi on 5
+kuusi on 6
+seitsemän on 7
+kahdeksan on 8
+yhdeksän on 9
 
 # esityksiä
-yksi esitetään "1"
-kaksi esitetään "2"
-kolme esitetään "3"
-neljä esitetään "4"
-viisi esitetään "5"
-kuusi esitetään "6"
-kuuden seuraaja esitetään "7"
-kuuden seuraajan seuraaja esitetään "8"
-kuuden seuraajan seuraajan seuraaja esitetään "9"
+1 esitetään "1"
+2 esitetään "2"
+3 esitetään "3"
+4 esitetään "4"
+5 esitetään "5"
+6 esitetään "6"
+7 esitetään "7"
+8 esitetään "8"
+9 esitetään "9"
+10 esitetään 10
 
 ## listat
 
