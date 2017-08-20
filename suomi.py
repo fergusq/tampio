@@ -97,7 +97,7 @@ def inflect(word, case):
 		case_latin += "_mon"
 	word = word[1:]
 	
-	if re.match("[0-9]+", word):
+	if re.match(r"[0-9]+", word):
 		if case == "sisatulento":
 			if word[-1] in "123560":
 				return word + ":een"
@@ -249,7 +249,7 @@ class VarTree:
 	def str(self):
 		return self.name
 	def match(self, tree, subs):
-		if len(self.name) == 2:
+		if len(self.name) == 2 and re.match(r"\$[^0-9]", self.name):
 			return True, {self.name: (tree, subs)}
 		if isinstance(tree, VarTree):
 			if self.name == tree.name:
