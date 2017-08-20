@@ -11,6 +11,10 @@ x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
 # vakioita
 yksi on nollan seuraaja
 kaksi on yhden seuraaja
+kolme on kahden seuraaja
+neljä on kolmen seuraaja
+viisi on neljän seuraaja
+kuusi on viiden seuraaja
 
 ## listat
 
