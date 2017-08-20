@@ -1,0 +1,867 @@
+# Kotus 52 ampua
+class: 52
+sm-class: punoa
+rmsfx: a
+match-word: VA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	0	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+# Kotus 53 muistaa ======================
+
+class: 53
+sm-class: aavistaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!subst_Us	a	us	w
+end: rules
+end: class
+
+class: 53
+sm-class: hidastaa
+match-word: tAA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	s
+preesens_yks_1	a	n	w
+imperfekti_yks_3	aa	i	s
+kondit_yks_3	a	isi	s
+imperatiivi_yks_3	a	koon	s
+partisiippi_2	a	nut	s
+imperfekti_pass	aa	ettiin	w
+!verbi_ellA	aa	ella	w
+!verbi_tUA	aa	ua	w
+!subst_Us	aa	us	w
+end: rules
+end: class
+
+class: 53
+sm-class: heittää
+rmsfx: a
+match-word: ttAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!subst_tO	a	o	s
+!subst_ntA	0	nta	w
+end: rules
+end: class
+
+class: 53
+sm-class: muistaa
+match-word: CAA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	s
+preesens_yks_1	a	n	w
+imperfekti_yks_3	aa	i	s
+kondit_yks_3	a	isi	s
+imperatiivi_yks_3	a	koon	s
+partisiippi_2	a	nut	s
+imperfekti_pass	aa	ettiin	w
+!verbi_ellA	aa	ella	w
+!verbi_UA	aa	ua	w
+!subst_tO	aa	o	s
+end: rules
+end: class
+
+# FIXME: tässä luokassa ei tueta sanoja, joilla ei ole astevaihtelua
+class: 53
+sm-class: inttää
+rmsfx: a
+match-word: [hit]tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+end: rules
+end: class
+
+class: 53
+sm-class: sulaa
+rmsfx: a
+match-word: CAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+end: rules
+end: class
+
+class: 53
+sm-class: hohtaa
+rmsfx: a
+match-word: AA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!verbi_ttAA	0	ttaa	w
+!subst_tO	a	o	s
+end: rules
+end: class
+
+class: 53
+sm-class: hujahtaa
+rmsfx: a
+match-word: VhtAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!verbi_UttA	hta	uttaa	s
+!subst_Us	a	us	w
+end: rules
+end: class
+
+class: 53
+sm-class: kirjoittaa
+rmsfx: a
+match-word: VttAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!verbi_ttAUtUA	0	utua	s
+!subst_Us	a	us	w
+end: rules
+end: class
+
+class: 53
+sm-class: loistaa
+match-word: CAA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	s
+preesens_yks_1	a	n	w
+imperfekti_yks_3	aa	i	s
+kondit_yks_3	a	isi	s
+imperatiivi_yks_3	a	koon	s
+partisiippi_2	a	nut	s
+imperfekti_pass	aa	ettiin	w
+!subst_tO	aa	o	s
+end: rules
+end: class
+
+# End Kotus 53 muistaa ==================
+
+# Kotus 54 huutaa =======================
+
+class: 54
+sm-class: vuotaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+end: rules
+end: class
+
+class: 54
+sm-class: huutaa
+rmsfx: a
+match-word: [Vn]tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+end: rules
+end: class
+
+class: 54
+sm-class: sukeltaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!subst_Us	a	us	w
+end: rules
+end: class
+
+class: 54
+sm-class: paleltaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!subst_Us	a	us	w
+end: rules
+end: class
+
+class: 54
+sm-class: murtaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+note: kaksitavuinen sana
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!subst_Os	a	os	w
+!subst_tO	a	o	s
+end: rules
+end: class
+
+class: 54
+sm-class: juontaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!subst_tO	a	o	s
+end: rules
+end: class
+
+class: 54
+sm-class: pahentaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+!verbi_UA	a	ua	s
+!subst_Us	a	us	w
+end: rules
+end: class
+
+# End Kotus 54 huutaa ===================
+
+
+# Kotus 55 soutaa
+class: 55
+sm-class: soutaa
+rmsfx: a
+match-word: tAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	i	s
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+!verbi_ellA	a	ella	w
+end: rules
+end: class
+
+
+# Kotus 56 kaivaa
+class: 56
+sm-class: kaivaa
+rmsfx: a
+match-word: CAA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	a	oi	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	a	ettiin	w
+end: rules
+end: class
+
+
+# Kotus 58 laskea
+class: 58
+sm-class: laskea
+rmsfx: a
+match-word: CeA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	e	i	s
+kondit_yks_3	e	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+
+# Kotus 59 tuntea
+class: 59
+sm-class: tuntea
+rmsfx: a
+match-word: tuntea
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	te	si	s
+kondit_yks_3	e	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+
+# Kotus 60 lähteä
+class: 60
+sm-class: lähteä
+rmsfx: a
+match-word: lähteä
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	e	i	s
+imperfekti_yks_3	hte	ksi	s	prio=2
+kondit_yks_3	e	isi	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+
+# Kotus 61 sallia
+class: 61
+sm-class: sallia
+rmsfx: a
+match-word: CiA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	a	s
+preesens_yks_1	0	n	w
+imperfekti_yks_3	0	0	s
+kondit_yks_3	0	si	s
+imperatiivi_yks_3	0	koon	s
+partisiippi_2	0	nut	s
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+
+# Kotus 62 voida (1/2)
+class: 62
+sm-class: voida
+match-word: idA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	w
+preesens_yks_1	da	n	w
+imperfekti_yks_3	da	0	w
+kondit_yks_3	da	si	w
+imperatiivi_yks_3	da	koon	w
+partisiippi_2	da	nut	w
+imperfekti_pass	a	iin	s
+end: rules
+end: class
+
+# Kotus 62 voida (2/2)
+class: 62
+sm-class: kanavoida
+match-word: idA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	w
+preesens_yks_1	da	n	w
+imperfekti_yks_3	da	0	w
+kondit_yks_3	da	si	w
+imperatiivi_yks_3	da	koon	w
+partisiippi_2	da	nut	w
+imperfekti_pass	a	iin	s
+!verbi_tuA	a	ua	s
+end: rules
+end: class
+
+
+# Kotus 63 saada
+class: 63
+sm-class: saada
+match-word: CV[AUO]dA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	w
+preesens_yks_1	da	n	w
+imperfekti_yks_3	[ayä]da	i	w
+kondit_yks_3	[ayä]da	isi	w
+imperatiivi_yks_3	da	koon	w
+partisiippi_2	da	nut	w
+imperfekti_pass	da	tiin	w
+end: rules
+end: class
+
+
+# Kotus 64 juoda
+class: 64
+sm-class: juoda
+match-word: [eO]dA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	w
+preesens_yks_1	da	n	w
+imperfekti_yks_3	uoda	oi	w
+imperfekti_yks_3	ieda	ei	w
+kondit_yks_3	uoda	oisi	w
+kondit_yks_3	ieda	eisi	w
+imperatiivi_yks_3	da	koon	w
+partisiippi_2	da	nut	w
+imperfekti_pass	da	tiin	s
+end: rules
+end: class
+
+
+# Kotus 66 rohkaista ====================
+# FIXME: rangaista (nuolaista-av2)
+class: 66
+sm-class: nuolaista
+rmsfx: sta
+match-word: stA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	sta	w
+preesens_yks_1	0	sen	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	sisi	s
+imperatiivi_yks_3	0	skoon	s
+partisiippi_2	0	ssut	s
+imperfekti_pass	0	stiin	s
+end: rules
+end: class
+
+class: 66
+sm-class: kihistä
+rmsfx: sta
+match-word: istA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	sta	w
+preesens_yks_1	0	sen	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	sisi	s
+imperatiivi_yks_3	0	skoon	s
+partisiippi_2	0	ssut	s
+imperfekti_pass	0	stiin	s
+!verbi_AjAA	i	ajaa	s
+!verbi_AhtAA	i	ahtaa	s
+!verbi_AUttAA	i	auttaa	s
+!verbi_AUtellA	i	autella	s
+end: rules
+end: class
+
+class: 66
+sm-class: kitistä
+rmsfx: sta
+match-word: istA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	sta	w
+preesens_yks_1	0	sen	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	sisi	s
+imperatiivi_yks_3	0	skoon	s
+partisiippi_2	0	ssut	s
+imperfekti_pass	0	stiin	s
+!verbi_AjAA	i	ajaa	s #FIXME: a<->ä
+end: rules
+end: class
+
+# End Kotus 66 rohkaista ================
+
+# Kotus 67 tulla (1/2)
+class: 67
+sm-class: katsella
+rmsfx: lla
+match-word: VllA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	lla	w
+preesens_yks_1	0	len	s
+imperfekti_yks_3	0	li	s
+kondit_yks_3	0	lisi	s
+imperatiivi_yks_3	0	lkoon	w
+partisiippi_2	0	llut	w
+imperfekti_pass	0	ltiin	w
+end: rules
+end: class
+
+# Kotus 67 tulla (2/2)
+class: 67
+sm-class: mennä
+rmsfx: nna
+match-word: VnnA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	nna	w
+preesens_yks_1	0	nen	s
+imperfekti_yks_3	0	ni	s
+kondit_yks_3	0	nisi	s
+imperatiivi_yks_3	0	nkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ntiin	w
+end: rules
+end: class
+
+
+# Kotus 68 tupakoida
+class: 68
+sm-class: haravoida
+match-word: idA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	w
+preesens_yks_1	da	n	w
+preesens_yks_1	a	sen	s
+imperfekti_yks_3	da	0	w
+imperfekti_yks_3	a	si	s
+kondit_yks_3	da	si	w
+kondit_yks_3	a	sisi	s
+imperatiivi_yks_3	da	koon	w
+imperatiivi_yks_3	a	sekoon	s
+partisiippi_2	da	nut	w
+imperfekti_pass	a	iin	s
+verbi_tUA	a	ua	s
+end: rules
+end: class
+
+
+# Kotus 69 valita
+class: 69
+sm-class: valita
+rmsfx: tA
+match-word: itA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	ta	w
+preesens_yks_1	0	tsen	s
+imperfekti_yks_3	0	tsi	s
+kondit_yks_3	0	tsisi	s
+imperatiivi_yks_3	0	tkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+
+# Kotus 72 vanheta
+class: 72
+sm-class: aleta
+rmsfx: tA
+match-word: VtA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	ta	w
+preesens_yks_1	0	nen	s
+imperfekti_yks_3	0	ni	s
+kondit_yks_3	0	nisi	s
+imperatiivi_yks_3	0	tkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+# Kotus 73 salata (1/2)
+class: 73
+sm-class: saneerata
+match-word: CAtA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	0	w
+preesens_yks_1	ta	an	s
+imperfekti_yks_3	ta	si	s
+kondit_yks_3	ta	isi	s
+imperatiivi_yks_3	ta	tkoon	w
+partisiippi_2	ta	nnut	w
+imperfekti_pass	ta	ttiin	w
+end: rules
+end: class
+
+# Kotus 73 salata (2/2)
+class: 73
+sm-class: salata
+rmsfx: ta
+match-word: AtA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	ta	w
+preesens_yks_1	0	an	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	tkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ttiin	w
+!verbi_illA	0	illa	s
+end: rules
+end: class
+
+
+# Kotus 74 katketa (1/2)
+class: 74
+sm-class: katketa
+rmsfx: tA
+match-word: (?:e|O|U)tA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	ta	w
+preesens_yks_1	0	an	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	aisi	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	tkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+# Kotus 74 katketa (2/2)
+class: 74
+sm-class: kohota
+rmsfx: tA
+match-word: (?:O|U)tA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	ta	w
+preesens_yks_1	0	an	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	aisi	s
+kondit_yks_3	0	isi	s
+imperatiivi_yks_3	0	tkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ttiin	w
+!verbi_illA	0	illa	s
+end: rules
+end: class
+
+
+# Kotus 75 selvitä (1/2)
+class: 75
+sm-class: haluta
+rmsfx: tA
+match-word: VtA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	ta	w
+preesens_yks_1	0	an	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	aisi	s
+imperatiivi_yks_3	0	tkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ttiin	w
+end: rules
+end: class
+
+# Kotus 75 selvitä (2/2)
+class: 75
+sm-class: juoruta
+rmsfx: tA
+match-word: UtA
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+infinitiivi_1	0	ta	w
+preesens_yks_1	0	an	s
+imperfekti_yks_3	0	si	s
+kondit_yks_3	0	aisi	s
+imperatiivi_yks_3	0	tkoon	w
+partisiippi_2	0	nnut	w
+imperfekti_pass	0	ttiin	w
+!verbi_illA	0	illa	s
+end: rules
+end: class
+
+
+# Kotus 78 kaikaa
+class: 78
+sm-class: kaikaa
+match-word: CAA
+consonant-gradation: -
+group: t
+transform-group: e
+note: vaillinaisesti taipuva
+rules:
+infinitiivi_1	0	0	w
+kondit_yks_3	a	isi	s
+end: rules
+end: class

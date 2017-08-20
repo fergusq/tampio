@@ -1,0 +1,2220 @@
+# Kotus 1 talo
+class: 1
+sm-class: valo
+match-word: (?:O|U)
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([ouy])	(1)(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	0	jen	s
+partitiivi_mon	0	ja	s
+translatiivi_mon	0	iksi	w	ps=f
+translatiivi_mon	0	ikse	w	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	w
+elatiivi_mon	0	ista	w
+illatiivi_mon	0	ihin	s
+adessiivi_mon	0	illa	w
+ablatiivi_mon	0	ilta	w
+allatiivi_mon	0	ille	w
+abessiivi_mon	0	itta	w	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 2 palvelu, 4 laatikko
+# astevaihtelu: ahdinko
+# Luokkaan 4 kuuluvat kkO-loppuset sanat, muut luokkaan 2
+class: 2,4
+sm-class: arvelu
+match-word: C(?:O|U)
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([ou])	(1)(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	0	jen	s
+genetiivi_mon	0	iden	w
+genetiivi_mon	0	itten	w	prio=2
+partitiivi_mon	0	ja	s
+partitiivi_mon	0	ita	w
+translatiivi_mon	0	iksi	w	ps=f
+translatiivi_mon	0	ikse	w	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	w
+elatiivi_mon	0	ista	w
+illatiivi_mon	0	ihin	s
+illatiivi_mon	kko	koihin	s
+adessiivi_mon	0	illa	w
+ablatiivi_mon	0	ilta	w
+allatiivi_mon	0	ille	w
+abessiivi_mon	0	itta	w	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 3 kallio, oboe
+class: 3
+sm-class: autio
+match-word: (?:VO|oe)
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	s
+partitiivi	0	ta	s
+translatiivi	0	ksi	s	ps=f
+translatiivi	0	kse	s	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	s
+elatiivi		0	sta	s
+illatiivi		([oe])	(1)(1)n	s
+adessiivi		0	lla	s
+ablatiivi		0	lta	s
+allatiivi		0	lle	s
+abessiivi		0	tta	s	ps=f
+nominatiivi_mon	0	t	s	ps=f
+genetiivi_mon	0	iden	s
+genetiivi_mon	0	itten	s	prio=2
+partitiivi_mon	0	ita	s
+translatiivi_mon	0	iksi	s	ps=f
+translatiivi_mon	0	ikse	s	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	s
+elatiivi_mon	0	ista	s
+illatiivi_mon	0	ihin	s
+adessiivi_mon	0	illa	s
+ablatiivi_mon	0	ilta	s
+allatiivi_mon	0	ille	s
+abessiivi_mon	0	itta	s	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 5 patti (1/2)
+class: 5
+sm-class: risti
+match-word: Ci
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([aeiou])	(1)(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	0	en	s
+partitiivi_mon	i	eja	s
+translatiivi_mon	i	eiksi	w	ps=f
+translatiivi_mon	i	eikse	w	ps=r
+essiivi_mon	i	eina	s
+inessiivi_mon	i	eissa	w
+elatiivi_mon	i	eista	w
+illatiivi_mon	i	eihin	s
+adessiivi_mon	i	eilla	w
+ablatiivi_mon	i	eilta	w
+allatiivi_mon	i	eille	w
+abessiivi_mon	i	eitta	w	ps=f
+komitatiivi_mon	i	eine	s	ps=r
+instruktiivi_mon	i	ein	w	ps=f
+end: rules
+end: class
+
+# Kotus 5 patti (2/2)
+class: 5
+sm-class: kiiski
+match-word: Ci
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+genetiivi		i	en	w	ps=f
+partitiivi	0	a	s
+partitiivi	i	ea	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+translatiivi	i	eksi	w	ps=f
+translatiivi	i	ekse	w	ps=r
+essiivi		0	na	s
+essiivi		i	ena	s
+inessiivi		0	ssa	w
+inessiivi		i	essa	w
+elatiivi		0	sta	w
+elatiivi		i	esta	w
+illatiivi		0	in	s
+illatiivi		i	een	s
+adessiivi		0	lla	w
+adessiivi		i	ella	w
+ablatiivi		0	lta	w
+ablatiivi		i	elta	w
+allatiivi		0	lle	w
+allatiivi		i	elle	w
+abessiivi		0	tta	w	ps=f
+abessiivi		i	etta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+nominatiivi_mon	i	et	w	ps=f
+genetiivi_mon	0	en	s
+partitiivi_mon	i	eja	s
+translatiivi_mon	i	eiksi	w	ps=f
+translatiivi_mon	i	eikse	w	ps=r
+essiivi_mon	i	eina	s
+inessiivi_mon	i	eissa	w
+elatiivi_mon	i	eista	w
+illatiivi_mon	i	eihin	s
+adessiivi_mon	i	eilla	w
+ablatiivi_mon	i	eilta	w
+allatiivi_mon	i	eille	w
+abessiivi_mon	i	eitta	w	ps=f
+komitatiivi_mon	i	eine	s	ps=r
+instruktiivi_mon	i	ein	w	ps=f
+end: rules
+end: class
+
+
+class: 5
+sm-class: kalsium
+match-word: C
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	in	w	ps=f
+partitiivi	0	ia	s
+translatiivi	0	iksi	w	ps=f
+translatiivi	0	ikse	w	ps=r
+essiivi		0	ina	s
+inessiivi		0	issa	w
+elatiivi		0	ista	w
+illatiivi		0	iin	s
+adessiivi		0	illa	w
+ablatiivi		0	ilta	w
+allatiivi		0	ille	w
+abessiivi		0	itta	w	ps=f
+nominatiivi_mon	0	it	w	ps=f
+genetiivi_mon	0	ien	s
+partitiivi_mon	0	eja	s
+translatiivi_mon	0	eiksi	w	ps=f
+translatiivi_mon	0	eikse	w	ps=r
+essiivi_mon	0	eina	s
+inessiivi_mon	0	eissa	w
+elatiivi_mon	0	eista	w
+illatiivi_mon	0	eihin	s
+adessiivi_mon	0	eilla	w
+ablatiivi_mon	0	eilta	w
+allatiivi_mon	0	eille	w
+abessiivi_mon	0	eitta	w	ps=f
+komitatiivi_mon	0	eine	s	ps=r
+instruktiivi_mon	0	ein	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 6 paperi (1/2)
+class: 6
+sm-class: paperi
+match-word: Ci
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([aeiou])	(1)(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	i	eiden	w
+genetiivi_mon	i	eitten	w
+partitiivi_mon	i	eita	w
+partitiivi_mon	i	eja	s
+translatiivi_mon	i	eiksi	w	ps=f
+translatiivi_mon	i	eikse	w	ps=r
+essiivi_mon	i	eina	s
+inessiivi_mon	i	eissa	w
+elatiivi_mon	i	eista	w
+illatiivi_mon	i	eihin	s
+adessiivi_mon	i	eilla	w
+ablatiivi_mon	i	eilta	w
+allatiivi_mon	i	eille	w
+abessiivi_mon	i	eitta	w	ps=f
+komitatiivi_mon	i	eine	s	ps=r
+instruktiivi_mon	i	ein	w	ps=f
+end: rules
+end: class
+
+# Kotus 6 paperi (2/2)
+class: 6
+sm-class: edam
+match-word: C
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	in	w	ps=f
+partitiivi	0	ia	s
+translatiivi	0	iksi	w	ps=f
+translatiivi	0	ikse	w	ps=r
+essiivi		0	ina	s
+inessiivi		0	issa	w
+elatiivi		0	ista	w
+illatiivi		0	iin	s
+adessiivi		0	illa	w
+ablatiivi		0	ilta	w
+allatiivi		0	ille	w
+abessiivi		0	itta	w	ps=f
+nominatiivi_mon	0	it	w	ps=f
+genetiivi_mon	0	ien	s
+genetiivi_mon	0	eiden	w
+genetiivi_mon	0	eitten	w
+partitiivi_mon	0	eita	w
+partitiivi_mon	0	eja	s
+translatiivi_mon	0	eiksi	w	ps=f
+translatiivi_mon	0	eikse	w	ps=r
+essiivi_mon	0	eina	s
+inessiivi_mon	0	eissa	w
+elatiivi_mon	0	eista	w
+illatiivi_mon	0	eihin	s
+adessiivi_mon	0	eilla	w
+ablatiivi_mon	0	eilta	w
+allatiivi_mon	0	eille	w
+abessiivi_mon	0	eitta	w	ps=f
+komitatiivi_mon	0	eine	s	ps=r
+instruktiivi_mon	0	ein	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 7 lampi
+class: 7
+sm-class: lovi
+match-word: i
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi		i	en	w
+partitiivi	i	ea	s
+translatiivi	i	eksi	w	ps=f
+translatiivi	i	ekse	w	ps=r
+essiivi		i	ena	s
+inessiivi		i	essa	w
+elatiivi		i	esta	w
+illatiivi		i	een	s
+adessiivi		i	ella	w
+ablatiivi		i	elta	w
+allatiivi		i	elle	w
+abessiivi		i	etta	w	ps=f
+nominatiivi_mon	i	et	w	ps=f
+genetiivi_mon	0	en	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	w	ps=f
+translatiivi_mon	0	kse	w	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	w
+elatiivi_mon	0	sta	w
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	w
+ablatiivi_mon	0	lta	w
+allatiivi_mon	0	lle	w
+abessiivi_mon	0	tta	w	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 8 polle
+class: 8
+sm-class: nalle
+match-word: (?:C|U|i)e
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	en	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	0	jen	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	0	ja	s
+translatiivi_mon	0	iksi	w	ps=f
+translatiivi_mon	0	ikse	w	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	w
+elatiivi_mon	0	ista	w
+illatiivi_mon	0	ihin	s
+adessiivi_mon	0	illa	w
+ablatiivi_mon	0	ilta	w
+allatiivi_mon	0	ille	w
+abessiivi_mon	0	itta	w	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 9 kissa
+class: 9
+sm-class: kala
+match-word: A
+consonant-gradation: sw
+group: t
+transform-group: e # Onko näitä?
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	an	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	a	ojen	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	oja	s
+translatiivi_mon	a	oiksi	w	ps=f
+translatiivi_mon	a	oikse	w	ps=r
+essiivi_mon	a	oina	s
+inessiivi_mon	a	oissa	w
+elatiivi_mon	a	oista	w
+illatiivi_mon	a	oihin	s
+adessiivi_mon	a	oilla	w
+ablatiivi_mon	a	oilta	w
+allatiivi_mon	a	oille	w
+abessiivi_mon	a	oitta	w	ps=f
+komitatiivi_mon	a	oine	s	ps=r
+instruktiivi_mon	a	oin	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 10 luokka (1/4)
+class: 10
+sm-class: koira
+match-word: CA
+consonant-gradation: sw
+group: t
+transform-group: e
+note: substantiivi tai kaksitavuinen adjektiivi
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([aeiou])	(1)(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	a	ien	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	ia	s
+translatiivi_mon	a	iksi	w	ps=f
+translatiivi_mon	a	ikse	w	ps=r
+essiivi_mon	a	ina	s
+inessiivi_mon	a	issa	w
+elatiivi_mon	a	ista	w
+illatiivi_mon	a	iin	s
+adessiivi_mon	a	illa	w
+ablatiivi_mon	a	ilta	w
+allatiivi_mon	a	ille	w
+abessiivi_mon	a	itta	w	ps=f
+komitatiivi_mon	a	ine	s	ps=r
+instruktiivi_mon	a	in	w	ps=f
+end: rules
+end: class
+
+# Kotus 10 luokka (2/4)
+class: 10
+sm-class: asema
+match-word: CA
+consonant-gradation: sw
+group: t
+transform-group: e
+note: substantiivi tai kolme- tai useampitavuinen adjektiivi
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+partitiivi	0	ta	s	prio=3
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([aeiou])	(1)(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	a	ien	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	ia	s
+translatiivi_mon	a	iksi	w	ps=f
+translatiivi_mon	a	ikse	w	ps=r
+essiivi_mon	a	ina	s
+inessiivi_mon	a	issa	w
+elatiivi_mon	a	ista	w
+illatiivi_mon	a	iin	s
+adessiivi_mon	a	illa	w
+ablatiivi_mon	a	ilta	w
+allatiivi_mon	a	ille	w
+abessiivi_mon	a	itta	w	ps=f
+komitatiivi_mon	a	ine	s	ps=r
+instruktiivi_mon	a	in	w	ps=f
+end: rules
+end: class
+
+# Kotus 10 luokka (3/4)
+class: 10
+sm-class: apaja
+match-word: CA
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+partitiivi	0	ta	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([aeiou])	(1)(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	a	ien	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+genetiivi_mon	a	oiden	s	ps=f,prio=2
+genetiivi_mon	a	oitten	s	ps=f,prio=2
+partitiivi_mon	a	ia	s
+translatiivi_mon	a	iksi	w	ps=f
+translatiivi_mon	a	ikse	w	ps=r
+essiivi_mon	a	ina	s
+inessiivi_mon	a	issa	w
+elatiivi_mon	a	ista	w
+illatiivi_mon	a	iin	s
+adessiivi_mon	a	illa	w
+ablatiivi_mon	a	ilta	w
+allatiivi_mon	a	ille	w
+abessiivi_mon	a	itta	w	ps=f
+komitatiivi_mon	a	ine	s	ps=r
+instruktiivi_mon	a	in	w	ps=f
+end: rules
+end: class
+
+# Kotus 10 luokka (4/4)
+class: 10
+sm-class: poika
+match-word: poika
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		ika	jan	s	ps=f
+partitiivi	0	a	s
+translatiivi	ika	jiksi	s	ps=f
+translatiivi	ika	jikse	s	ps=r
+essiivi		0	na	s
+inessiivi		ika	jissa	s
+elatiivi		ika	jista	s
+illatiivi		([aeiou])	(1)(1)n	s
+adessiivi		ika	jilla	s
+ablatiivi		ika	jilta	s
+allatiivi		ika	jille	s
+abessiivi		ika	jitta	s	ps=f
+nominatiivi_mon	ika	jat	s	ps=f
+genetiivi_mon	a	ien	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	ia	s
+translatiivi_mon	ika	jiksi	s	ps=f
+translatiivi_mon	ika	jikse	s	ps=r
+essiivi_mon	a	ina	s
+inessiivi_mon	ika	jissa	s
+elatiivi_mon	ika	jista	s
+illatiivi_mon	a	iin	s
+adessiivi_mon	ika	jilla	s
+ablatiivi_mon	ika	jilta	s
+allatiivi_mon	ika	jille	s
+abessiivi_mon	ika	jitta	s	ps=f
+komitatiivi_mon	a	ine	s	ps=r
+instruktiivi_mon	ika	jin	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 11 omena
+class: 11
+sm-class: matala
+match-word: CA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	an	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	a	ien	s
+genetiivi_mon	a	oiden	s
+genetiivi_mon	a	oitten	s
+genetiivi_mon	a	ojen	s	prio=2
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	ia	s
+partitiivi_mon	a	oita	s
+partitiivi_mon	a	oja	s	prio=2
+translatiivi_mon	a	iksi	w	ps=f
+translatiivi_mon	a	ikse	w	ps=r
+essiivi_mon	a	ina	s
+inessiivi_mon	a	issa	w
+elatiivi_mon	a	ista	w
+illatiivi_mon	a	iin	s
+illatiivi_mon	a	oihin	s
+adessiivi_mon	a	illa	w
+ablatiivi_mon	a	ilta	w
+allatiivi_mon	a	ille	w
+abessiivi_mon	a	itta	w	ps=f
+komitatiivi_mon	a	ine	s	ps=r
+instruktiivi_mon	a	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 12 lattia (1/2)
+class: 12
+sm-class: kulkija
+match-word: A
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	s
+partitiivi	0	a	s
+translatiivi	0	ksi	s	ps=f
+translatiivi	0	kse	s	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	s
+elatiivi		0	sta	s
+illatiivi		0	an	s
+adessiivi		0	lla	s
+ablatiivi		0	lta	s
+allatiivi		0	lle	s
+abessiivi		0	tta	s	ps=f
+nominatiivi_mon	0	t	s	ps=f
+genetiivi_mon	a	oiden	s
+genetiivi_mon	a	oitten	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	oita	s
+translatiivi_mon	a	oiksi	s	ps=f
+translatiivi_mon	a	oikse	s	ps=r
+essiivi_mon	a	oina	s
+inessiivi_mon	a	oissa	s
+elatiivi_mon	a	oista	s
+illatiivi_mon	a	oihin	s
+adessiivi_mon	a	oilla	s
+ablatiivi_mon	a	oilta	s
+allatiivi_mon	a	oille	s
+abessiivi_mon	a	oitta	s	ps=f
+komitatiivi_mon	a	oine	s	ps=r
+instruktiivi_mon	a	oin	s	ps=f
+end: rules
+end: class
+
+# Kotus 12 lattia (2/2)
+class: 12
+sm-class: peruna
+match-word: CA
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	s
+partitiivi	0	a	s
+translatiivi	0	ksi	s	ps=f
+translatiivi	0	kse	s	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	s
+elatiivi		0	sta	s
+illatiivi		0	an	s
+adessiivi		0	lla	s
+ablatiivi		0	lta	s
+allatiivi		0	lle	s
+abessiivi		0	tta	s	ps=f
+nominatiivi_mon	0	t	s	ps=f
+genetiivi_mon	a	oiden	s
+genetiivi_mon	a	oitten	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+genetiivi_mon	a	ien	s	prio=2
+partitiivi_mon	a	oita	s
+partitiivi_mon	a	ia	s	prio=2
+translatiivi_mon	a	oiksi	s	ps=f
+translatiivi_mon	a	oikse	s	ps=r
+essiivi_mon	a	oina	s
+inessiivi_mon	a	oissa	s
+elatiivi_mon	a	oista	s
+illatiivi_mon	a	oihin	s
+illatiivi_mon	a	iin	s	prio=2
+adessiivi_mon	a	oilla	s
+ablatiivi_mon	a	oilta	s
+allatiivi_mon	a	oille	s
+abessiivi_mon	a	oitta	s	ps=f
+komitatiivi_mon	a	oine	s	ps=r
+instruktiivi_mon	a	oin	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 13 katiska, kotus 14 solakka
+# FIXME: 13,14
+class: 13,14
+sm-class: karahka
+match-word: A
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	an	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	a	oiden	w
+genetiivi_mon	a	oitten	w
+genetiivi_mon	a	ojen	s
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	oita	w
+partitiivi_mon	a	oja	s
+translatiivi_mon	a	oiksi	w	ps=f
+translatiivi_mon	a	oikse	w	ps=r
+essiivi_mon	a	oina	w
+inessiivi_mon	a	oissa	w
+elatiivi_mon	a	oista	w
+illatiivi_mon	a	oihin	w
+illatiivi_mon	a	oihin	s	
+adessiivi_mon	a	oilla	w
+ablatiivi_mon	a	oilta	w
+allatiivi_mon	a	oille	w
+abessiivi_mon	a	oitta	w	ps=f
+komitatiivi_mon	a	oine	s	ps=r
+instruktiivi_mon	a	oin	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 14 puolukka
+class: 14
+match-word: (?:kk|pp|tt)A
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w	ps=f
+partitiivi	0	a	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	an	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	a	oiden	w
+genetiivi_mon	a	oitten	w	prio=2
+genetiivi_mon	a	ojen	s	prio=2
+genetiivi_mon	0	in	s	ps=f,prio=2
+partitiivi_mon	a	oita	w
+partitiivi_mon	a	oja	s	prio=2
+translatiivi_mon	a	oiksi	w	ps=f
+translatiivi_mon	a	oikse	w	ps=r
+essiivi_mon	a	oina	w
+inessiivi_mon	a	oissa	w
+elatiivi_mon	a	oista	w
+illatiivi_mon	a	oihin	w
+illatiivi_mon	a	oihin	s	prio=2
+adessiivi_mon	a	oilla	w
+ablatiivi_mon	a	oilta	w
+allatiivi_mon	a	oille	w
+abessiivi_mon	a	oitta	w	ps=f
+komitatiivi_mon	a	oine	w	ps=r
+instruktiivi_mon	a	oin	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 15 hopea
+class: 15
+sm-class: korkea
+match-word: [oe]A
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	s
+partitiivi	0	a	s
+partitiivi	0	ta	s	prio=2
+translatiivi	0	ksi	s	ps=f
+translatiivi	0	kse	s	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	s
+elatiivi		0	sta	s
+illatiivi		0	an	s
+adessiivi		0	lla	s
+ablatiivi		0	lta	s
+allatiivi		0	lle	s
+abessiivi		0	tta	s	ps=f
+nominatiivi_mon	0	t	s	ps=f
+genetiivi_mon	a	iden	s
+genetiivi_mon	a	itten	s	prio=2
+genetiivi_mon	0	in	s	prio=3
+partitiivi_mon	a	ita	s
+translatiivi_mon	a	iksi	s	ps=f
+translatiivi_mon	a	ikse	s	ps=r
+essiivi_mon	a	ina	s
+inessiivi_mon	a	issa	s
+elatiivi_mon	a	ista	s
+illatiivi_mon	a	isiin	s
+illatiivi_mon	a	ihin	s	prio=2
+adessiivi_mon	a	illa	s
+ablatiivi_mon	a	ilta	s
+allatiivi_mon	a	ille	s
+abessiivi_mon	a	itta	s	ps=f
+komitatiivi_mon	a	ine	s	ps=r
+instruktiivi_mon	a	in	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 16 vanhempi
+class: 16
+sm-class: suurempi
+match-word: Vmpi
+consonant-gradation: sw
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		i	an	w
+partitiivi	i	aa	s
+translatiivi	i	aksi	w	ps=f
+translatiivi	i	akse	w	ps=r
+essiivi		i	ana	s
+inessiivi		i	assa	w
+elatiivi		i	asta	w
+illatiivi		i	aan	s
+adessiivi		i	alla	w
+ablatiivi		i	alta	w
+allatiivi		i	alle	w
+abessiivi		i	atta	w	ps=f
+nominatiivi_mon	i	at	w	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	i	ain	s	prio=2
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	w	ps=f
+translatiivi_mon	0	kse	w	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	w
+elatiivi_mon	0	sta	w
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	w
+ablatiivi_mon	0	lta	w
+allatiivi_mon	0	lle	w
+abessiivi_mon	0	tta	w	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 17 vapaa
+class: 17
+sm-class: vapaa
+match-word: C[aäoöuy][aäoöuy]
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w
+partitiivi	0	ta	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	seen	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	[aou]	iden	s
+genetiivi_mon	[aou]	itten	s
+partitiivi_mon	[aou]	ita	s
+translatiivi_mon	[aou]	iksi	w	ps=f
+translatiivi_mon	[aou]	ikse	w	ps=r
+essiivi_mon	[aou]	ina	s
+inessiivi_mon	[aou]	issa	w
+elatiivi_mon	[aou]	ista	w
+illatiivi_mon	[aou]	isiin	s
+illatiivi_mon	[aou]	ihin	s	prio=2
+adessiivi_mon	[aou]	illa	w
+ablatiivi_mon	[aou]	ilta	w
+allatiivi_mon	[aou]	ille	w
+abessiivi_mon	[aou]	itta	w	ps=f
+komitatiivi_mon	[aou]	ine	s	ps=r
+instruktiivi_mon	[aou]	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 18 maa
+class: 18
+sm-class: pii
+match-word: V[aäeiuy]
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w
+partitiivi	0	ta	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		([aeiu])	(1)h(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	[aeiu]	iden	s
+genetiivi_mon	[aeiu]	itten	s
+partitiivi_mon	[aeiu]	ita	s
+translatiivi_mon	[aeiu]	iksi	w	ps=f
+translatiivi_mon	[aeiu]	ikse	w	ps=r
+essiivi_mon	[aeiu]	ina	s
+inessiivi_mon	[aeiu]	issa	w
+elatiivi_mon	[aeiu]	ista	w
+illatiivi_mon	[aeiu]	ihin	s
+adessiivi_mon	[aeiu]	illa	w
+ablatiivi_mon	[aeiu]	ilta	w
+allatiivi_mon	[aeiu]	ille	w
+abessiivi_mon	[aeiu]	itta	w	ps=f
+komitatiivi_mon	[aeiu]	ine	s	ps=r
+instruktiivi_mon	[aeiu]	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 19 suo
+class: 19
+sm-class: suo
+match-word: CUO
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w
+partitiivi	0	ta	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	hon	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	uo	oiden	s
+genetiivi_mon	uo	oitten	s
+partitiivi_mon	uo	oita	s
+translatiivi_mon	uo	oiksi	w	ps=f
+translatiivi_mon	uo	oikse	w	ps=r
+essiivi_mon	uo	oina	s
+inessiivi_mon	uo	oissa	w
+elatiivi_mon	uo	oista	w
+illatiivi_mon	uo	oihin	s
+adessiivi_mon	uo	oilla	w
+ablatiivi_mon	uo	oilta	w
+allatiivi_mon	uo	oille	w
+abessiivi_mon	uo	oitta	w	ps=f
+komitatiivi_mon	uo	oine	s	ps=r
+instruktiivi_mon	uo	oin	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 20 filee
+class: 20
+sm-class: kamee
+match-word: CVV
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w
+partitiivi	0	ta	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	seen	s
+illatiivi		([eouy])	(1)h(1)n	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	[eou]	iden	s
+genetiivi_mon	[eou]	itten	s
+partitiivi_mon	[eou]	ita	s
+translatiivi_mon	[eou]	iksi	w	ps=f
+translatiivi_mon	[eou]	ikse	w	ps=r
+essiivi_mon	[eou]	ina	s
+inessiivi_mon	[eou]	issa	w
+elatiivi_mon	[eou]	ista	w
+illatiivi_mon	[eou]	isiin	s
+illatiivi_mon	[eou]	ihin	s
+adessiivi_mon	[eou]	illa	w
+ablatiivi_mon	[eou]	ilta	w
+allatiivi_mon	[eou]	ille	w
+abessiivi_mon	[eou]	itta	w	ps=f
+komitatiivi_mon	[eou]	ine	s	ps=r
+instruktiivi_mon	[eou]	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 21 rosé
+class: 21
+sm-class: rosé
+match-word: V
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w
+partitiivi	0	ta	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		é	éhen	s
+illatiivi		e	ehen	s
+illatiivi		o	ohon	s
+illatiivi		u	uhun	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	0	iden	s
+partitiivi_mon	0	ita	s
+translatiivi_mon	0	iksi	w	ps=f
+translatiivi_mon	0	ikse	w	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	w
+elatiivi_mon	0	ista	w
+illatiivi_mon	0	ihin	s
+adessiivi_mon	0	illa	w
+ablatiivi_mon	0	ilta	w
+allatiivi_mon	0	ille	w
+abessiivi_mon	0	itta	w	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 21 spray
+class: 21
+sm-class: spray
+match-word: [ao]y
+consonant-gradation: -
+group: t
+transform-group: e
+note: äännettäessä sana päättyy -ei/-oi
+rules:
+nominatiivi	0	0	s
+genetiivi		0	n	w
+partitiivi	0	ta	s
+translatiivi	0	ksi	w	ps=f
+translatiivi	0	kse	w	ps=r
+essiivi		0	na	s
+inessiivi		0	ssa	w
+elatiivi		0	sta	w
+illatiivi		0	hin	s
+illatiivi		0	hyn	s
+adessiivi		0	lla	w
+ablatiivi		0	lta	w
+allatiivi		0	lle	w
+abessiivi		0	tta	w	ps=f
+nominatiivi_mon	0	t	w	ps=f
+genetiivi_mon	0	iden	s
+partitiivi_mon	0	ita	s
+translatiivi_mon	0	iksi	w	ps=f
+translatiivi_mon	0	ikse	w	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	w
+elatiivi_mon	0	ista	w
+illatiivi_mon	0	ihin	s
+adessiivi_mon	0	illa	w
+ablatiivi_mon	0	ilta	w
+allatiivi_mon	0	ille	w
+abessiivi_mon	0	itta	w	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 22 parfait
+class: 22
+sm-class: parfait
+match-word: VC
+consonant-gradation: -
+group: t
+transform-group: e
+note: vierasperäinen sana, illatiivin pääte -'hVn
+rules:
+nominatiivi	0	0	s
+genetiivi		0	'n	w
+partitiivi	0	'ta	s
+translatiivi	0	'ksi	w	ps=f
+translatiivi	0	'kse	w	ps=r
+essiivi		0	'na	s
+inessiivi		0	'ssa	w
+elatiivi		0	'sta	w
+adessiivi		0	'lla	w
+ablatiivi		0	'lta	w
+allatiivi		0	'lle	w
+abessiivi		0	'tta	w	ps=f
+nominatiivi_mon	0	't	w	ps=f
+genetiivi_mon	0	'iden	s
+partitiivi_mon	0	'ita	s
+translatiivi_mon	0	'iksi	w	ps=f
+translatiivi_mon	0	'ikse	w	ps=r
+essiivi_mon	0	'ina	s
+inessiivi_mon	0	'issa	w
+elatiivi_mon	0	'ista	w
+illatiivi_mon	0	'ihin	s
+adessiivi_mon	0	'illa	w
+ablatiivi_mon	0	'ilta	w
+allatiivi_mon	0	'ille	w
+abessiivi_mon	0	'itta	w	ps=f
+komitatiivi_mon	0	'ine	s	ps=r
+instruktiivi_mon	0	'in	w	ps=f
+end: rules
+end: class
+
+
+# Kotus 23 tuohi
+class: 23
+sm-class: tuohi
+match-word: [lhn]i
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi		i	en	s	ps=f
+partitiivi	i	ta	s
+translatiivi	i	eksi	s	ps=f
+translatiivi	i	ekse	s	ps=r
+essiivi		i	ena	s
+inessiivi		i	essa	s
+elatiivi		i	esta	s
+illatiivi		i	een	s
+adessiivi		i	ella	s
+ablatiivi		i	elta	s
+allatiivi		i	elle	s
+abessiivi		i	etta	s	ps=f
+nominatiivi_mon	i	et	s	ps=f
+genetiivi_mon	0	en	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 24, 26 huuli (1/2)
+class: 24,26
+sm-class: huuli
+match-word: Ci
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi		i	en	s	ps=f
+partitiivi	i	ta	s
+translatiivi	i	eksi	s	ps=f
+translatiivi	i	ekse	s	ps=r
+essiivi		i	ena	s
+inessiivi		i	essa	s
+elatiivi		i	esta	s
+illatiivi		i	een	s
+adessiivi		i	ella	s
+ablatiivi		i	elta	s
+allatiivi		i	elle	s
+abessiivi		i	etta	s	ps=f
+nominatiivi_mon	i	et	s	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	i	ten	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 24, 26 meri (2/2)
+class: 24,26
+sm-class: meri
+match-word: [vm]eri
+consonant-gradation: -
+group: t
+transform-group: e
+note: partitiivissa takavokaalipääte
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi		i	en	s	ps=f
+partitiivi	i	ta	s
+translatiivi	i	eksi	s	ps=f
+translatiivi	i	ekse	s	ps=r
+essiivi		i	ena	s
+inessiivi		i	essa	s
+elatiivi		i	esta	s
+illatiivi		i	een	s
+adessiivi		i	ella	s
+ablatiivi		i	elta	s
+allatiivi		i	elle	s
+abessiivi		i	etta	s	ps=f
+nominatiivi_mon	i	et	s	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	i	ten	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+# Kotus 25 loimi (1/2)
+class: 25
+sm-class: niemi
+match-word: Vmi
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi		i	en	s	ps=f
+partitiivi	i	ea	s
+partitiivi	mi	nta	s
+translatiivi	i	eksi	s	ps=f
+translatiivi	i	ekse	s	ps=r
+essiivi		i	ena	s
+inessiivi		i	essa	s
+elatiivi		i	esta	s
+illatiivi		i	een	s
+adessiivi		i	ella	s
+ablatiivi		i	elta	s
+allatiivi		i	elle	s
+abessiivi		i	etta	s	ps=f
+nominatiivi_mon	i	et	s	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	mi	nten	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+# Kotus 25 loimi (2/2)
+class: 25
+sm-class: lumi
+match-word: Vmi
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi		i	en	s	ps=f
+partitiivi	mi	nta	s
+translatiivi	i	eksi	s	ps=f
+translatiivi	i	ekse	s	ps=r
+essiivi		i	ena	s
+inessiivi		i	essa	s
+elatiivi		i	esta	s
+illatiivi		i	een	s
+adessiivi		i	ella	s
+ablatiivi		i	elta	s
+allatiivi		i	elle	s
+abessiivi		i	etta	s	ps=f
+nominatiivi_mon	i	et	s	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	mi	nten	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 26 pieni
+class: 26
+sm-class: pieni
+match-word: CVVni
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi	i	en	s	ps=f
+partitiivi	i	ta	s
+translatiivi	i	eksi	s	ps=f
+translatiivi	i	ekse	s	ps=r
+essiivi		i	ena	s
+inessiivi	i	essa	s
+elatiivi	i	esta	s
+illatiivi	i	een	s
+adessiivi	i	ella	s
+ablatiivi	i	elta	s
+allatiivi	i	elle	s
+abessiivi	i	etta	s	ps=f
+nominatiivi_mon	i	et	s	ps=f
+genetiivi_mon	i	ten	s
+genetiivi_mon	0	en	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 27 käsi
+class: 27
+sm-class: susi
+match-word: Vsi
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	si	te	s	ps=r
+genetiivi		si	den	s	ps=f
+partitiivi	si	tta	s
+translatiivi	si	deksi	s	ps=f
+translatiivi	si	dekse	s	ps=r
+essiivi		si	tena	s
+inessiivi		si	dessa	s
+elatiivi		si	desta	s
+illatiivi		si	teen	s
+adessiivi		si	della	s
+ablatiivi		si	delta	s
+allatiivi		si	delle	s
+abessiivi		si	detta	s	ps=f
+nominatiivi_mon	si	det	s	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	si	tten	s	prio=2
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 28 kansi
+class: 28
+sm-class: kansi
+match-word: (?:n|l|r)si
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	si	te	s	ps=r
+genetiivi		([nlr])si	(1)(1)en	s	ps=f
+partitiivi	si	tta	s
+translatiivi	([nlr])si	(1)(1)eksi	s	ps=f
+translatiivi	([nlr])si	(1)(1)ekse	s	ps=r
+essiivi		si	tena	s
+inessiivi		([nlr])si	(1)(1)essa	s
+elatiivi		([nlr])si	(1)(1)esta	s
+illatiivi		si	teen	s
+adessiivi		([nlr])si	(1)(1)ella	s
+ablatiivi		([nlr])si	(1)(1)elta	s
+allatiivi		([nlr])si	(1)(1)elle	s
+abessiivi		([nlr])si	(1)(1)etta	s	ps=f
+nominatiivi_mon	([nlr])si	(1)(1)et	s	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	si	tten	s	prio=2
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 29, 30 lapsi
+# FIXME: 29,30
+class: 29,30
+match-word: (?:p|t)si
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	i	e	s	ps=r
+genetiivi		i	en	s	ps=f
+partitiivi	[pt]si	sta	s
+translatiivi	i	eksi	s	ps=f
+translatiivi	i	ekse	s	ps=r
+essiivi		i	ena	s
+inessiivi		i	essa	s
+elatiivi		i	esta	s
+illatiivi		i	een	s
+adessiivi		i	ella	s
+ablatiivi		i	elta	s
+allatiivi		i	elle	s
+abessiivi		i	etta	s	ps=f
+nominatiivi_mon	i	et	s	ps=f
+genetiivi_mon	0	en	s
+genetiivi_mon	[pt]si	sten	s
+partitiivi_mon	0	a	s
+translatiivi_mon	0	ksi	s	ps=f
+translatiivi_mon	0	kse	s	ps=r
+essiivi_mon	0	na	s
+inessiivi_mon	0	ssa	s
+elatiivi_mon	0	sta	s
+illatiivi_mon	0	in	s
+adessiivi_mon	0	lla	s
+ablatiivi_mon	0	lta	s
+allatiivi_mon	0	lle	s
+abessiivi_mon	0	tta	s	ps=f
+komitatiivi_mon	0	ne	s	ps=r
+instruktiivi_mon	0	n	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 32 ien
+class: 32
+sm-class: sisar
+match-word: (?:CVC|ien)
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	0	e	s	ps=r
+genetiivi		0	en	s
+partitiivi	0	ta	w
+translatiivi	0	eksi	s	ps=f
+translatiivi	0	ekse	s	ps=r
+essiivi		0	ena	s
+inessiivi		0	essa	s
+elatiivi		0	esta	s
+illatiivi		0	een	s
+adessiivi		0	ella	s
+ablatiivi		0	elta	s
+allatiivi		0	elle	s
+abessiivi		0	etta	s	ps=f
+nominatiivi_mon	0	et	s	ps=f
+genetiivi_mon	0	ien	s
+genetiivi_mon	0	ten	w
+partitiivi_mon	0	ia	s
+translatiivi_mon	0	iksi	s	ps=f
+translatiivi_mon	0	ikse	s	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	s
+elatiivi_mon	0	ista	s
+illatiivi_mon	0	iin	s
+adessiivi_mon	0	illa	s
+ablatiivi_mon	0	ilta	s
+allatiivi_mon	0	ille	s
+abessiivi_mon	0	itta	s	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 33 kytkin
+class: 33
+sm-class: uistin
+match-word: (?:i|A)n
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	n	me	s	ps=r
+genetiivi		n	men	s
+partitiivi	0	ta	w
+translatiivi	n	meksi	s	ps=f
+translatiivi	n	mekse	s	ps=r
+essiivi		n	mena	s
+inessiivi		n	messa	s
+elatiivi		n	mesta	s
+illatiivi		n	meen	s
+adessiivi		n	mella	s
+ablatiivi		n	melta	s
+allatiivi		n	melle	s
+abessiivi		n	metta	s	ps=f
+nominatiivi_mon	n	met	s	ps=f
+genetiivi_mon	n	mien	s
+genetiivi_mon	0	ten	w	
+partitiivi_mon	n	mia	s
+translatiivi_mon	n	miksi	s	ps=f
+translatiivi_mon	n	mikse	s	ps=r
+essiivi_mon	n	mina	s
+inessiivi_mon	n	missa	s
+elatiivi_mon	n	mista	s
+illatiivi_mon	n	miin	s
+adessiivi_mon	n	milla	s
+ablatiivi_mon	n	milta	s
+allatiivi_mon	n	mille	s
+abessiivi_mon	n	mitta	s	ps=f
+komitatiivi_mon	n	mine	s	ps=r
+instruktiivi_mon	n	min	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 34 onneton
+class: 34
+sm-class: onneton
+match-word: t[oö]n
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	n	ma	s	ps=r
+genetiivi		n	man	s
+partitiivi	0	ta	w
+translatiivi	n	maksi	s	ps=f
+translatiivi	n	makse	s	ps=r
+essiivi		n	mana	s
+inessiivi		n	massa	s
+elatiivi		n	masta	s
+illatiivi		n	maan	s
+adessiivi		n	malla	s
+ablatiivi		n	malta	s
+allatiivi		n	malle	s
+abessiivi		n	matta	s	ps=f
+nominatiivi_mon	n	mat	s	ps=f
+genetiivi_mon	n	mien	s
+genetiivi_mon	0	ten	w	prio=3
+partitiivi_mon	n	mia	s
+translatiivi_mon	n	miksi	s	ps=f
+translatiivi_mon	n	mikse	s	ps=r
+essiivi_mon	n	mina	s
+inessiivi_mon	n	missa	s
+elatiivi_mon	n	mista	s
+illatiivi_mon	n	miin	s
+adessiivi_mon	n	milla	s
+ablatiivi_mon	n	milta	s
+allatiivi_mon	n	mille	s
+abessiivi_mon	n	mitta	s	ps=f
+komitatiivi_mon	n	mine	s	ps=r
+instruktiivi_mon	n	min	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 36 sisin
+class: 36
+sm-class: sisin
+match-word: in
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	n	mpa	s	ps=r
+genetiivi		n	mman	s
+partitiivi	0	ta	w
+translatiivi	n	mmaksi	s	ps=f
+translatiivi	n	mmakse	s	ps=r
+essiivi		n	mpana	s
+inessiivi		n	mmassa	s
+elatiivi		n	mmasta	s
+illatiivi		n	mpaan	s
+adessiivi		n	mmalla	s
+ablatiivi		n	mmalta	s
+allatiivi		n	mmalle	s
+abessiivi		n	mmatta	s	ps=f
+nominatiivi_mon	n	mmat	s	ps=f
+genetiivi_mon	n	mpien	s
+genetiivi_mon	0	ten	w	prio=2
+genetiivi_mon	n	mpain	s	prio=2
+partitiivi_mon	n	mpia	s
+translatiivi_mon	n	mmiksi	s	ps=f
+translatiivi_mon	n	mmikse	s	ps=r
+essiivi_mon	n	mpina	s
+inessiivi_mon	n	mmissa	s
+elatiivi_mon	n	mmista	s
+illatiivi_mon	n	mpiin	s
+adessiivi_mon	n	mmilla	s
+ablatiivi_mon	n	mmilta	s
+allatiivi_mon	n	mmille	s
+abessiivi_mon	n	mmitta	s	ps=f
+komitatiivi_mon	n	mpine	s	ps=r
+instruktiivi_mon	n	mmin	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 38 hevonen
+class: 38
+sm-class: nainen
+match-word: nen
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	nen	se	s	ps=r
+genetiivi		nen	sen	s
+partitiivi	nen	sta	s
+translatiivi	nen	seksi	s	ps=f
+translatiivi	nen	sekse	s	ps=r
+essiivi		nen	sena	s
+inessiivi		nen	sessa	s
+elatiivi		nen	sesta	s
+illatiivi		nen	seen	s
+adessiivi		nen	sella	s
+ablatiivi		nen	selta	s
+allatiivi		nen	selle	s
+abessiivi		nen	setta	s	ps=f
+nominatiivi_mon	nen	set	s	ps=f
+genetiivi_mon	nen	sten	s
+genetiivi_mon	nen	sien	s	prio=2
+partitiivi_mon	nen	sia	s
+translatiivi_mon	nen	siksi	s	ps=f
+translatiivi_mon	nen	sikse	s	ps=r
+essiivi_mon	nen	sina	s
+inessiivi_mon	nen	sissa	s
+elatiivi_mon	nen	sista	s
+illatiivi_mon	nen	siin	s
+adessiivi_mon	nen	silla	s
+ablatiivi_mon	nen	silta	s
+allatiivi_mon	nen	sille	s
+abessiivi_mon	nen	sitta	s	ps=f
+komitatiivi_mon	nen	sine	s	ps=r
+instruktiivi_mon	nen	sin	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 39 ajatus
+class: 39
+sm-class: vastaus
+match-word: Vs
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	s	kse	s	ps=r
+genetiivi		s	ksen	s
+partitiivi	0	ta	s
+translatiivi	s	kseksi	s	ps=f
+translatiivi	s	ksekse	s	ps=r
+essiivi		s	ksena	s
+inessiivi		s	ksessa	s
+elatiivi		s	ksesta	s
+illatiivi		s	kseen	s
+adessiivi		s	ksella	s
+ablatiivi		s	kselta	s
+allatiivi		s	kselle	s
+abessiivi		s	ksetta	s	ps=f
+nominatiivi_mon	s	kset	s	ps=f
+genetiivi_mon	0	ten	s
+genetiivi_mon	s	ksien	s	prio=2
+partitiivi_mon	s	ksia	s
+translatiivi_mon	s	ksiksi	s	ps=f
+translatiivi_mon	s	ksikse	s	ps=r
+essiivi_mon	s	ksina	s
+inessiivi_mon	s	ksissa	s
+elatiivi_mon	s	ksista	s
+illatiivi_mon	s	ksiin	s
+adessiivi_mon	s	ksilla	s
+ablatiivi_mon	s	ksilta	s
+allatiivi_mon	s	ksille	s
+abessiivi_mon	s	ksitta	s	ps=f
+komitatiivi_mon	s	ksine	s	ps=r
+instruktiivi_mon	s	ksin	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 40 kansallisuus
+class: 40
+sm-class: kalleus
+match-word: Us
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	s	ps=f
+nominatiivi	s	te	s	ps=r
+genetiivi		s	den	s	ps=f
+partitiivi	s	tta	s
+translatiivi	s	deksi	s	ps=f
+translatiivi	s	dekse	s	ps=r
+essiivi		s	tena	s
+inessiivi		s	dessa	s
+elatiivi		s	desta	s
+illatiivi		s	teen	s
+adessiivi		s	della	s
+ablatiivi		s	delta	s
+allatiivi		s	delle	s
+abessiivi		s	detta	s	ps=f
+nominatiivi_mon	s	det	s	ps=f
+genetiivi_mon	s	ksien	s
+partitiivi_mon	s	ksia	s
+translatiivi_mon	s	ksiksi	s	ps=f
+translatiivi_mon	s	ksikse	s	ps=r
+essiivi_mon	s	ksina	s
+inessiivi_mon	s	ksissa	s
+elatiivi_mon	s	ksista	s
+illatiivi_mon	s	ksiin	s
+adessiivi_mon	s	ksilla	s
+ablatiivi_mon	s	ksilta	s
+allatiivi_mon	s	ksille	s
+abessiivi_mon	s	ksitta	s	ps=f
+komitatiivi_mon	s	ksine	s	ps=r
+instruktiivi_mon	s	ksin	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 41 rengas (1/2)
+class: 41
+sm-class: vieras
+match-word: [Aie]s
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	([aei])s	(1)(1)	s	ps=r
+genetiivi		([aei])s	(1)(1)n	s
+partitiivi	0	ta	w
+translatiivi	([aei])s	(1)(1)ksi	s	ps=f
+translatiivi	([aei])s	(1)(1)kse	s	ps=r
+essiivi		([aei])s	(1)(1)na	s
+inessiivi		([aei])s	(1)(1)ssa	s
+elatiivi		([aei])s	(1)(1)sta	s
+illatiivi		([aei])s	(1)(1)seen	s
+adessiivi		([aei])s	(1)(1)lla	s
+ablatiivi		([aei])s	(1)(1)lta	s
+allatiivi		([aei])s	(1)(1)lle	s
+abessiivi		([aei])s	(1)(1)tta	s	ps=f
+nominatiivi_mon	([aei])s	(1)(1)t	s	ps=f
+genetiivi_mon	s	iden	s
+genetiivi_mon	s	itten	s	prio=2
+partitiivi_mon	s	ita	s
+translatiivi_mon	s	iksi	s	ps=f
+translatiivi_mon	s	ikse	s	ps=r
+essiivi_mon	s	ina	s
+inessiivi_mon	s	issa	s
+elatiivi_mon	s	ista	s
+illatiivi_mon	s	isiin	s
+illatiivi_mon	s	ihin	s	prio=3
+adessiivi_mon	s	illa	s
+ablatiivi_mon	s	ilta	s
+allatiivi_mon	s	ille	s
+abessiivi_mon	s	itta	s	ps=f
+komitatiivi_mon	s	ine	s	ps=r
+instruktiivi_mon	s	in	s	ps=f
+end: rules
+end: class
+
+# Kotus 41 rengas (2/2)
+class: 41
+sm-class: iäkäs
+match-word: kAs
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	([aei])s	(1)(1)	s	ps=r
+genetiivi		([aei])s	(1)(1)n	s
+partitiivi	0	ta	w
+translatiivi	([aei])s	(1)(1)ksi	s	ps=f
+translatiivi	([aei])s	(1)(1)kse	s	ps=r
+essiivi		([aei])s	(1)(1)na	s
+inessiivi		([aei])s	(1)(1)ssa	s
+elatiivi		([aei])s	(1)(1)sta	s
+illatiivi		([aei])s	(1)(1)seen	s
+adessiivi		([aei])s	(1)(1)lla	s
+ablatiivi		([aei])s	(1)(1)lta	s
+allatiivi		([aei])s	(1)(1)lle	s
+abessiivi		([aei])s	(1)(1)tta	s	ps=f
+nominatiivi_mon	([aei])s	(1)(1)t	s	ps=f
+genetiivi_mon	s	iden	s
+genetiivi_mon	s	itten	s	prio=2
+partitiivi_mon	s	ita	s
+translatiivi_mon	s	iksi	s	ps=f
+translatiivi_mon	s	ikse	s	ps=r
+essiivi_mon	s	ina	s
+inessiivi_mon	s	issa	s
+elatiivi_mon	s	ista	s
+illatiivi_mon	s	isiin	s
+illatiivi_mon	s	ihin	s	prio=3
+adessiivi_mon	s	illa	s
+ablatiivi_mon	s	ilta	s
+allatiivi_mon	s	ille	s
+abessiivi_mon	s	itta	s	ps=f
+komitatiivi_mon	s	ine	s	ps=r
+instruktiivi_mon	s	in	s	ps=f
+!subst_UUs	as	uus	s
+end: rules
+end: class
+
+
+# Kotus 42 mies
+class: 42
+sm-class: mies
+match-word: mies
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	s	he	s	ps=r
+genetiivi		s	hen	s
+partitiivi	0	ta	w
+translatiivi	s	heksi	s	ps=f
+translatiivi	s	hekse	s	ps=r
+essiivi		s	hena	s
+inessiivi		s	hessa	s
+elatiivi		s	hesta	s
+illatiivi		s	heen	s
+adessiivi		s	hella	s
+ablatiivi		s	helta	s
+allatiivi		s	helle	s
+abessiivi		s	hetta	s	ps=f
+nominatiivi_mon	s	het	s	ps=f
+genetiivi_mon	0	ten	s
+genetiivi_mon	s	hien	s
+partitiivi_mon	s	hia	s
+translatiivi_mon	s	hiksi	s	ps=f
+translatiivi_mon	s	hikse	s	ps=r
+essiivi_mon	s	hina	s
+inessiivi_mon	s	hissa	s
+elatiivi_mon	s	hista	s
+illatiivi_mon	s	hiin	s
+adessiivi_mon	s	hilla	s
+ablatiivi_mon	s	hilta	s
+allatiivi_mon	s	hille	s
+abessiivi_mon	s	hitta	s	ps=f
+komitatiivi_mon	s	hine	s	ps=r
+instruktiivi_mon	s	hin	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 43 ohut
+class: 43
+sm-class: ohut
+match-word: CUt
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	t	e	s	ps=r
+genetiivi		t	en	s
+partitiivi	0	ta	w
+translatiivi	t	eksi	s	ps=f
+translatiivi	t	ekse	s	ps=r
+essiivi		t	ena	s
+inessiivi		t	essa	s
+elatiivi		t	esta	s
+illatiivi		t	een	s
+adessiivi		t	ella	s
+ablatiivi		t	elta	s
+allatiivi		t	elle	s
+abessiivi		t	etta	s	ps=f
+nominatiivi_mon	t	et	s	ps=f
+genetiivi_mon	t	iden	s
+genetiivi_mon	t	itten	s
+partitiivi_mon	t	ita	s
+translatiivi_mon	t	iksi	s	ps=f
+translatiivi_mon	t	ikse	s	ps=r
+essiivi_mon	t	ina	s
+inessiivi_mon	t	issa	s
+elatiivi_mon	t	ista	s
+illatiivi_mon	t	isiin	s
+illatiivi_mon	t	ihin	s
+adessiivi_mon	t	illa	s
+ablatiivi_mon	t	ilta	s
+allatiivi_mon	t	ille	s
+abessiivi_mon	t	itta	s	ps=f
+komitatiivi_mon	t	ine	s	ps=r
+instruktiivi_mon	t	in	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 47 kuollut
+class: 47
+sm-class: kuollut
+match-word: CUt
+consonant-gradation: -
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	ut	ee	s	ps=r
+genetiivi		ut	een	s
+partitiivi	0	ta	w
+translatiivi	ut	eeksi	s	ps=f
+translatiivi	ut	eekse	s	ps=r
+essiivi		ut	eena	s
+inessiivi		ut	eessa	s
+elatiivi		ut	eesta	s
+illatiivi		ut	eeseen	s
+adessiivi		ut	eella	s
+ablatiivi		ut	eelta	s
+allatiivi		ut	eelle	s
+abessiivi		ut	eetta	s	ps=f
+nominatiivi_mon	ut	eet	s	ps=f
+genetiivi_mon	ut	eiden	s
+genetiivi_mon	ut	eitten	s
+partitiivi_mon	ut	eita	s
+translatiivi_mon	ut	eiksi	s	ps=f
+translatiivi_mon	ut	eikse	s	ps=r
+essiivi_mon	ut	eina	s
+inessiivi_mon	ut	eissa	s
+elatiivi_mon	ut	eista	s
+illatiivi_mon	ut	eisiin	s
+illatiivi_mon	ut	eihin	s	prio=2
+adessiivi_mon	ut	eilla	s
+ablatiivi_mon	ut	eilta	s
+allatiivi_mon	ut	eille	s
+abessiivi_mon	ut	eitta	s	ps=f
+komitatiivi_mon	ut	eine	s	ps=r
+instruktiivi_mon	ut	ein	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 48 aate
+class: 48
+sm-class: hame
+match-word: e
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	0	e	s	ps=r
+genetiivi		0	en	s
+partitiivi	0	tta	w
+translatiivi	0	eksi	s	ps=f
+translatiivi	0	ekse	s	ps=r
+essiivi		0	ena	s
+inessiivi		0	essa	s
+elatiivi		0	esta	s
+illatiivi		0	eseen	s
+adessiivi		0	ella	s
+ablatiivi		0	elta	s
+allatiivi		0	elle	s
+abessiivi		0	etta	s	ps=f
+nominatiivi_mon	0	et	s	ps=f
+genetiivi_mon	0	iden	s
+genetiivi_mon	0	itten	s	prio=2
+partitiivi_mon	0	ita	s
+translatiivi_mon	0	iksi	s	ps=f
+translatiivi_mon	0	ikse	s	ps=r
+essiivi_mon	0	ina	s
+inessiivi_mon	0	issa	s
+elatiivi_mon	0	ista	s
+illatiivi_mon	0	isiin	s
+illatiivi_mon	0	ihin	s	prio=2
+adessiivi_mon	0	illa	s
+ablatiivi_mon	0	ilta	s
+allatiivi_mon	0	ille	s
+abessiivi_mon	0	itta	s	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+instruktiivi_mon	0	in	s	ps=f
+end: rules
+end: class
+
+
+# Kotus 49 askel
+class: 49
+sm-class: askel
+match-word: [ae][lrn]
+consonant-gradation: ws
+group: t
+transform-group: e
+rules:
+nominatiivi	0	0	w	ps=f
+nominatiivi	0	e	s
+genetiivi		0	en	s
+genetiivi		0	een	s
+partitiivi	0	ta	w
+partitiivi	0	etta	s
+translatiivi	0	eeksi	s	ps=f
+translatiivi	0	eekse	s	ps=r
+essiivi		0	eena	s
+inessiivi		0	eessa	s
+elatiivi		0	eesta	s
+illatiivi		0	eeseen	s
+adessiivi		0	eella	s
+ablatiivi		0	eelta	s
+allatiivi		0	eelle	s
+abessiivi		0	eetta	s	ps=f
+nominatiivi_mon	0	et	s	ps=f
+nominatiivi_mon	0	eet	s	ps=f
+genetiivi_mon	0	ten	w
+genetiivi_mon	0	ien	s
+genetiivi_mon	0	eiden	s
+genetiivi_mon	0	eitten	s	prio=2
+partitiivi_mon	0	ia	s
+partitiivi_mon	0	eita	s
+translatiivi_mon	0	iksi	s	ps=f
+translatiivi_mon	0	ikse	s	ps=r
+translatiivi_mon	0	eiksi	s	ps=f
+translatiivi_mon	0	eikse	s	ps=r
+essiivi_mon	0	ina	s
+essiivi_mon	0	eina	s
+inessiivi_mon	0	issa	s
+inessiivi_mon	0	eissa	s
+elatiivi_mon	0	ista	s
+elatiivi_mon	0	eista	s
+illatiivi_mon	0	iin	s
+illatiivi_mon	0	eisiin	s
+illatiivi_mon	0	eihin	s	prio=2
+adessiivi_mon	0	illa	s
+adessiivi_mon	0	eilla	s
+ablatiivi_mon	0	ilta	s
+ablatiivi_mon	0	eilta	s
+allatiivi_mon	0	ille	s
+allatiivi_mon	0	eille	s
+abessiivi_mon	0	itta	s	ps=f
+abessiivi_mon	0	eitta	s	ps=f
+komitatiivi_mon	0	ine	s	ps=r
+komitatiivi_mon	0	eine	s	ps=r
+instruktiivi_mon	0	in	s	ps=f
+instruktiivi_mon	0	ein	s	ps=f
+end: rules
+end: class

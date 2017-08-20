@@ -1,0 +1,29 @@
+## luvut
+
+# yhteenlasku
+nolla plus x on x
+x:n seuraaja plus y on x plus y:n seuraaja
+
+# kertolasku
+x kerrottuna nollalla on nolla
+x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
+
+# vakioita
+yksi on nollan seuraaja
+kaksi on yhden seuraaja
+
+## listat
+
+# pää ja häntä
+a:n lisättynä b:hen pää on a
+a:n lisättynä b:hen häntä on b
+
+# map
+f sovellettuna tyhjyyden jäseniin on tyhjyys
+f sovellettuna a:n lisättynä b:hen jäseniin on a:n f lisättynä f:ään sovellettuna b:n jäseniin
+
+## ohjelma
+
+lista on yksi lisättynä kahteen lisättynä tyhjyyteen lisättynä tyhjyyteen
+
+tulos on seuraaja sovellettuna listan jäseniin
