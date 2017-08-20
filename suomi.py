@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, traceback, argparse, operator
+import os, sys, traceback, argparse, operator, re
 from voikko.libvoikko import Voikko, Token
 from voikko.inflect_word import inflect_word
 
@@ -97,7 +97,19 @@ def inflect(word, case):
 		case_latin += "_mon"
 	word = word[1:]
 	
-	if len(word) == 1:
+	if re.match("[0-9]+", word):
+		if case == "sisatulento":
+			if word[-1] in "123560":
+				return word + ":een"
+			elif word[-1] in "479":
+				return word + ":ään"
+			else: # 8
+				return word + ":aan"
+		elif word[-1] in "14579":
+			return word + CASES_A[case].replace("a", "ä")
+		else:
+			return word + CASES_A[case]
+	elif len(word) == 1:
 		if word in "flmnrsx":
 			return word + CASES_F[case]
 		elif case == "sisatulento":
