@@ -255,9 +255,9 @@ class VarTree:
 		return hash(self.name)
 	def str(self):
 		return self.name
-	def match(self, tree, subs):
+	def match(self, tree):
 		if len(self.name) == 2 and re.match(r"\$[^0-9]", self.name):
-			return True, {self.name: (tree, subs)}
+			return True, {self.name: tree}
 		if isinstance(tree, VarTree):
 			return self.name == tree.name, {}
 #		elif isinstance(tree, NumTree):
@@ -265,6 +265,11 @@ class VarTree:
 		return False, {}
 	def inflect(self, case):
 		return inflect(self.name, case)
+	def subs(self, subs):
+		if self.name in subs:
+			return subs[self.name]
+		else:
+			return self
 
 #class NumTree:
 #	def __init__(self, num):
@@ -275,12 +280,14 @@ class VarTree:
 #		return self.num
 #	def str(self):
 #		return "$" + str(self.num)
-#	def match(self, tree, subs):
+#	def match(self, tree):
 #		if isinstance(tree, NumTree):
 #			return self.num == tree.num, {}
 #		elif isinstance(tree, VarTree):
 #			return str(self.num) == tree.name, {}
 #		return False, {}
+#	def subs(self, subs):
+#		return self
 #	def inflect(self, case):
 #		return inflect(str(self.num), case)
 
@@ -304,12 +311,12 @@ class CallTree:
 		return self.hash
 	def str(self):
 		return self.repr
-	def match(self, tree, subs0):
+	def match(self, tree):
 		if isinstance(tree, CallTree):
 			if self.headInfl != tree.headInfl:
 				return False, {}
 			
-			ok, subs = self.head.match(tree.head, subs0)
+			ok, subs = self.head.match(tree.head)
 			
 			if not ok or len(tree.args) != len(self.args):
 				return False, {}
@@ -317,12 +324,14 @@ class CallTree:
 			for arg, arg2, ai, ai2 in zip(self.args, tree.args, self.argInfls, tree.argInfls):
 				if ai != ai2:
 					return False, {}
-				ok, subs2 = arg.match(arg2, subs0)
+				ok, subs2 = arg.match(arg2)
 				subs.update(subs2)
 				if not ok:
 					return False, {}
 			return True, subs
 		return False, {}
+	def subs(self, subs):
+		return CallTree(self.head.subs(subs), [arg.subs(subs) for arg in self.args], self.headInfl, self.argInfls)
 	def inflect(self, case):
 		if self in REPRS:
 			return '"' + REPRS[self].inflect(case) + '"'
@@ -415,55 +424,42 @@ stack = []
 class StopEvaluation(Exception):
 	pass
 
-def subsToString(s):
-	return "{" + ", ".join([k + " = " + s[k][0].str() + " " + subsToString(s[k][1]) for k in s]) + "}"
-
-def printStack(subs):
-	sys.stderr.write("Names:\n")
-	for key in subs:
-		sys.stderr.write("  " + key + " = " + subs[key][0].str() + "\n")
+def printStack():
 	sys.stderr.write("Stack:\n")
-	for val, s in stack:
-		#sys.stderr.write("  " + val.str() + " " + subsToString(s) + "\n")
+	for val in stack:
 		sys.stderr.write("  " + val.str() + "\n")
 	raise(StopEvaluation())
 
-def evals(tree, subs={}):
-	a = evals_(tree, subs)
+def evals(tree):
+	a = evals_(tree)
 	while True:
-		b = evals_(a, subs)
+		b = evals_(a)
 		if a == b:
 			break
 		a = b
 	return a
 
-def evals_(tree, subs={}):
+def evals_(tree):
 	global stack
-	stack += [(tree, subs)]
+	stack += [tree]
 	try:
 		a = None
-		if isinstance(tree, VarTree) and tree.name in subs:
-			a = evals(subs[tree.name][0], subs[tree.name][1])
-		else:
-			for defi in DEFS:
-				ok, subs2 = defi.left.match(tree, subs)
-				if ok:
-					#print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + defi.right.str())
-					subs3 = {}
-					subs3.update(subs)
-					subs3.update(subs2)
-					a = evals(defi.right, subs3)
-					break
+		for defi in DEFS:
+			ok, subs2 = defi.left.match(tree)
+			if ok:
+				#print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + defi.right.str())
+				a = defi.right.subs(subs2)
+				break
 		if a is None:
 			if isinstance(tree, CallTree):
-				a = CallTree(evals_(tree.head, subs), [evals_(arg, subs) for arg in tree.args], tree.headInfl, tree.argInfls)
+				a = CallTree(evals_(tree.head), [evals_(arg) for arg in tree.args], tree.headInfl, tree.argInfls)
 			else:
 				a = tree
 	except StopEvaluation as e:
 		raise(e)
 	except Exception as e:
 		traceback.print_exc(file=sys.stderr)
-		printStack(subs)
+		printStack()
 	del stack[-1]
 	return a
 

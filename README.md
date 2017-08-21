@@ -72,16 +72,13 @@ For example, given the following definitions, `nollan seuraaja plus nollan seura
     
     nollan seuraaja plus nollan seuraaja
     # (step 1) matches def 2 (x:n seuraaja plus y)
-    # (step 3) repeat
-    x plus y:n seuraaja
-    # (step 1) does not match
-    # (step 2) evaluate x and y:n seuraaja (x = nolla, y = nollan seuraaja)
+    #          substitute with x plus y:n seuraaja
+    #          where x = nolla, y = nollan seuraaja
     # (step 3) repeat
     nolla plus nollan seuraajan seuraaja
     # (step 1) matches def 1 (nolla plus x)
-    # (step 3) repeat
-    x
-    # (step 1) matches (x = nollan seuraajan seuraaja)
+    #          substitute with x
+    #          where x = nollan seuraajan seuraaja
     # (step 3) repeat
     nollan seuraajan seuraaja
     # (step 1) does not match
