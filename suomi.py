@@ -41,6 +41,7 @@ CASES_LATIN = {
 }
 
 CASES_ABRV = {
+	"": "*",
 	"nimento": "N",
 	"omanto": "G",
 	"osanto": "P",
@@ -162,7 +163,7 @@ def lexLine(line):
 				alternatives += [Conj(bf)]
 			#else:
 			#	print("Unknown word:", bf, analysis)
-		else:
+		if len(analysisList) == 0:
 			alternatives += [Noun(word, "nimento", "singular")]
 		output += [alternatives]
 	return output
@@ -239,6 +240,12 @@ def parseEq(words, allowQueries):
 		raise(StopEvaluation())
 	return EqTree(w.str(), left, right)
 
+def parseVar(name):
+#	if re.match(name, r"\$[1-9][0-9]*"):
+#		return NumTree(int(name[1:]))
+#	else:
+		return VarTree(name)
+
 class VarTree:
 	def __init__(self, name):
 		self.name = name
@@ -252,11 +259,30 @@ class VarTree:
 		if len(self.name) == 2 and re.match(r"\$[^0-9]", self.name):
 			return True, {self.name: (tree, subs)}
 		if isinstance(tree, VarTree):
-			if self.name == tree.name:
-				return True, {}
+			return self.name == tree.name, {}
+#		elif isinstance(tree, NumTree):
+#			return self.name == str(tree.num), {}
 		return False, {}
 	def inflect(self, case):
 		return inflect(self.name, case)
+
+#class NumTree:
+#	def __init__(self, num):
+#		self.num = num
+#	def __eq__(self, tree):
+#		return type(tree) == NumTree and self.num == tree.num
+#	def __hash__(self):
+#		return self.num
+#	def str(self):
+#		return "$" + str(self.num)
+#	def match(self, tree, subs):
+#		if isinstance(tree, NumTree):
+#			return self.num == tree.num, {}
+#		elif isinstance(tree, VarTree):
+#			return str(self.num) == tree.name, {}
+#		return False, {}
+#	def inflect(self, case):
+#		return inflect(str(self.num), case)
 
 class CallTree:
 	def __init__(self, head, args, headInfl, argInfls):
@@ -264,12 +290,20 @@ class CallTree:
 		self.args = args
 		self.headInfl = headInfl
 		self.argInfls = argInfls
+		self.repr = self.head.str() + ":" + CASES_ABRV[self.headInfl] + "(" + ", ".join([arg.str() + ":" + CASES_ABRV[argInfl] for arg, argInfl in zip(self.args, self.argInfls)]) + ")"
+		self.hash = hash(self.head) + sum([hash(a) for a in self.args]) + hash(self.headInfl) + sum([hash(ai) for ai in self.argInfls])
 	def __eq__(self, tree):
-		return type(tree) == CallTree and self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
+		if type(tree) == CallTree:
+			if self.repr == tree.repr:
+				return True
+			else:
+				return self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
+		else:
+			return False
 	def __hash__(self):
-		return hash(self.head) + sum([hash(a) for a in self.args]) + hash(self.headInfl) + sum([hash(ai) for ai in self.argInfls])
+		return self.hash
 	def str(self):
-		return self.head.str() + "(" + ", ".join([arg.str() for arg in self.args]) + ")"
+		return self.repr
 	def match(self, tree, subs0):
 		if isinstance(tree, CallTree):
 			if self.headInfl != tree.headInfl:
@@ -326,11 +360,11 @@ def parseUnary(words):
 	if w.cl != "noun":
 		sys.stderr.write("Syntax error: expected noun (at " + w.str() + ")\n")
 		raise(StopEvaluation())
-	root = VarTree(w.str(nocase=True))
+	root = parseVar(w.str(nocase=True))
 	root = parseEssive(root, words, True)
 	while w.case == "omanto":
 		w = next(words)
-		root = CallTree(VarTree(w.str(nocase=True)), [root], "", ["omanto"])
+		root = CallTree(parseVar(w.str(nocase=True)), [root], "", ["omanto"])
 	if w.case != "nimento" and w.case != "omanto" and len(words) != 0 and as2w(words[0]).str() in ["&ja", "&tai", "&sekä"]:
 		words2 = words[:]
 		conj = as2w(words[0]).str()
@@ -340,7 +374,7 @@ def parseUnary(words):
 		#else:
 		case, arg = parseUnary(words)
 		if case == w.case:
-			root = CallTree(VarTree(conj), [root, arg], "", [case, case])
+			root = CallTree(parseVar(conj), [root, arg], "", [case, case])
 		else:
 			del words[:]
 			words += words2
@@ -366,9 +400,9 @@ def parseEssive(root, words, allowFullPattern):
 					if as2w(words[0]).cl == "noun":
 						case, arg = parseUnary(words)
 						args += [arg]
-				root2 = VarTree(w.str(nocase=True))
+				root2 = parseVar(w.str(nocase=True))
 				for o in owners[::-1]:
-					root2 = CallTree(root2, [VarTree(o.str(nocase=True))], "", ["omanto"])
+					root2 = CallTree(root2, [parseVar(o.str(nocase=True))], "", ["omanto"])
 				root = CallTree(root2, [root]+args, "olento", ["", case])
 			elif allowFullPattern:
 				del words[:]
@@ -425,6 +459,8 @@ def evals_(tree, subs={}):
 				a = CallTree(evals_(tree.head, subs), [evals_(arg, subs) for arg in tree.args], tree.headInfl, tree.argInfls)
 			else:
 				a = tree
+	except StopEvaluation as e:
+		raise(e)
 	except Exception as e:
 		traceback.print_exc(file=sys.stderr)
 		printStack(subs)
@@ -464,7 +500,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	if args.filename:
 		evalFile(args.filename)
-		print(evals(VarTree("$tulos"), {}).inflect("nimento"))
+		print(evals(parseVar("$tulos"), {}).inflect("nimento"))
 	else:
 		print("""Tampio Interpreter
 Copyright (C) 2017 Iikka Hauhio
