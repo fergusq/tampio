@@ -155,6 +155,10 @@ yhdeksän on 9
 24 esitetään "24"
 25 esitetään "25"
 
+## identiteetti
+
+x:n arvo on x
+
 ## listat
 
 # pää ja häntä
@@ -164,3 +168,7 @@ a:n lisättynä b:hen häntä on b
 # map
 f sovellettuna tyhjyyden jäseniin on tyhjyys
 f sovellettuna a:n lisättynä b:hen jäseniin on a:n f lisättynä f:ään sovellettuna b:n jäseniin
+
+# zip
+f sovellettuna tyhjyyden jäseniin ja tyhjyyden jäseniin on tyhjyys
+f sovellettuna a:n lisättynä b:hen jäseniin ja c:n lisättynä d:hen jäseniin on f:n sovellettuna a:lla ja c:llä arvo lisättynä f:ään sovellettuna b:n jäseniin ja d:n jäseniin
