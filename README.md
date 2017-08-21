@@ -107,9 +107,17 @@ For example, given the following definitions, `nollan seuraaja plus nollan seura
 
 ## Examples
 
-### Fibonacci sequence
+### Lazy infinite lists
 
     yhteenlasku kutsuttuna a:lla ja b:llä on a plus b
+    
+    # Ones [1, 1, 1, ...]
+    yhdet ovat yksi lisättynä yksiin
+    
+    # Natural numbers [1, 2, 3, 4, ...]
+    luvut ovat yhteenlasku sovellettuna yksien jäseniin ja nollan lisättynä lukuihin jäseniin
+    
+    # Fibonacci sequence [1, 1, 2, 3, 5, 8, ...]
     luvut ovat 1 lisättynä 1:een lisättynä yhteenlaskuun sovellettuna lukujen jäseniin ja lukujen hännän jäseniin
 
 ## Finnish declension
