@@ -37,7 +37,7 @@ Genitive calls have form `argumentin funktio`, where `argumentti` is the argumen
 
 Essive calls can have either one or two arguments. They have form `argumentti funktiona [argumentilla]` where the optional last argument must be inflected in a case that is not nominative, genitive or essive. Essive calls are right-associative, meaning that eg. `a f:nä b:llä g:nä` means `f(a,g(b))` in pseudocode.
 
-There are three binary operators in addition to conjunctions in the language: `plus`, `ynnä` and `miinus`. Their first operand must be in the nominative case and the second is inflected in the case of the expression.
+There are three binary operators in addition to conjunctions: `plus`, `ynnä` and `miinus`. Their first operand must be in the nominative case and the second is inflected in the case of the expression.
 
 The conjunctions `ja`, `tai` and `sekä` have usually the same precedence as other binary operators. They require that the first operand is in the same case as the second is. This can lead to situations where the conjunctions actually have a very high precedence:
 
@@ -49,9 +49,9 @@ The conjunctions `ja`, `tai` and `sekä` have usually the same precedence as oth
 |Precedence   |Name                   |Syntax        |Pseudocode |Inflected word|Notes|
 |-------------|-----------------------|--------------|-----------|--------------|-----|
 |1            |Genitive               |`a:n f`       |`f(a)`     |`f`           |     |
-|2            |Essive                 |`a f:nä b:llä`|`f(a,b)`   |`a`           |The case of `b` may vary, but must not be nominative, genitive or essive|
-|3            |Binary operator        |`a plus b`    |`plus(a,b)`|`b`           |Available operators: `plus`, `ynnä`, `miinus`|
-|3<sup>a</sup>|Conjunction<sup>b</sup>|`a ja b`      |`ja(a,b)`  |`a` and `b`   |Available conjunctions: `ja`, `sekä`, `tai`|
+|1            |Essive                 |`a f:nä b:llä`|`f(a,b)`   |`a`           |The case of `b` may vary, but must not be nominative, genitive or essive|
+|2            |Binary operator        |`a plus b`    |`plus(a,b)`|`b`           |Available operators: `plus`, `ynnä`, `miinus`|
+|2<sup>a</sup>|Conjunction<sup>b</sup>|`a ja b`      |`ja(a,b)`  |`a` and `b`   |Available conjunctions: `ja`, `sekä`, `tai`|
 
 <sup>a</sup>The precedence level of a conjunction depends on the cases of the operands, as both operands must share the same case.
 
@@ -109,7 +109,7 @@ In Finnish nouns are inflected in [cases][wp-case]. There are a few of them, lis
 |Instructive|-in   |kisso*in*   |Plural only|
 |Comitative |-ine- |kisso*ine*ni|Plural only, possessive suffix required|
 
-The inflection of nouns is a pretty complicated process. The exact suffix depends on vowel harmony ("A" is either "a" or "ä") and the stem of the word can change due to consonant gradation. It is outside the scope of this document to describe declension further, so it is recommended to check the exact inflected form using from eg. [Wiktionary].
+The inflection of nouns is a pretty complicated process. The exact suffix depends on vowel harmony ("A" is either "a" or "ä") and the stem of the word can change due to consonant gradation. It is outside the scope of this document to describe declension further. Inflected forms of different words can be checked from [Wiktionary] if needed.
 
 [wp-case]: https://en.wikipedia.org/wiki/Finnish_noun_cases
 [Wiktionary]: https://en.wiktionary.org/wiki/kissa
