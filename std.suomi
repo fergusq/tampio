@@ -165,10 +165,15 @@ x:n arvo on x
 a:n lisättynä b:hen pää on a
 a:n lisättynä b:hen häntä on b
 
+# n:s jäsen
+
+l tutkittuna nollalla on l:n pää
+l tutkittuna x:n seuraajalla on l:n häntä tutkittuna x:llä
+
 # map
 f sovellettuna tyhjyyden jäseniin on tyhjyys
 f sovellettuna a:n lisättynä b:hen jäseniin on a:n f lisättynä f:ään sovellettuna b:n jäseniin
 
 # zip
 f sovellettuna tyhjyyden jäseniin ja tyhjyyden jäseniin on tyhjyys
-f sovellettuna a:n lisättynä b:hen jäseniin ja c:n lisättynä d:hen jäseniin on f:n sovellettuna a:lla ja c:llä arvo lisättynä f:ään sovellettuna b:n jäseniin ja d:n jäseniin
+f sovellettuna a:n lisättynä b:hen jäseniin ja c:n lisättynä d:hen jäseniin on f:n kutsuttuna a:lla ja c:llä arvo lisättynä f:ään sovellettuna b:n jäseniin ja d:n jäseniin
