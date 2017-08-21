@@ -405,14 +405,16 @@ def parseEssive(root, words, allowFullPattern):
 			#print([o.str() for o in owners])
 			if w.case == "olento":
 				args = []
+				argInfls = []
 				if len(words) != 0:
 					if as2w(words[0]).cl == "noun":
 						case, arg = parseUnary(words)
 						args += [arg]
+						argInfls += [case]
 				root2 = parseVar(w.str(nocase=True))
 				for o in owners[::-1]:
 					root2 = CallTree(root2, [parseVar(o.str(nocase=True))], "", ["omanto"])
-				root = CallTree(root2, [root]+args, "olento", ["", case])
+				root = CallTree(root2, [root]+args, "olento", [""]+argInfls)
 			elif allowFullPattern:
 				del words[:]
 				words += words2
