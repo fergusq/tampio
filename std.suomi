@@ -4,9 +4,17 @@
 nolla plus x on x
 x:n seuraaja plus y on x plus y:n seuraaja
 
+# vähennyslasku
+x miinus nolla on x
+x:n seuraaja miinus y:n seuraaja on x miinus y
+
 # kertolasku
 x kerrottuna nollalla on nolla
 x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
+
+# potenssiin korotus
+x korotettuna nollaan on yksi
+x korotettuna y:n seuraajaan on x kerrottuna x:llä korotettuna y:hyn
 
 # vakioita
 1 on nollan seuraaja
@@ -19,6 +27,96 @@ x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
 8 on 7:n seuraaja
 9 on 8:n seuraaja
 10 on 9:n seuraaja
+11 on 10:n seuraaja
+12 on 11:n seuraaja
+13 on 12:n seuraaja
+14 on 13:n seuraaja
+15 on 14:n seuraaja
+16 on 15:n seuraaja
+17 on 16:n seuraaja
+18 on 17:n seuraaja
+19 on 18:n seuraaja
+20 on 19:n seuraaja
+21 on 20:n seuraaja
+22 on 21:n seuraaja
+23 on 22:n seuraaja
+24 on 23:n seuraaja
+25 on 24:n seuraaja
+26 on 25:n seuraaja
+27 on 26:n seuraaja
+28 on 27:n seuraaja
+29 on 28:n seuraaja
+30 on 29:n seuraaja
+31 on 30:n seuraaja
+32 on 31:n seuraaja
+33 on 32:n seuraaja
+34 on 33:n seuraaja
+35 on 34:n seuraaja
+36 on 35:n seuraaja
+37 on 36:n seuraaja
+38 on 37:n seuraaja
+39 on 38:n seuraaja
+40 on 39:n seuraaja
+41 on 40:n seuraaja
+42 on 41:n seuraaja
+43 on 42:n seuraaja
+44 on 43:n seuraaja
+45 on 44:n seuraaja
+46 on 45:n seuraaja
+47 on 46:n seuraaja
+48 on 47:n seuraaja
+49 on 48:n seuraaja
+50 on 49:n seuraaja
+51 on 50:n seuraaja
+52 on 51:n seuraaja
+53 on 52:n seuraaja
+54 on 53:n seuraaja
+55 on 54:n seuraaja
+56 on 55:n seuraaja
+57 on 56:n seuraaja
+58 on 57:n seuraaja
+59 on 58:n seuraaja
+60 on 59:n seuraaja
+61 on 60:n seuraaja
+62 on 61:n seuraaja
+63 on 62:n seuraaja
+64 on 63:n seuraaja
+65 on 64:n seuraaja
+66 on 65:n seuraaja
+67 on 66:n seuraaja
+68 on 67:n seuraaja
+69 on 68:n seuraaja
+70 on 69:n seuraaja
+71 on 70:n seuraaja
+72 on 71:n seuraaja
+73 on 72:n seuraaja
+74 on 73:n seuraaja
+75 on 74:n seuraaja
+76 on 75:n seuraaja
+77 on 76:n seuraaja
+78 on 77:n seuraaja
+79 on 78:n seuraaja
+80 on 79:n seuraaja
+81 on 80:n seuraaja
+82 on 81:n seuraaja
+83 on 82:n seuraaja
+84 on 83:n seuraaja
+85 on 84:n seuraaja
+86 on 85:n seuraaja
+87 on 86:n seuraaja
+88 on 87:n seuraaja
+89 on 88:n seuraaja
+90 on 89:n seuraaja
+91 on 90:n seuraaja
+92 on 91:n seuraaja
+93 on 92:n seuraaja
+94 on 93:n seuraaja
+95 on 94:n seuraaja
+96 on 95:n seuraaja
+97 on 96:n seuraaja
+98 on 97:n seuraaja
+99 on 98:n seuraaja
+100 on 99:n seuraaja
 
 yksi on 1
 kaksi on 2
@@ -40,7 +138,22 @@ yhdeksän on 9
 7 esitetään "7"
 8 esitetään "8"
 9 esitetään "9"
-10 esitetään 10
+10 esitetään "10"
+11 esitetään "11"
+12 esitetään "12"
+13 esitetään "13"
+14 esitetään "14"
+15 esitetään "15"
+16 esitetään "16"
+17 esitetään "17"
+18 esitetään "18"
+19 esitetään "19"
+20 esitetään "20"
+21 esitetään "21"
+22 esitetään "22"
+23 esitetään "23"
+24 esitetään "24"
+25 esitetään "25"
 
 ## listat
 
