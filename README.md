@@ -4,6 +4,26 @@ The Tampio Programming Language
 Tampio is a homoiconic lazy purely functional programming language that looks like a natural language – Finnish.
 It is named after a famous Finnish programmer.
 
+## Dependencies
+
+* Python 3
+* Libvoikko (package `libvoikko` in Ubuntu and Fedora)
+* Finnish morphological dictionary (eg. [this](http://www.puimula.org/htp/testing/voikko-snapshot/dict-morpho.zip))
+
+The morphological dictionary must be unzipped to `~/.voikko/`.
+
+## Usage
+
+To open an interactive prompt:
+
+    python3 suomi.py
+
+To evaluate a file:
+
+    python3 suomi.py file.suomi
+
+The output will be the value of `tulos`.
+
 ## Introduction
 
 Tampio is a purely functional programming language designed to resemble written Finnish. Each program is a list of transformations that are applied to the evaluated code. Tampio is homoiconic, meaning that the code and data are represented using the same data type.
@@ -84,6 +104,13 @@ For example, given the following definitions, `nollan seuraaja plus nollan seura
     # (step 1) does not match
     # (step 2) no nested expression matches
     # (step 3) no need to repeat, stop evaluation
+
+## Examples
+
+### Fibonacci sequence
+
+    yhteenlasku kutsuttuna a:lla ja b:llä on a plus b
+    luvut ovat 1 lisättynä 1:een lisättynä yhteenlaskuun sovellettuna lukujen jäseniin ja lukujen hännän jäseniin
 
 ## Finnish declension
 
