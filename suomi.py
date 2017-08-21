@@ -498,7 +498,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	if args.filename:
 		evalFile(args.filename)
-		print(evals(parseVar("$tulos"), {}).inflect("nimento"))
+		print(evals(parseVar("$tulos")).inflect("nimento"))
 	else:
 		print("""Tampio Interpreter
 Copyright (C) 2017 Iikka Hauhio
