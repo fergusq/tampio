@@ -441,7 +441,8 @@ def evals(tree):
 		if a == b:
 			break
 		a = b
-	#print("End: " + a.str())
+	if debug:
+		print("End: " + a.str())
 	return a
 
 def evals_(tree):
@@ -452,7 +453,8 @@ def evals_(tree):
 		for defi in DEFS:
 			ok, subs2 = defi.left.match(tree)
 			if ok:
-				#print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + defi.right.str())
+				if debug:
+					print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + defi.right.str())
 				a = defi.right.subs(subs2)
 				break
 		if a is None:
@@ -483,7 +485,8 @@ def evalLine(line, allowQueries=False):
 		return
 	#print(" ".join(["|".join(set([a.str() for a in alternatives])) for alternatives in output]))
 	eq = parseEq(output, allowQueries)
-	#print(eq.str())
+	if debug:
+		print(eq.str())
 	if eq.query():
 		return evals(eq.left)
 	elif eq.op == "#olla":
@@ -491,19 +494,33 @@ def evalLine(line, allowQueries=False):
 	elif eq.op == "#esittää":
 		REPRS[evals(eq.left)] = eq.right
 
+debug = False
+
+TAMPIO_VERSION = "1.0"
+INTERPRETER_VERSION = "1.0.0"
+
+VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
+
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 evalFile(os.path.join(SCRIPT_DIR, 'std.suomi'))
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description='Interpret code.')
-	parser.add_argument('filename', type=str, nargs='?',
-		help='source code file')
+	parser = argparse.ArgumentParser(description='Interprets Tampio code.')
+	parser.add_argument('filename', type=str, nargs='?', help='source code file')
+	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
+	parser.add_argument('--debug', help='enable debug mode', action='store_true')
 	args = parser.parse_args()
+	
+	if args.version:
+		print(VERSION_STRING)
+		sys.exit(0)
+	
+	debug = args.debug
 	if args.filename:
 		evalFile(args.filename)
 		print(evals(parseVar("$tulos")).inflect("nimento"))
 	else:
-		print("""Tampio Interpreter
+		print(VERSION_STRING + """
 Copyright (C) 2017 Iikka Hauhio
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
