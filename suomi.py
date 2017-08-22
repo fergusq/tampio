@@ -40,6 +40,23 @@ CASES_LATIN = {
 	"seuranto": "komitatiivi",
 }
 
+CASES_ENGLISH = {
+	"nimento": "nominative",
+	"omanto": "genitive",
+	"osanto": "partitive",
+	"olento": "essive",
+	"tulento": "translative",
+	"ulkotulento": "allative",
+	"ulkoolento": "adessive",
+	"ulkoeronto": "ablative",
+	"sisatulento": "illative",
+	"sisaolento": "inessive",
+	"sisaeronto": "elative",
+	"vajanto": "abessive",
+	"keinonto": "instructive",
+	"seuranto": "comitative",
+}
+
 CASES_ABRV = {
 	"": "*",
 	"nimento": "N",
@@ -194,29 +211,29 @@ def lexLine(line):
 		for analysis in analysisList:
 			bf = analysis["BASEFORM"]
 			cl = analysis["CLASS"]
-			if cl == "nimisana" or cl == "lyhenne" or cl == "lukusana" or cl == "laatusana" or cl == "nimisana_laatusana" or cl == "etunimi":
-				alternatives += [Noun(bf, analysis["SIJAMUOTO"], analysis["NUMBER"])]
+			if cl in ["nimisana", "lyhenne", "lukusana", "laatusana", "nimisana_laatusana", "etunimi", "asemosana"]:
+				alternatives += [Noun(bf, analysis["SIJAMUOTO"], analysis["NUMBER"], "pronoun" if cl == "asemosana" else "noun")]
 			elif cl == "seikkasana":
 				alternatives += [Noun(bf, "nimento", "na")]
-			elif cl == "teonsana" or cl == "kieltosana":
+			elif cl in ["teonsana", "kieltosana"]:
 				alternatives += [Verb(bf)]
 			elif cl == "sidesana":
 				alternatives += [Conj(bf)]
-			#else:
-			#	print("Unknown word:", bf, analysis)
-		if len(analysisList) == 0:
+			else:
+				print("Unknown word:", bf, analysis)
+		if len(alternatives) == 0:
 			alternatives += [Noun(word, "nimento", "singular")]
 		output += [alternatives]
 	return output
 
 class Noun:
-	def __init__(self, bf, case, num):
-		self.cl = "noun"
+	def __init__(self, bf, case, num, cl = "noun"):
+		self.cl = cl
 		self.bf = bf
 		self.case = case
 		self.num = num
 	def str(self, nocase=False):
-		num = "$" if self.num == "singular" else "@" if self.num == "plural" else "."
+		num = "?" if self.cl == "pronoun" else "$" if self.num == "singular" else "@" if self.num == "plural" else "."
 		case = CASES_ABRV[self.case]
 		if nocase:
 			return num + self.bf
@@ -252,16 +269,22 @@ PROMOTE = [
 def as2w(w):
 	return sorted(w, key=lambda a: 1 if a.cl == "noun" or a.bf in PROMOTE else 0)[-1]
 
+def checkCase(got, expected, place):
+	if got != expected:
+		sys.stderr.write("Syntax error: illegal case: expected " + CASES_ENGLISH[expected] + ", got " + CASES_ENGLISH[got] + " (" + place + ")\n")
+		raise(StopEvaluation())
+
 class EqTree:
-	def __init__(self, op, left, right):
+	def __init__(self, op, left, right, where):
 		self.op = op
 		self.left = left
 		self.right = right
+		self.where = where
 	def str(self):
 		if self.query():
 			return self.left.str()
 		elif self.op == "#olla":
-			return self.left.str() + " = " + self.right.str()
+			return self.left.str() + " = " + self.right.str() + ("" if not self.where else ", where " + ", ".join([v + " = " + b.str() for v, b in self.where]))
 		elif self.op == "#esittää":
 			return self.left.str() + ' = "' + self.right.str() + '"'
 	def query(self):
@@ -270,20 +293,31 @@ class EqTree:
 def parseEq(words, allowQueries):
 	words = words[:]
 	c, left = parsePattern(words)
-	if c != "nimento":
-		sys.stderr.write("Syntax error: illegal case (" + left.str() + ")\n")
-		raise(StopEvaluation())
+	checkCase(c, "nimento", left.inflect(c))
 	if len(words) == 0 and allowQueries:
-		return EqTree("", left, None)
+		return EqTree("", left, None, None)
 	w = next(words)
 	if w.str() not in ["#olla", "#esittää"]:
 		sys.stderr.write("Syntax error: expected 'on' or 'esitetään' (at " + w.str() + ")\n")
 		raise(StopEvaluation())
 	c, right = parsePattern(words)
-	if c != "nimento":
-		sys.stderr.write("Syntax error: illegal case (" + right.str() + ")\n")
-		raise(StopEvaluation())
-	return EqTree(w.str(), left, right)
+	checkCase(c, "nimento", right.inflect(c))
+	where = []
+	if len(words) > 0 and as2w(words[0]).str() == "?mikä:S_":
+		del words[0]
+		var = next(words)
+		if var.cl != "noun":
+			sys.stderr.write("Syntax error: expected noun (" + var.str() + ")\n")
+			raise(StopEvaluation())
+		checkCase(var.case, "nimento", var.str())
+		w = next(words)
+		if w.str() != "#olla":
+			sys.stderr.write("Syntax error: expected 'on' (at " + w.str() + ")\n")
+			raise(StopEvaluation())
+		c, body = parsePattern(words)
+		checkCase(c, "nimento", right.inflect(c))
+		where += [(var.str(nocase=True), body)]
+	return EqTree(w.str(), left, right, where)
 
 def parseVar(name):
 	if magic and re.fullmatch(r"\$([1-9][0-9]*|0)", name):
@@ -418,9 +452,8 @@ def parsePattern(words):
 			del words[0]
 			
 			case2, arg = parseUnary(words)
-			if w.str() in ["&ja", "&tai", "&sekä"] and case != case2:
-				sys.stderr.write("Syntax error: illegal case (after " + w.str() + ", expected " + case + ", got " + case2 + ")\n")
-				raise(StopEvaluation())
+			if w.str() in ["&ja", "&tai", "&sekä"]:
+				checkCase(case2, case, w.str())
 			case = case2
 			
 			root = CallTree(VarTree(w.str(nocase=True)), [root, arg], "", ["", ""])
@@ -527,11 +560,16 @@ def evals_(tree):
 						print("Match: " + tree.str() + " (opt)")
 					return opt.optimize(tree)
 		for defi in DEFS:
-			ok, subs2 = defi.left.match(tree)
+			ok, subs = defi.left.match(tree)
 			if ok:
 				if debug:
 					print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + defi.right.str())
-				return defi.right.subs(subs2)
+				for var, body in defi.where[::-1]:
+					if var in subs:
+						sys.stderr.write("Error: Illegal redefinition of " + var + "\n")
+						raise(StopEvaluation())
+					subs[var] = body.subs(subs)
+				return defi.right.subs(subs)
 		if isinstance(tree, CallTree):
 			return CallTree(evals_(tree.head), [evals_(arg) for arg in tree.args], tree.headInfl, tree.argInfls)
 		else:
@@ -605,8 +643,8 @@ OPTIMIZATIONS = [
 debug = False
 magic = True
 
-TAMPIO_VERSION = "1.0"
-INTERPRETER_VERSION = "1.3.1"
+TAMPIO_VERSION = "1.1"
+INTERPRETER_VERSION = "1.4.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
