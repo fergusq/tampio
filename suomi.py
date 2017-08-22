@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, traceback, argparse, operator, re
+import os, sys, traceback, argparse, operator, re, readline, atexit
 from voikko.libvoikko import Voikko, Token
 from voikko.inflect_word import inflect_word
 
@@ -539,7 +539,7 @@ def evalLine(line, allowQueries=False):
 debug = False
 
 TAMPIO_VERSION = "1.0"
-INTERPRETER_VERSION = "1.0.1"
+INTERPRETER_VERSION = "1.1.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
@@ -562,6 +562,15 @@ if __name__ == "__main__":
 		evalFile(args.filename)
 		print(evals(parseVar("$tulos")).inflect("nimento"))
 	else:
+		
+		histfile = os.path.join(os.path.expanduser("~"), ".tampio_history")
+		try:
+			readline.read_history_file(histfile)
+			readline.set_history_length(1000)
+		except FileNotFoundError:
+			pass
+		atexit.register(readline.write_history_file, histfile)
+		
 		print(VERSION_STRING + """
 Copyright (C) 2017 Iikka Hauhio
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
