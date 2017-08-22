@@ -92,13 +92,44 @@ CASES_F = {
 	"seuranto": ":ineen",
 }
 
+CASE_REGEXES = {
+	"singular": {
+		"omanto": r"[^:]+:n",
+		"osanto": r"[^:]+:(aa?|ää?|t[aä])",
+		"olento": r"[^:]+:(n[aä])",
+		"tulento": r"[^:]+:ksi",
+		"ulkotulento": r"[^:]+:lle",
+		"ulkoolento": r"[^:]+:ll[aä]",
+		"ulkoeronto": r"[^:]+:lt[aä]",
+		"sisatulento": r"[^:]+:(aan|ään|h[aeiouyäöå]n)",
+		"sisaolento": r"[^:]+:ss[aä]",
+		"sisaeronto": r"[^:]+:st[aä]",
+		"vajanto": r"[^:]+:tt[aä]"
+	},
+	"plural": {
+		"omanto": r"[^:]+:ien",
+		"osanto": r"[^:]+:(ia?|iä?|it[aä])",
+		"olento": r"[^:]+:(in[aä])",
+		"tulento": r"[^:]+:iksi",
+		"ulkotulento": r"[^:]+:ille",
+		"ulkoolento": r"[^:]+:ill[aä]",
+		"ulkoeronto": r"[^:]+:ilt[aä]",
+		"sisatulento": r"[^:]+:(iin|ih[aeiouyäöå]n)",
+		"sisaolento": r"[^:]+:iss[aä]",
+		"sisaeronto": r"[^:]+:ist[aä]",
+		"vajanto": r"[^:]+:itt[aä]",
+		"keinonto": r"[^:]+:in",
+		"seuranto": r"[^:]+:ine[^:]*"
+	}
+}
+
 def inflect(word, case):
 	case_latin = CASES_LATIN[case]
 	if word[0] == "@":
 		case_latin += "_mon"
 	word = word[1:]
 	
-	if re.match(r"[0-9]+", word):
+	if re.fullmatch(r"[0-9]+", word):
 		if case == "sisatulento":
 			if word[-1] in "123560":
 				return word + ":een"
@@ -148,6 +179,16 @@ def lexLine(line):
 		if token.tokenType != Token.WORD:
 			continue
 		word = token.tokenText
+		
+		cont = False
+		for number in CASE_REGEXES:
+			for case in CASE_REGEXES[number]:
+				if re.fullmatch(CASE_REGEXES[number][case], word):
+					output += [[Noun(word[:word.index(":")], case, number)]]
+					cont = True
+		if cont:
+			continue
+		
 		analysisList = voikko.analyze(word)
 		alternatives = []
 		for analysis in analysisList:
@@ -245,7 +286,7 @@ def parseEq(words, allowQueries):
 	return EqTree(w.str(), left, right)
 
 def parseVar(name):
-#	if re.match(name, r"\$[1-9][0-9]*"):
+#	if re.fullmatch(name, r"$[1-9][0-9]*"):
 #		return NumTree(int(name[1:]))
 #	else:
 		return VarTree(name)
@@ -260,7 +301,7 @@ class VarTree:
 	def str(self):
 		return self.name
 	def match(self, tree):
-		if len(self.name) == 2 and re.match(r".[^0-9]", self.name):
+		if re.fullmatch(r".[^0-9]", self.name):
 			return True, {self.name: tree}
 		if isinstance(tree, VarTree):
 			return self.name == tree.name, {}
@@ -483,7 +524,8 @@ def evalLine(line, allowQueries=False):
 	output = lexLine(line)
 	if not output:
 		return
-	#print(" ".join(["|".join(set([a.str() for a in alternatives])) for alternatives in output]))
+	if debug:
+		print(" ".join(["|".join(set([a.str() for a in alternatives])) for alternatives in output]))
 	eq = parseEq(output, allowQueries)
 	if debug:
 		print(eq.str())
@@ -497,7 +539,7 @@ def evalLine(line, allowQueries=False):
 debug = False
 
 TAMPIO_VERSION = "1.0"
-INTERPRETER_VERSION = "1.0.0"
+INTERPRETER_VERSION = "1.0.1"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
