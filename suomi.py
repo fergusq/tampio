@@ -204,8 +204,12 @@ def next(words):
 	del words[0]
 	return as2w(w)
 
+PROMOTE = [
+	"yksi"
+]
+
 def as2w(w):
-	return sorted(w, key=lambda a: 1 if a is Noun else 0)[0]
+	return sorted(w, key=lambda a: 1 if a.cl == "noun" or a.bf in PROMOTE else 0)[-1]
 
 class EqTree:
 	def __init__(self, op, left, right):
@@ -256,7 +260,7 @@ class VarTree:
 	def str(self):
 		return self.name
 	def match(self, tree):
-		if len(self.name) == 2 and re.match(r"\$[^0-9]", self.name):
+		if len(self.name) == 2 and re.match(r".[^0-9]", self.name):
 			return True, {self.name: tree}
 		if isinstance(tree, VarTree):
 			return self.name == tree.name, {}
@@ -301,10 +305,8 @@ class CallTree:
 		self.hash = hash(self.head) + sum([hash(a) for a in self.args]) + hash(self.headInfl) + sum([hash(ai) for ai in self.argInfls])
 	def __eq__(self, tree):
 		if type(tree) == CallTree:
-			if self.repr == tree.repr:
-				return True
-			else:
-				return self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
+			return self.repr == tree.repr
+			#return self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
 		else:
 			return False
 	def __hash__(self):
@@ -439,6 +441,7 @@ def evals(tree):
 		if a == b:
 			break
 		a = b
+	#print("End: " + a.str())
 	return a
 
 def evals_(tree):
