@@ -4,17 +4,25 @@
 nolla plus x on x
 x:n seuraaja plus y on x plus y:n seuraaja
 
+yhteenlasku kutsuttuna a:lla ja b:llä on a plus b
+
 # vähennyslasku
 x miinus nolla on x
 x:n seuraaja miinus y:n seuraaja on x miinus y
+
+vähennyslasku kutsuttuna a:lla ja b:llä on a miinus b
 
 # kertolasku
 x kerrottuna nollalla on nolla
 x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
 
+kertolasku kutsuttuna a:lla ja b:llä on a kerrottuna b:llä
+
 # potenssiin korotus
 x korotettuna nollaan on yksi
 x korotettuna y:n seuraajaan on x kerrottuna x:llä korotettuna y:hyn
+
+eksponentaatio kutsuttuna a:lla ja b:llä on a korotettuna b:hen
 
 # vakioita
 1 on nollan seuraaja
@@ -125,7 +133,7 @@ neljä on 4
 viisi on 5
 kuusi on 6
 
-# esityksiä
+# esityksiä (ladataan samalla vakioiden arvot muistiin)
 1 esitetään "1"
 2 esitetään "2"
 3 esitetään "3"
@@ -151,6 +159,81 @@ kuusi on 6
 23 esitetään "23"
 24 esitetään "24"
 25 esitetään "25"
+26 esitetään "26"
+27 esitetään "27"
+28 esitetään "28"
+29 esitetään "29"
+30 esitetään "30"
+31 esitetään "31"
+32 esitetään "32"
+33 esitetään "33"
+34 esitetään "34"
+35 esitetään "35"
+36 esitetään "36"
+37 esitetään "37"
+38 esitetään "38"
+39 esitetään "39"
+40 esitetään "40"
+41 esitetään "41"
+42 esitetään "42"
+43 esitetään "43"
+44 esitetään "44"
+45 esitetään "45"
+46 esitetään "46"
+47 esitetään "47"
+48 esitetään "48"
+49 esitetään "49"
+50 esitetään "50"
+51 esitetään "51"
+52 esitetään "52"
+53 esitetään "53"
+54 esitetään "54"
+55 esitetään "55"
+56 esitetään "56"
+57 esitetään "57"
+58 esitetään "58"
+59 esitetään "59"
+60 esitetään "60"
+61 esitetään "61"
+62 esitetään "62"
+63 esitetään "63"
+64 esitetään "64"
+65 esitetään "65"
+66 esitetään "66"
+67 esitetään "67"
+68 esitetään "68"
+69 esitetään "69"
+70 esitetään "70"
+71 esitetään "71"
+72 esitetään "72"
+73 esitetään "73"
+74 esitetään "74"
+75 esitetään "75"
+76 esitetään "76"
+77 esitetään "77"
+78 esitetään "78"
+79 esitetään "79"
+80 esitetään "80"
+81 esitetään "81"
+82 esitetään "82"
+83 esitetään "83"
+84 esitetään "84"
+85 esitetään "85"
+86 esitetään "86"
+87 esitetään "87"
+88 esitetään "88"
+89 esitetään "89"
+90 esitetään "90"
+91 esitetään "91"
+92 esitetään "92"
+93 esitetään "93"
+94 esitetään "94"
+95 esitetään "95"
+96 esitetään "96"
+97 esitetään "97"
+98 esitetään "98"
+99 esitetään "99"
+100 esitetään "100"
 
 ## identiteetti
 
@@ -173,9 +256,10 @@ l jatkettuna nollasta on l
 l jatkettuna x:n seuraajasta on l:n häntä jatkettuna x:stä
 
 # yhdiste
-l yhdistettynä k:hon on l plus k
 tyhjyys plus l on l
 a lisättynä b:hen plus c on a lisättynä b:hen yhdistettynä c:hen
+
+l yhdistettynä k:hon on l plus k
 
 # map
 f sovellettuna tyhjyyden jäseniin on tyhjyys
