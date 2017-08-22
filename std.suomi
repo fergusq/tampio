@@ -124,9 +124,6 @@ kolme on 3
 neljä on 4
 viisi on 5
 kuusi on 6
-seitsemän on 7
-kahdeksan on 8
-yhdeksän on 9
 
 # esityksiä
 1 esitetään "1"
@@ -166,9 +163,19 @@ a:n lisättynä b:hen pää on a
 a:n lisättynä b:hen häntä on b
 
 # n:s jäsen
-
 l tutkittuna nollalla on l:n pää
 l tutkittuna x:n seuraajalla on l:n häntä tutkittuna x:llä
+
+# slice
+l katkaistuna nollasta on tyhjyys    
+l katkaistuna x:n seuraajasta on l:n pää lisättynä l:n häntään katkaistuna x:stä
+l jatkettuna nollasta on l
+l jatkettuna x:n seuraajasta on l:n häntä jatkettuna x:stä
+
+# yhdiste
+l yhdistettynä k:hon on l plus k
+tyhjyys plus l on l
+a lisättynä b:hen plus c on a lisättynä b:hen yhdistettynä c:hen
 
 # map
 f sovellettuna tyhjyyden jäseniin on tyhjyys
