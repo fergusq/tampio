@@ -286,9 +286,9 @@ def parseEq(words, allowQueries):
 	return EqTree(w.str(), left, right)
 
 def parseVar(name):
-#	if re.fullmatch(name, r"$[1-9][0-9]*"):
-#		return NumTree(int(name[1:]))
-#	else:
+	if magic and re.fullmatch(r"\$[1-9][0-9]*", name):
+		return NumTree(int(name[1:]))
+	else:
 		return VarTree(name)
 
 class VarTree:
@@ -305,8 +305,10 @@ class VarTree:
 			return True, {self.name: tree}
 		if isinstance(tree, VarTree):
 			return self.name == tree.name, {}
-#		elif isinstance(tree, NumTree):
-#			return self.name == str(tree.num), {}
+		elif isinstance(tree, NumTree):
+			if self.name == "$nolla" and tree.num == 0:
+				return True, {}
+			return self.name == str(tree.num), {}
 		return False, {}
 	def inflect(self, case):
 		return inflect(self.name, case)
@@ -316,25 +318,33 @@ class VarTree:
 		else:
 			return self
 
-#class NumTree:
-#	def __init__(self, num):
-#		self.num = num
-#	def __eq__(self, tree):
-#		return type(tree) == NumTree and self.num == tree.num
-#	def __hash__(self):
-#		return self.num
-#	def str(self):
-#		return "$" + str(self.num)
-#	def match(self, tree):
-#		if isinstance(tree, NumTree):
-#			return self.num == tree.num, {}
-#		elif isinstance(tree, VarTree):
-#			return str(self.num) == tree.name, {}
-#		return False, {}
-#	def subs(self, subs):
-#		return self
-#	def inflect(self, case):
-#		return inflect(str(self.num), case)
+class NumTree:
+	def __init__(self, num):
+		self.num = num
+	def __eq__(self, tree):
+		return type(tree) == NumTree and self.num == tree.num
+	def __hash__(self):
+		return self.num
+	def str(self):
+		if self.num == 0:
+			return "$nolla"
+		else:
+			return "$" + str(self.num)
+	def match(self, tree):
+		if isinstance(tree, NumTree):
+			return self.num == tree.num, {}
+		elif isinstance(tree, VarTree):
+			if self.num == 0 and tree.name == "$nolla":
+				return True, {}
+			return str(self.num) == tree.name, {}
+		return False, {}
+	def subs(self, subs):
+		return self
+	def inflect(self, case):
+		if self.num == 0:
+			return inflect("$nolla", case)
+		else:
+			return '"' + inflect("$" + str(self.num), case) + '"'
 
 class CallTree:
 	def __init__(self, head, args, headInfl, argInfls):
@@ -352,6 +362,12 @@ class CallTree:
 			return False
 	def __hash__(self):
 		return self.hash
+	def headIs(self, tree, headInfl, argInfls):
+		inflOk = self.headInfl == headInfl and self.argInfls == argInfls
+		if isinstance(tree, str):
+			return isinstance(self.head, VarTree) and self.head.name == tree
+		else:
+			return self.head == tree and inflOk
 	def str(self):
 		return self.repr
 	def match(self, tree):
@@ -372,6 +388,9 @@ class CallTree:
 				if not ok:
 					return False, {}
 			return True, subs
+		if isinstance(tree, NumTree) and tree.num > 0:
+			if self.headIs(VarTree("$seuraaja"), "", ["omanto"]):
+				return self.args[0].match(NumTree(tree.num - 1))
 		return False, {}
 	def subs(self, subs):
 		return CallTree(self.head.subs(subs), [arg.subs(subs) for arg in self.args], self.headInfl, self.argInfls)
@@ -499,26 +518,29 @@ def evals_(tree):
 	global stack
 	stack += [tree]
 	try:
-		a = None
+		if magic:
+			for opt in OPTIMIZATIONS:
+				if opt.match(tree):
+					if debug:
+						print("Match: " + tree.str() + " (opt)")
+					return opt.optimize(tree)
 		for defi in DEFS:
 			ok, subs2 = defi.left.match(tree)
 			if ok:
 				if debug:
 					print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + defi.right.str())
-				a = defi.right.subs(subs2)
-				break
-		if a is None:
-			if isinstance(tree, CallTree):
-				a = CallTree(evals_(tree.head), [evals_(arg) for arg in tree.args], tree.headInfl, tree.argInfls)
-			else:
-				a = tree
+				return defi.right.subs(subs2)
+		if isinstance(tree, CallTree):
+			return CallTree(evals_(tree.head), [evals_(arg) for arg in tree.args], tree.headInfl, tree.argInfls)
+		else:
+			return tree
 	except StopEvaluation as e:
 		raise(e)
 	except Exception as e:
 		traceback.print_exc(file=sys.stderr)
 		printStack()
-	del stack[-1]
-	return a
+	finally:
+		del stack[-1]
 
 DEFS = []
 REPRS = {}
@@ -529,7 +551,7 @@ def evalFile(filename):
 			evalLine(line)
 
 def evalLine(line, allowQueries=False):
-	global DEFS
+	global DEFS, VAR_STORE
 	output = lexLine(line)
 	if not output:
 		return
@@ -542,13 +564,47 @@ def evalLine(line, allowQueries=False):
 		return evals(eq.left)
 	elif eq.op == "#olla":
 		DEFS += [eq]
+		VAR_STORE = {}
 	elif eq.op == "#esittää":
 		REPRS[evals(eq.left)] = eq.right
 
+class OptimizeOperator:
+	def __init__(self, operator, opcase, argcases, fun):
+		self.operator = operator
+		self.opcase = opcase
+		self.argcases = argcases
+		self.fun = fun
+	def match(self, tree):
+		if isinstance(tree, CallTree) and tree.headIs(self.operator, self.opcase, self.argcases):
+			if all([isinstance(arg, NumTree) for arg in tree.args]):
+				return True
+	def optimize(self, tree):
+		return NumTree(self.fun(*[arg.num for arg in tree.args]))
+
+class OptimizePlus:
+	def match(self, tree):
+		if isinstance(tree, CallTree) and tree.headIs("$plus", "", ["", ""]):
+			return isinstance(tree.args[0], CallTree) and tree.args[0].headIs("$seuraaja", "", ["omanto"])
+	def optimize(self, tree):
+		left = tree.args[0]
+		right = tree.args[1]
+		while isinstance(left, CallTree) and left.headIs("$seuraaja", "", ["omanto"]):
+			left = left.args[0]
+			right = CallTree(VarTree("$seuraaja"), [right], "", ["omanto"])
+		return CallTree(VarTree("$plus"), [left, right], "", ["", ""])
+
+OPTIMIZATIONS = [
+	OptimizeOperator("$seuraaja", "", ["omanto"], lambda x: x + 1),
+	OptimizeOperator("$plus", "", ["", ""], lambda x, y: x + y),
+	OptimizeOperator("$kerrottu", "essiivi", ["", "ulkoolento"], lambda x, y: x * y),
+	OptimizePlus()
+]
+
 debug = False
+magic = True
 
 TAMPIO_VERSION = "1.0"
-INTERPRETER_VERSION = "1.2.0"
+INTERPRETER_VERSION = "1.3.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
@@ -560,6 +616,7 @@ if __name__ == "__main__":
 	parser.add_argument('filename', type=str, nargs='?', help='source code file')
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
 	parser.add_argument('--debug', help='enable debug mode', action='store_true')
+	parser.add_argument('--no-magic', help='disable all optimizations', action='store_true')
 	args = parser.parse_args()
 	
 	if args.version:
@@ -567,6 +624,10 @@ if __name__ == "__main__":
 		sys.exit(0)
 	
 	debug = args.debug
+	
+	if args.no_magic:
+		magic = False
+	
 	if args.filename:
 		evalFile(args.filename)
 		print(evals(parseVar("$tulos")).inflect("nimento"))
