@@ -108,8 +108,6 @@ For example, given the following definitions, `nollan seuraaja plus nollan seura
 ## Examples
 
 ### Lazy infinite lists
-
-    yhteenlasku kutsuttuna a:lla ja b:llä on a plus b
     
     # Ones [1, 1, 1, ...]
     yhdet ovat yksi lisättynä yksiin
