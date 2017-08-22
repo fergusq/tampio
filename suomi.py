@@ -286,8 +286,10 @@ def parseEq(words, allowQueries):
 	return EqTree(w.str(), left, right)
 
 def parseVar(name):
-	if magic and re.fullmatch(r"\$[1-9][0-9]*", name):
+	if magic and re.fullmatch(r"\$([1-9][0-9]*|0)", name):
 		return NumTree(int(name[1:]))
+	elif magic and name == "$nolla":
+		return NumTree(0)
 	else:
 		return VarTree(name)
 
@@ -604,7 +606,7 @@ debug = False
 magic = True
 
 TAMPIO_VERSION = "1.0"
-INTERPRETER_VERSION = "1.3.0"
+INTERPRETER_VERSION = "1.3.1"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
