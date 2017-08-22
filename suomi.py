@@ -475,7 +475,12 @@ def printStack():
 		sys.stderr.write("  " + val.str() + "\n")
 	raise(StopEvaluation())
 
+VAR_STORE = {}
+
 def evals(tree):
+	isvar = isinstance(tree, VarTree)
+	if isvar and tree.name in VAR_STORE:
+		return VAR_STORE[tree.name]
 	a = evals_(tree)
 	while True:
 		b = evals_(a)
@@ -484,9 +489,13 @@ def evals(tree):
 		a = b
 	if debug:
 		print("End: " + a.str())
+	if isvar:
+		VAR_STORE[tree.name] = a
 	return a
 
 def evals_(tree):
+	if isinstance(tree, VarTree) and tree.name in VAR_STORE:
+		return VAR_STORE[tree.name]
 	global stack
 	stack += [tree]
 	try:
@@ -539,7 +548,7 @@ def evalLine(line, allowQueries=False):
 debug = False
 
 TAMPIO_VERSION = "1.0"
-INTERPRETER_VERSION = "1.1.0"
+INTERPRETER_VERSION = "1.2.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
