@@ -485,7 +485,7 @@ def parseUnary(words, allowReverseWordOrder=True):
 		#else:
 		case, arg = parseUnary(words)
 		if case == w.case:
-			root = CallTree(parseVar(conj), [root, arg], "", [case, case])
+			root = CallTree(parseVar(conj), [root, arg], "", ["", ""])
 		else:
 			del words[:]
 			words += words2
@@ -518,13 +518,18 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 			elif allowReverseWordOrder and w.case not in ["nimento", "omanto"]:
 				case = w.case
 				arg = applyOwners(parseVar(w.str(nocase=True)), owners)
-				owners = []
-				w = next(words)
-				while w.case == "omanto":
-					owners += [w]
-					w = next(words)
+				
+				if len(words) != 0 and as2w(words[0]).str() in ["&ja", "&tai", "&sekä"]:
+					c = next(words)
+					owners, w = parseOwners(words)
+					checkCase(w.case, case, w.str() + ", after " + arg.inflect(case) + " " + c.str()[1:])
+					arg2 = applyOwners(parseVar(w.str(nocase=True)), owners)
+					arg = CallTree(VarTree(c.str(nocase=True)), [arg, arg2], "", ["", ""])
+				
+				owners, w = parseOwners(words)
 				checkCase(w.case, "olento", w.str() + ", after " + arg.inflect(case))
 				root2 = applyOwners(parseVar(w.str(nocase=True)), owners)
+				
 				root = CallTree(root2, [root, arg], "olento", ["", case])
 			elif allowFullPattern:
 				del words[:]
@@ -533,6 +538,14 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 		else:
 			break
 	return root
+
+def parseOwners(words):
+	owners = []
+	w = next(words)
+	while w.case == "omanto":
+		owners += [w]
+		w = next(words)
+	return owners, w
 
 def applyOwners(root, owners):
 	for o in owners[::-1]:
@@ -599,6 +612,7 @@ def evals_(tree):
 		raise(e)
 	except Exception as e:
 		traceback.print_exc(file=sys.stderr)
+		sys.stderr.write(str(e) + "\n")
 		printStack()
 	finally:
 		del stack[-1]
@@ -664,8 +678,8 @@ OPTIMIZATIONS = [
 debug = False
 magic = True
 
-TAMPIO_VERSION = "1.2"
-INTERPRETER_VERSION = "1.6.0"
+TAMPIO_VERSION = "1.3"
+INTERPRETER_VERSION = "1.7.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
