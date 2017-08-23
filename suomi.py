@@ -581,6 +581,8 @@ def evals(tree):
 		return VAR_STORE[tree.name]
 	a = evals_(tree)
 	while True:
+		if visualize:
+			print(a.inflect("nimento"))
 		b = evals_(a)
 		if a == b:
 			break
@@ -691,10 +693,11 @@ OPTIMIZATIONS = [
 ]
 
 debug = False
+visualize = False
 magic = True
 
 TAMPIO_VERSION = "1.3"
-INTERPRETER_VERSION = "1.9.0"
+INTERPRETER_VERSION = "1.10.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
@@ -707,6 +710,7 @@ if __name__ == "__main__":
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
 	parser.add_argument('--debug', help='enable debug mode', action='store_true')
 	parser.add_argument('--no-magic', help='disable all optimizations', action='store_true')
+	parser.add_argument('--visualize', help='enable inflected debug mode', action='store_true')
 	args = parser.parse_args()
 	
 	if args.version:
@@ -714,6 +718,7 @@ if __name__ == "__main__":
 		sys.exit(0)
 	
 	debug = args.debug
+	visualize = args.visualize
 	
 	if args.no_magic:
 		magic = False
