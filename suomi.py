@@ -655,15 +655,16 @@ def evalLine(line, allowQueries=False):
 		REPRS[evals(eq.left)] = eq.right
 
 class OptimizeOperator:
-	def __init__(self, operator, opcase, argcases, fun):
+	def __init__(self, operator, opcase, argcases, ok, fun):
 		self.operator = operator
 		self.opcase = opcase
 		self.argcases = argcases
+		self.ok = ok
 		self.fun = fun
 	def match(self, tree):
 		if isinstance(tree, CallTree) and tree.headIs(self.operator, self.opcase, self.argcases):
 			if all([isinstance(arg, NumTree) for arg in tree.args]):
-				return True
+				return self.ok(*[arg.num for arg in tree.args])
 	def optimize(self, tree):
 		return NumTree(self.fun(*[arg.num for arg in tree.args]))
 
@@ -680,10 +681,12 @@ class OptimizePlus:
 		return CallTree(VarTree("$plus"), [left, right], "", ["", ""])
 
 OPTIMIZATIONS = [
-	OptimizeOperator("$seuraaja", "", ["omanto"], lambda x: x + 1),
-	OptimizeOperator("$plus", "", ["", ""], lambda x, y: x + y),
-	OptimizeOperator("$kerrottu", "essiivi", ["", "ulkoolento"], lambda x, y: x * y),
-	OptimizeOperator("$modulo", "", ["", ""], lambda x, y: x % y),
+	OptimizeOperator("$seuraaja", "", ["omanto"], lambda x: True, lambda x: x + 1),
+	OptimizeOperator("$plus", "", ["", ""], lambda x, y: True, lambda x, y: x + y),
+	OptimizeOperator("$miinus", "", ["", ""], lambda x, y: x >= y, lambda x, y: x - y),
+	OptimizeOperator("$kerrottu", "essiivi", ["", "ulkoolento"], lambda x, y: True, lambda x, y: x * y),
+	OptimizeOperator("$jaettu", "essiivi", ["", "ulkoolento"], lambda x, y: x%y == 0, lambda x, y: x // y),
+	OptimizeOperator("$modulo", "", ["", ""], lambda x, y: True, lambda x, y: x % y),
 	OptimizePlus()
 ]
 
