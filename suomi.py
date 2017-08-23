@@ -694,7 +694,7 @@ debug = False
 magic = True
 
 TAMPIO_VERSION = "1.3"
-INTERPRETER_VERSION = "1.8.0"
+INTERPRETER_VERSION = "1.9.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
