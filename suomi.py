@@ -353,6 +353,8 @@ class VarTree:
 			return subs[self.name]
 		else:
 			return self
+	def shouldReverseOrder(self):
+		return True
 
 class NumTree:
 	def __init__(self, num):
@@ -381,6 +383,8 @@ class NumTree:
 			return inflect("$nolla", case)
 		else:
 			return '"' + inflect("$" + str(self.num), case) + '"'
+	def shouldReverseOrder(self):
+		return True
 
 class CallTree:
 	def __init__(self, head, args, headInfl, argInfls):
@@ -439,7 +443,7 @@ class CallTree:
 			return self.args[0].inflect("nimento") + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if self.headInfl == "olento":
 			# TODO: entä jos tulevaisuudessa olisikin enemmän argumentteja???
-			if case != "omanto" and len(self.args) == 2 and (not isinstance(self.args[1], CallTree) or self.args[1].headInfl != "olento"):
+			if case != "omanto" and len(self.args) == 2 and self.args[1].shouldReverseOrder():
 				return (self.args[0].inflect(case) + " "
 					+ self.args[1].inflect(self.argInfls[1]) + " "
 					+ self.head.inflect("olento"))
@@ -448,6 +452,8 @@ class CallTree:
 				a += " " + self.args[1].inflect(self.argInfls[1])
 			return a
 		return self.args[0].inflect("omanto") + " " + self.head.inflect(case)
+	def shouldReverseOrder(self):
+		return self.headInfl != "olento" and (len(self.args) > 1 and self.args[-1].shouldReverseOrder())
 
 def parsePattern(words):
 	case, root = parseUnary(words)
@@ -679,7 +685,7 @@ debug = False
 magic = True
 
 TAMPIO_VERSION = "1.3"
-INTERPRETER_VERSION = "1.7.0"
+INTERPRETER_VERSION = "1.7.1"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
