@@ -437,9 +437,9 @@ class CallTree:
 	def inflect(self, case):
 		if self in REPRS:
 			return '"' + REPRS[self].inflect(case) + '"'
-		if self.head.str() in ["&ja", "&sekä", "&tai"]:
+		if self.head.str() in CONJUNCTIONS:
 			return self.args[0].inflect(case) + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
-		if self.head.str() in [".ynnä", "$plus", "$miinus"]:
+		if self.head.str() in BINARY_OPERATORS:
 			return self.args[0].inflect("nimento") + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if self.headInfl == "olento":
 			# TODO: entä jos tulevaisuudessa olisikin enemmän argumentteja???
@@ -455,15 +455,19 @@ class CallTree:
 	def shouldReverseOrder(self):
 		return self.headInfl != "olento" and (len(self.args) > 1 and self.args[-1].shouldReverseOrder())
 
+BINARY_OPERATORS_CASE = [".ynnä:N", "$plus:N", "$miinus:N", "$modulo:N"]
+BINARY_OPERATORS = [".ynnä", "$plus", "$miinus", "$modulo"]
+CONJUNCTIONS = ["&ja", "&sekä", "&tai"]
+
 def parsePattern(words):
 	case, root = parseUnary(words)
 	while len(words) != 0:
 		w = as2w(words[0])
-		if w.str() in ["&ja", "&sekä", "&tai", ".ynnä:N", "$plus:N", "$miinus:N"]:
+		if w.str() in (CONJUNCTIONS + BINARY_OPERATORS_CASE):
 			del words[0]
 			
 			case2, arg = parseUnary(words)
-			if w.str() in ["&ja", "&tai", "&sekä"]:
+			if w.str() in CONJUNCTIONS:
 				checkCase(case2, case, w.str())
 			case = case2
 			
@@ -482,7 +486,7 @@ def parseUnary(words, allowReverseWordOrder=True):
 	while w.case == "omanto":
 		w = next(words)
 		root = CallTree(parseVar(w.str(nocase=True)), [root], "", ["omanto"])
-	if w.case != "nimento" and w.case != "omanto" and len(words) != 0 and as2w(words[0]).str() in ["&ja", "&tai", "&sekä"]:
+	if w.case != "nimento" and w.case != "omanto" and len(words) != 0 and as2w(words[0]).str() in CONJUNCTIONS:
 		words2 = words[:]
 		conj = as2w(words[0]).str()
 		del words[0]
@@ -525,7 +529,7 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 				case = w.case
 				arg = applyOwners(parseVar(w.str(nocase=True)), owners)
 				
-				if len(words) != 0 and as2w(words[0]).str() in ["&ja", "&tai", "&sekä"]:
+				if len(words) != 0 and as2w(words[0]).str() in CONJUNCTIONS:
 					c = next(words)
 					owners, w = parseOwners(words)
 					checkCase(w.case, case, w.str() + ", after " + arg.inflect(case) + " " + c.str()[1:])
@@ -602,14 +606,15 @@ def evals_(tree):
 		for defi in DEFS:
 			ok, subs = defi.left.match(tree)
 			if ok:
-				if debug:
-					print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + defi.right.str())
 				for var, body in defi.where[::-1]:
 					if var in subs:
 						sys.stderr.write("Error: Illegal redefinition of " + var + "\n")
 						raise(StopEvaluation())
 					subs[var] = body.subs(subs)
-				return defi.right.subs(subs)
+				rightsubs = defi.right.subs(subs)
+				if debug:
+					print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + rightsubs.str())
+				return rightsubs
 		if isinstance(tree, CallTree):
 			return CallTree(evals_(tree.head), [evals_(arg) for arg in tree.args], tree.headInfl, tree.argInfls)
 		else:
@@ -678,6 +683,7 @@ OPTIMIZATIONS = [
 	OptimizeOperator("$seuraaja", "", ["omanto"], lambda x: x + 1),
 	OptimizeOperator("$plus", "", ["", ""], lambda x, y: x + y),
 	OptimizeOperator("$kerrottu", "essiivi", ["", "ulkoolento"], lambda x, y: x * y),
+	OptimizeOperator("$modulo", "", ["", ""], lambda x, y: x % y),
 	OptimizePlus()
 ]
 
@@ -685,7 +691,7 @@ debug = False
 magic = True
 
 TAMPIO_VERSION = "1.3"
-INTERPRETER_VERSION = "1.7.1"
+INTERPRETER_VERSION = "1.8.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 

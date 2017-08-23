@@ -49,6 +49,18 @@ x korotettuna y:n seuraajaan on x kerrottuna x:llä korotettuna y:hyn
 
 eksponentaatio kutsuttuna a:lla ja b:llä on a korotettuna b:hen
 
+# jakojäännös
+nolla modulo y on nolla
+x:n seuraaja modulo y on jäännöksen seuraaja alempana y:tä tai nolla, missä jäännös on x modulo y
+
+# apufunktioita
+nolla nollasta vähennettynä negatiivisena b:tä tai c on c
+a nollasta vähennettynä negatiivisena b:tä tai c on b
+nolla negatiivisena b:tä tai c on c
+a:n seuraaja negatiivisena b:tä tai c on c
+
+a alempana b:tä tai c on erotus negatiivisena a:ta tai c, missä erotus on a miinus b
+
 # vakioita
 
 yksi on 1
