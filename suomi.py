@@ -438,8 +438,13 @@ class CallTree:
 		if self.head.str() in [".ynnä", "$plus", "$miinus"]:
 			return self.args[0].inflect("nimento") + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if self.headInfl == "olento":
+			# TODO: entä jos tulevaisuudessa olisikin enemmän argumentteja???
+			if case != "omanto" and len(self.args) == 2 and (not isinstance(self.args[1], CallTree) or self.args[1].headInfl != "olento"):
+				return (self.args[0].inflect(case) + " "
+					+ self.args[1].inflect(self.argInfls[1]) + " "
+					+ self.head.inflect("olento"))
 			a = self.args[0].inflect(case) + " " + self.head.inflect("olento")
-			if len(self.args) == 2: # TODO: entä jos tulevaisuudessa olisikin enemmän argumentteja???
+			if len(self.args) == 2:
 				a += " " + self.args[1].inflect(self.argInfls[1])
 			return a
 		return self.args[0].inflect("omanto") + " " + self.head.inflect(case)
@@ -660,7 +665,7 @@ debug = False
 magic = True
 
 TAMPIO_VERSION = "1.2"
-INTERPRETER_VERSION = "1.5.0"
+INTERPRETER_VERSION = "1.6.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
