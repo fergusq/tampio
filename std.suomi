@@ -43,6 +43,12 @@ x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
 
 kertolasku kutsuttuna a:lla ja b:llä on a kerrottuna b:llä
 
+# jakolasku
+x jaettuna y:llä on nolla jakovälivaiheena x:llä ja y:llä
+
+a jakovälivaiheena nollalla ja y:llä on a
+a jakovälivaiheena x:n seuraajalla ja y:llä on a:n seuraaja jakovälivaiheena erotuksella ja y:llä, missä erotus on x:n seuraaja miinus y
+
 # potenssiin korotus
 x korotettuna nollaan on yksi
 x korotettuna y:n seuraajaan on x kerrottuna x:llä korotettuna y:hyn
