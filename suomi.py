@@ -685,7 +685,7 @@ OPTIMIZATIONS = [
 	OptimizeOperator("$plus", "", ["", ""], lambda x, y: True, lambda x, y: x + y),
 	OptimizeOperator("$miinus", "", ["", ""], lambda x, y: x >= y, lambda x, y: x - y),
 	OptimizeOperator("$kerrottu", "essiivi", ["", "ulkoolento"], lambda x, y: True, lambda x, y: x * y),
-	OptimizeOperator("$jaettu", "essiivi", ["", "ulkoolento"], lambda x, y: x%y == 0, lambda x, y: x // y),
+	OptimizeOperator("$jaettu", "essiivi", ["", "ulkoolento"], lambda x, y: True, lambda x, y: x // y),
 	OptimizeOperator("$modulo", "", ["", ""], lambda x, y: True, lambda x, y: x % y),
 	OptimizePlus()
 ]

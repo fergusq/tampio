@@ -47,6 +47,7 @@ kertolasku kutsuttuna a:lla ja b:llä on a kerrottuna b:llä
 x jaettuna y:llä on nolla jakovälivaiheena x:llä ja y:llä
 
 a jakovälivaiheena nollalla ja y:llä on a
+a:n seuraaja jakovälivaiheena x:llä vähennettynä nollasta ja y:llä on a
 a jakovälivaiheena x:n seuraajalla ja y:llä on a:n seuraaja jakovälivaiheena erotuksella ja y:llä, missä erotus on x:n seuraaja miinus y
 
 # potenssiin korotus
