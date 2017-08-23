@@ -461,13 +461,13 @@ def parsePattern(words):
 			break
 	return case, root
 
-def parseUnary(words):
+def parseUnary(words, allowReverseWordOrder=True):
 	w = next(words)
 	if w.cl != "noun":
 		sys.stderr.write("Syntax error: expected noun (at " + w.str() + ")\n")
 		raise(StopEvaluation())
 	root = parseVar(w.str(nocase=True))
-	root = parseEssive(root, words, True)
+	root = parseEssive(root, words, False)
 	while w.case == "omanto":
 		w = next(words)
 		root = CallTree(parseVar(w.str(nocase=True)), [root], "", ["omanto"])
@@ -485,11 +485,11 @@ def parseUnary(words):
 			del words[:]
 			words += words2
 	else:
-		root = parseEssive(root, words, True)
+		root = parseEssive(root, words, allowReverseWordOrder)
 	return w.case, root
 
-def parseEssive(root, words, allowFullPattern):
-	if len(words) != 0:
+def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
+	while len(words) != 0:
 		w = as2w(words[0])
 		if w.cl == "noun":
 			owners = []
@@ -505,17 +505,33 @@ def parseEssive(root, words, allowFullPattern):
 				argInfls = []
 				if len(words) != 0:
 					if as2w(words[0]).cl == "noun":
-						case, arg = parseUnary(words)
+						case, arg = parseUnary(words, False)
 						args += [arg]
 						argInfls += [case]
-				root2 = parseVar(w.str(nocase=True))
-				for o in owners[::-1]:
-					root2 = CallTree(root2, [parseVar(o.str(nocase=True))], "", ["omanto"])
+				root2 = applyOwners(parseVar(w.str(nocase=True)), owners)
 				root = CallTree(root2, [root]+args, "olento", [""]+argInfls)
+			elif allowReverseWordOrder and w.case not in ["nimento", "omanto"]:
+				case = w.case
+				arg = applyOwners(parseVar(w.str(nocase=True)), owners)
+				owners = []
+				w = next(words)
+				while w.case == "omanto":
+					owners += [w]
+					w = next(words)
+				checkCase(w.case, "olento", w.str() + ", after " + arg.inflect(case))
+				root2 = applyOwners(parseVar(w.str(nocase=True)), owners)
+				root = CallTree(root2, [root, arg], "olento", ["", case])
 			elif allowFullPattern:
 				del words[:]
 				words += words2
 				return root
+		else:
+			break
+	return root
+
+def applyOwners(root, owners):
+	for o in owners[::-1]:
+		root = CallTree(root, [parseVar(o.str(nocase=True))], "", ["omanto"])
 	return root
 
 stack = []
@@ -643,8 +659,8 @@ OPTIMIZATIONS = [
 debug = False
 magic = True
 
-TAMPIO_VERSION = "1.1"
-INTERPRETER_VERSION = "1.4.0"
+TAMPIO_VERSION = "1.2"
+INTERPRETER_VERSION = "1.5.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
