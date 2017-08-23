@@ -4,7 +4,8 @@
 nolla plus x on x
 x:n seuraaja plus y on x plus y:n seuraaja
 
-yhteenlasku kutsuttuna a:lla ja b:llä on a plus b
+x summattuna y:hyn on x plus y
+yhteenlasku kutsuttuna x:llä ja y:llä on x plus y
 
 # vähennyslasku
 nolla vähennettynä x:stä on x
@@ -69,4 +70,4 @@ f sovellettuna a:n lisättynä b:hen jäseniin on a:n f lisättynä f:ään sove
 
 # zip
 f sovellettuna tyhjyyden jäseniin ja tyhjyyden jäseniin on tyhjyys
-f sovellettuna a:n lisättynä b:hen jäseniin ja c:n lisättynä d:hen jäseniin on f:n kutsuttuna a:lla ja c:llä arvo lisättynä f:ään sovellettuna b:n jäseniin ja d:n jäseniin
+f sovellettuna a:n lisättynä b:hen jäseniin ja c:n lisättynä d:hen jäseniin on z lisättynä f:ään sovellettuna b:n jäseniin ja d:n jäseniin, missä z on f kutsuttuna a:lla ja c:llä
