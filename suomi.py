@@ -38,6 +38,7 @@ CASES_LATIN = {
 	"vajanto": "abessiivi",
 	"keinonto": "instruktiivi",
 	"seuranto": "komitatiivi",
+	"kerrontosti": "adverbi"
 }
 
 CASES_ENGLISH = {
@@ -55,6 +56,7 @@ CASES_ENGLISH = {
 	"vajanto": "abessive",
 	"keinonto": "instructive",
 	"seuranto": "comitative",
+	"kerrontosti": "adverb"
 }
 
 CASES_ABRV = {
@@ -73,6 +75,7 @@ CASES_ABRV = {
 	"vajanto": "A",
 	"keinonto": "I",
 	"seuranto": "K",
+	"kerrontosti": "D"
 }
 
 CASES_A = {
@@ -90,6 +93,7 @@ CASES_A = {
 	"vajanto": ":tta",
 	"keinonto": ":in",
 	"seuranto": ":ineen",
+	"kerrontosti": ":sti"
 }
 
 CASES_F = {
@@ -107,6 +111,7 @@ CASES_F = {
 	"vajanto": ":ttä",
 	"keinonto": ":in",
 	"seuranto": ":ineen",
+	"kerrontosti": ":sti"
 }
 
 CASE_REGEXES = {
@@ -137,6 +142,9 @@ CASE_REGEXES = {
 		"vajanto": r"[^:]+:itt[aä]",
 		"keinonto": r"[^:]+:in",
 		"seuranto": r"[^:]+:ine[^:]*"
+	},
+	"": {
+		"kerrontosti": "[^:]+:sti"
 	}
 }
 
@@ -212,7 +220,9 @@ def lexLine(line):
 			bf = analysis["BASEFORM"]
 			cl = analysis["CLASS"]
 			if cl in ["nimisana", "lyhenne", "lukusana", "laatusana", "nimisana_laatusana", "etunimi", "asemosana"]:
-				alternatives += [Noun(bf, analysis["SIJAMUOTO"], analysis["NUMBER"], "pronoun" if cl == "asemosana" else "noun")]
+				case = analysis["SIJAMUOTO"]
+				number = analysis["NUMBER"] if "NUMBER" in analysis else ""
+				alternatives += [Noun(bf, case, number, "pronoun" if cl == "asemosana" else "noun")]
 			elif cl == "seikkasana":
 				alternatives += [Noun(bf, "nimento", "na")]
 			elif cl in ["teonsana", "kieltosana"]:
@@ -275,8 +285,9 @@ def checkCase(got, expected, place):
 		raise(StopEvaluation())
 
 class EqTree:
-	def __init__(self, op, left, right, where):
+	def __init__(self, op, always, left, right, where):
 		self.op = op
+		self.always = always
 		self.left = left
 		self.right = right
 		self.where = where
@@ -292,16 +303,26 @@ class EqTree:
 
 def parseEq(words, allowQueries):
 	words = words[:]
+	
 	c, left = parsePattern(words)
 	checkCase(c, "nimento", left.inflect(c))
+	
 	if len(words) == 0 and allowQueries:
-		return EqTree("", left, None, None)
+		return EqTree("", True, left, None, None)
+	
 	w = next(words)
 	if w.str() not in ["#olla", "#esittää"]:
 		sys.stderr.write("Syntax error: expected 'on' or 'esitetään' (at " + w.str() + ")\n")
 		raise(StopEvaluation())
+	
+	always = True
+	if len(words) > 0 and as2w(words[0]).str() == ".epäpuhdas:D":
+		del words[0]
+		always = False
+	
 	c, right = parsePattern(words)
 	checkCase(c, "nimento", right.inflect(c))
+	
 	where = []
 	if len(words) > 0 and as2w(words[0]).str() == "?mikä:S_":
 		del words[0]
@@ -317,7 +338,8 @@ def parseEq(words, allowQueries):
 		c, body = parsePattern(words)
 		checkCase(c, "nimento", right.inflect(c))
 		where += [(var.str(nocase=True), body)]
-	return EqTree(w.str(), left, right, where)
+	
+	return EqTree(w.str(), always, left, right, where)
 
 def parseVar(name):
 	if magic and re.fullmatch(r"\$([1-9][0-9]*|0)", name):
@@ -334,7 +356,11 @@ class VarTree:
 		return type(tree) == VarTree and self.name == tree.name
 	def __hash__(self):
 		return hash(self.name)
-	def str(self):
+	def safeEq(self, tree, objects=[]):
+		return self == tree
+	def copy(self, objects=None):
+		return VarTree(self.name)
+	def str(self, objects=None):
 		return self.name
 	def match(self, tree):
 		if re.fullmatch(r".[^0-9]", self.name):
@@ -348,7 +374,7 @@ class VarTree:
 		return False, {}
 	def inflect(self, case):
 		return inflect(self.name, case)
-	def subs(self, subs):
+	def subs(self, subs, objects=None):
 		if self.name in subs:
 			return subs[self.name]
 		else:
@@ -363,7 +389,11 @@ class NumTree:
 		return type(tree) == NumTree and self.num == tree.num
 	def __hash__(self):
 		return self.num
-	def str(self):
+	def safeEq(self, tree, objects=[]):
+		return self == tree
+	def copy(self, objects=None):
+		return NumTree(self.num)
+	def str(self, objects=None):
 		if self.num == 0:
 			return "$nolla"
 		else:
@@ -376,7 +406,7 @@ class NumTree:
 				return True, {}
 			return str(self.num) == tree.name, {}
 		return False, {}
-	def subs(self, subs):
+	def subs(self, subs, objects=None):
 		return self
 	def inflect(self, case):
 		if self.num == 0:
@@ -392,24 +422,52 @@ class CallTree:
 		self.args = args
 		self.headInfl = headInfl
 		self.argInfls = argInfls
-		self.repr = self.head.str() + ":" + CASES_ABRV[self.headInfl] + "(" + ", ".join([arg.str() + ":" + CASES_ABRV[argInfl] for arg, argInfl in zip(self.args, self.argInfls)]) + ")"
-		self.hash = hash(self.head) + sum([hash(a) for a in self.args]) + hash(self.headInfl) + sum([hash(ai) for ai in self.argInfls])
+		#if reprStr is not None:
+		#	self.repr = reprStr
+		#else:
+		#	self.repr = self.head.str() + ":" + CASES_ABRV[self.headInfl] + "(" + ", ".join([arg.str() + ":" + CASES_ABRV[argInfl] for arg, argInfl in zip(self.args, self.argInfls)]) + ")"
+		#self.hash = hash(self.repr)
 	def __eq__(self, tree):
 		if type(tree) == CallTree:
-			return self.repr == tree.repr
-			#return self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
+			#return self.repr == tree.repr
+			return self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
 		else:
 			return False
-	def __hash__(self):
-		return self.hash
+	#def __hash__(self):
+	#	return self.hash
+	def safeEq(self, tree, objects=[]):
+		if not isinstance(tree, CallTree):
+			return False
+		for obj in objects:
+			if obj is self:
+				return True
+		objects += [self]
+		return (len(self.args) == len(tree.args)
+			and self.headInfl == tree.headInfl
+			and self.argInfls == tree.argInfls
+			and self.head.safeEq(tree.head, objects)
+			and all([arg.safeEq(arg2, objects) for arg, arg2 in zip(self.args, tree.args)]))
+	def copy(self, objects=[]):
+		for obj, copy in objects:
+			if obj is self:
+				return copy
+		copy = CallTree(None, None, self.headInfl, self.argInfls)
+		objects = objects+[(self, copy)]
+		copy.head = self.head.copy(objects)
+		copy.args = [arg.copy(objects) for arg in self.args]
+		return copy
 	def headIs(self, tree, headInfl, argInfls):
 		inflOk = self.headInfl == headInfl and self.argInfls == argInfls
 		if isinstance(tree, str):
 			return isinstance(self.head, VarTree) and self.head.name == tree
 		else:
 			return self.head == tree and inflOk
-	def str(self):
-		return self.repr
+	def str(self, objects=[]):
+		for i in range(len(objects)):
+			if objects[i] is self:
+				return "\\" + str(i)
+		objects = objects + [self]
+		return self.head.str(objects) + ":" + CASES_ABRV[self.headInfl] + "(" + ", ".join([arg.str(objects) + ":" + CASES_ABRV[argInfl] for arg, argInfl in zip(self.args, self.argInfls)]) + ")"
 	def match(self, tree):
 		if isinstance(tree, CallTree):
 			if self.headInfl != tree.headInfl:
@@ -432,14 +490,20 @@ class CallTree:
 			if self.headIs(VarTree("$seuraaja"), "", ["omanto"]):
 				return self.args[0].match(NumTree(tree.num - 1))
 		return False, {}
-	def subs(self, subs):
-		return CallTree(self.head.subs(subs), [arg.subs(subs) for arg in self.args], self.headInfl, self.argInfls)
+	def subs(self, subs, objects=[]):
+		for obj, copy in objects:
+			if obj is self:
+				return copy
+		copy = CallTree(None, None, self.headInfl, self.argInfls)
+		objects = objects+[(self, copy)]
+		copy.head = self.head.subs(subs, objects)
+		copy.args = [arg.subs(subs, objects) for arg in self.args]
+		return copy
+		#return CallTree(self.head.subs(subs), [arg.subs(subs) for arg in self.args], self.headInfl, self.argInfls)
 	def inflect(self, case):
-		if self in REPRS:
-			return '"' + REPRS[self].inflect(case) + '"'
-		if self.head.str() in CONJUNCTIONS:
+		if isinstance(self.head, VarTree) and self.head.str() in CONJUNCTIONS:
 			return self.args[0].inflect(case) + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
-		if self.head.str() in BINARY_OPERATORS:
+		if isinstance(self.head, VarTree) and self.head.str() in BINARY_OPERATORS:
 			return self.args[0].inflect("nimento") + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if self.headInfl == "olento":
 			# TODO: entä jos tulevaisuudessa olisikin enemmän argumentteja???
@@ -571,31 +635,32 @@ def printStack():
 	sys.stderr.write("Stack:\n")
 	for val in stack:
 		sys.stderr.write("  " + val.str() + "\n")
+	if debug:
+		sys.stderr.write("Defs:\n")
+		for defi in DEFS:
+			sys.stderr.write("  " + defi.str() + "\n")
 	raise(StopEvaluation())
 
-VAR_STORE = {}
-
 def evals(tree):
-	isvar = isinstance(tree, VarTree)
-	if isvar and tree.name in VAR_STORE:
-		return VAR_STORE[tree.name]
 	a = evals_(tree)
+	c = a.copy()
 	while True:
 		if visualize:
 			print(a.inflect("nimento"))
 		b = evals_(a)
-		if a == b:
+		if c.safeEq(b):
 			break
 		a = b
+		c = a.copy()
 	if debug:
-		print("End: " + a.str())
-	if isvar:
-		VAR_STORE[tree.name] = a
+		print("\x1b[1;4;31mEnd:\x1b[0m " + a.str())
 	return a
 
-def evals_(tree):
-	if isinstance(tree, VarTree) and tree.name in VAR_STORE:
-		return VAR_STORE[tree.name]
+def evals_(tree, objects=[]):
+	for obj in objects:
+		if obj is tree:
+			return tree
+	objects = objects + [tree]
 	global stack
 	stack += [tree]
 	try:
@@ -603,7 +668,7 @@ def evals_(tree):
 			for opt in OPTIMIZATIONS:
 				if opt.match(tree):
 					if debug:
-						print("Match: " + tree.str() + " (opt)")
+						print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;33m(opt)\x1b[0m")
 					return opt.optimize(tree)
 		for defi in DEFS:
 			ok, subs = defi.left.match(tree)
@@ -613,16 +678,22 @@ def evals_(tree):
 						sys.stderr.write("Error: Illegal redefinition of " + var + "\n")
 						raise(StopEvaluation())
 					subs[var] = body.subs(subs)
-				rightsubs = defi.right.subs(subs)
+				rightsubs = defi.right.subs(subs) if len(subs) > 0 or defi.always else defi.right
 				if debug:
-					print("Match: " + tree.str() + " == " + defi.left.str() + " -> " + rightsubs.str())
+					print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;4;34m==\x1b[0m " + defi.left.str() + " \x1b[1;4;34m->\x1b[0m " + rightsubs.str())
 				return rightsubs
+			elif debug and verbose:
+				print(" "*len(stack) + "\x1b[1;4;31mNO MATCH:\x1b[0m " + tree.str() + " \x1b[1;4;34m!=\x1b[0m " + defi.left.str() + " \x1b[1;33m(def)\x1b[0m")
 		if isinstance(tree, CallTree):
-			return CallTree(evals_(tree.head), [evals_(arg) for arg in tree.args], tree.headInfl, tree.argInfls)
-		else:
-			return tree
+			tree.head = evals_(tree.head, objects)
+			tree.args = [evals_(arg, objects) for arg in tree.args]
+		return tree
 	except StopEvaluation as e:
 		raise(e)
+	except KeyboardInterrupt:
+		traceback.print_exc(file=sys.stderr)
+		sys.stderr.write(str(e) + "\n")
+		printStack()
 	except Exception as e:
 		traceback.print_exc(file=sys.stderr)
 		sys.stderr.write(str(e) + "\n")
@@ -631,7 +702,6 @@ def evals_(tree):
 		del stack[-1]
 
 DEFS = []
-REPRS = {}
 
 def evalFile(filename):
 	with open(filename) as f:
@@ -639,7 +709,7 @@ def evalFile(filename):
 			evalLine(line)
 
 def evalLine(line, allowQueries=False):
-	global DEFS, VAR_STORE
+	global DEFS
 	output = lexLine(line)
 	if not output:
 		return
@@ -652,9 +722,6 @@ def evalLine(line, allowQueries=False):
 		return evals(eq.left)
 	elif eq.op == "#olla":
 		DEFS += [eq]
-		VAR_STORE = {}
-	elif eq.op == "#esittää":
-		REPRS[evals(eq.left)] = eq.right
 
 class OptimizeOperator:
 	def __init__(self, operator, opcase, argcases, ok, fun):
@@ -670,34 +737,22 @@ class OptimizeOperator:
 	def optimize(self, tree):
 		return NumTree(self.fun(*[arg.num for arg in tree.args]))
 
-class OptimizePlus:
-	def match(self, tree):
-		if isinstance(tree, CallTree) and tree.headIs("$plus", "", ["", ""]):
-			return isinstance(tree.args[0], CallTree) and tree.args[0].headIs("$seuraaja", "", ["omanto"])
-	def optimize(self, tree):
-		left = tree.args[0]
-		right = tree.args[1]
-		while isinstance(left, CallTree) and left.headIs("$seuraaja", "", ["omanto"]):
-			left = left.args[0]
-			right = CallTree(VarTree("$seuraaja"), [right], "", ["omanto"])
-		return CallTree(VarTree("$plus"), [left, right], "", ["", ""])
-
 OPTIMIZATIONS = [
 	OptimizeOperator("$seuraaja", "", ["omanto"], lambda x: True, lambda x: x + 1),
 	OptimizeOperator("$plus", "", ["", ""], lambda x, y: True, lambda x, y: x + y),
 	OptimizeOperator("$miinus", "", ["", ""], lambda x, y: x >= y, lambda x, y: x - y),
 	OptimizeOperator("$kerrottu", "essiivi", ["", "ulkoolento"], lambda x, y: True, lambda x, y: x * y),
-	OptimizeOperator("$jaettu", "essiivi", ["", "ulkoolento"], lambda x, y: True, lambda x, y: x // y),
-	OptimizeOperator("$modulo", "", ["", ""], lambda x, y: True, lambda x, y: x % y),
-	OptimizePlus()
+	OptimizeOperator("$jaettu", "essiivi", ["", "ulkoolento"], lambda x, y: y != 0, lambda x, y: x // y),
+	OptimizeOperator("$modulo", "", ["", ""], lambda x, y: True, lambda x, y: x % y)
 ]
 
 debug = False
 visualize = False
+verbose = False
 magic = True
 
-TAMPIO_VERSION = "1.3"
-INTERPRETER_VERSION = "1.10.0"
+TAMPIO_VERSION = "1.4"
+INTERPRETER_VERSION = "1.11.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
@@ -745,6 +800,8 @@ Read the LICENSE file for details.""")
 		while True:
 			try:
 				line = input(">>> ")
+			except KeyboardInterrupt:
+				pass
 			except EOFError:
 				print()
 				break

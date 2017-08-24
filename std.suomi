@@ -23,8 +23,11 @@
 ## luvut
 
 # yhteenlasku
-nolla plus x on x
-x:n seuraaja plus y on x plus y:n seuraaja
+nolla plus nolla on nolla
+nolla plus x:n seuraaja on x:n seuraaja
+x:n seuraaja plus nolla on x:n seuraaja
+
+x:n seuraaja plus y:n seuraaja on x plus y:n seuraajan seuraaja
 
 x summattuna y:hyn on x plus y
 yhteenlasku kutsuttuna x:llä ja y:llä on x plus y
@@ -44,6 +47,7 @@ x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
 kertolasku kutsuttuna a:lla ja b:llä on a kerrottuna b:llä
 
 # jakolasku
+x jaettuna nollalla on virhe
 x jaettuna y:llä on nolla jakovälivaiheena x:llä ja y:llä
 
 a jakovälivaiheena nollalla ja y:llä on a
