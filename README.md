@@ -117,6 +117,20 @@ For example, given the following definitions, `nollan seuraaja plus nollan seura
     # (step 2) no nested expression matches
     # (step 3) no need to repeat, stop evaluation
 
+### Impure optimizations
+
+The interpreter supports _impure optimizations_, which – while increasing evaluation speed – do unfortunately make the language impure.
+
+For example, we can make an impure version of Fibonacci number list using the `epäpuhtaasti` keyword.
+
+    luvut ovat epäpuhtaasti 1 lisättynä 1:een lisättynä yhteenlaskuun sovellettuna lukujen jäseniin ja lukujen hännän jäseniin
+
+Now, after the next Fibonacci number after 1 and 1 is calculated, the `luvut` list is updated to include it.
+
+    luvut ovat epäpuhtaasti 1 lisättynä 1:een lisättynä 2:een lisättynä yhteenlaskuun sovellettuna lukujen jäseniin ja lukujen hännän jäseniin
+
+This reduces the complexity from O(2^n) to O(n). However, the impurity can leak to other parts of the program and cause it to behave in unintended ways.
+
 ## Examples
 
 ### Lazy infinite lists
