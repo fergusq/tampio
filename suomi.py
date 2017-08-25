@@ -511,6 +511,17 @@ class CallTree:
 			return self.args[0].inflect(case) + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if isinstance(self.head, VarTree) and self.head.str() in BINARY_OPERATORS:
 			return self.args[0].inflect("nimento") + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
+		if self.headIs("$lisätty", "olento", ["", "sisatulento"]):
+			elements = [self.args[0]]
+			tail = self.args[1]
+			while isinstance(tail, CallTree) and tail.headIs("$lisätty", "olento", ["", "sisatulento"]):
+				elements += [tail.args[0]]
+				tail = tail.args[1]
+			tailString = "" if isinstance(tail, VarTree) and tail.str() == "$tyhjyys" else " ++ " + tail.inflect("nimento")
+			return '"%s" [%s]%s' % (
+				inflect("$lista", case),
+				", ".join([e.inflect("nimento") for e in elements]),
+				tailString)
 		if self.headInfl == "olento":
 			# TODO: entä jos tulevaisuudessa olisikin enemmän argumentteja???
 			if case != "omanto" and len(self.args) == 2 and self.args[1].shouldReverseOrder():
@@ -758,12 +769,12 @@ verbosity = 0
 magic = True
 
 TAMPIO_VERSION = "1.5"
-INTERPRETER_VERSION = "2.0.0"
+INTERPRETER_VERSION = "2.1.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-evalFile(os.path.join(SCRIPT_DIR, 'std.suomi'))
+STD_LIB = os.path.join(SCRIPT_DIR, 'std.suomi')
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Interprets Tampio code.')
@@ -783,6 +794,8 @@ if __name__ == "__main__":
 	magic = not args.no_magic
 	verbosity = args.verbosity
 	visualize = args.visualize
+	
+	evalFile(STD_LIB)
 	
 	if args.filename:
 		evalFile(args.filename)
