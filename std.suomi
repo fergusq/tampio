@@ -24,10 +24,10 @@
 
 # yhteenlasku
 nolla plus nolla on nolla
-nolla plus x:n seuraaja on x:n seuraaja
-x:n seuraaja plus nolla on x:n seuraaja
+nolla plus luku on luku, missä luku on x:n seuraaja
+luku plus nolla on luku, missä luku on x:n seuraaja
 
-x:n seuraaja plus y:n seuraaja on x plus y:n seuraajan seuraaja
+x:n seuraaja plus luku on x plus luvun seuraaja, missä luku on y:n seuraaja
 
 x summattuna y:hyn on x plus y
 yhteenlasku kutsuttuna x:llä ja y:llä on x plus y
