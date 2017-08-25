@@ -326,18 +326,24 @@ def parseEq(words, allowQueries):
 	where = []
 	if len(words) > 0 and as2w(words[0]).str() == "?mikä:S_":
 		del words[0]
+		
 		var = next(words)
 		if var.cl != "noun":
 			sys.stderr.write("Syntax error: expected noun (" + var.str() + ")\n")
 			raise(StopEvaluation())
 		checkCase(var.case, "nimento", var.str())
+		varName = var.str(nocase=True)
+		
 		w = next(words)
 		if w.str() != "#olla":
 			sys.stderr.write("Syntax error: expected 'on' (at " + w.str() + ")\n")
 			raise(StopEvaluation())
 		c, body = parsePattern(words)
 		checkCase(c, "nimento", right.inflect(c))
-		where += [(var.str(nocase=True), body)]
+		
+		where += [(varName, body)]
+		
+		left = left.subs({varName: body})
 	
 	return EqTree(w.str(), always, left, right, where)
 
@@ -751,8 +757,8 @@ visualize = False
 verbosity = 0
 magic = True
 
-TAMPIO_VERSION = "1.4"
-INTERPRETER_VERSION = "1.12.0"
+TAMPIO_VERSION = "1.5"
+INTERPRETER_VERSION = "2.0.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
