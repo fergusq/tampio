@@ -23,9 +23,8 @@
 ## luvut
 
 # yhteenlasku
-nolla plus nolla on nolla
-nolla plus luku on luku, missä luku on x:n seuraaja
-luku plus nolla on luku, missä luku on x:n seuraaja
+x plus nolla on x
+nolla plus x on x
 
 x:n seuraaja plus luku on x plus luvun seuraaja, missä luku on y:n seuraaja
 
@@ -42,27 +41,30 @@ vähennyslasku kutsuttuna a:lla ja b:llä on a miinus b
 
 # kertolasku
 x kerrottuna nollalla on nolla
-x kerrottuna y:n seuraajalla on x plus x kerrottuna y:llä
+nolla kerrottuna x:llä on nolla
+luku kerrottuna y:n seuraajalla on luku plus luku kerrottuna y:llä, missä luku on x:n seuraaja
 
 kertolasku kutsuttuna a:lla ja b:llä on a kerrottuna b:llä
 
 # jakolasku
 x jaettuna nollalla on virhe
-x jaettuna y:llä on nolla jakovälivaiheena x:llä ja y:llä
+x:n seuraaja jaettuna y:n seuraajalla on nolla jakovälivaiheena x:n seuraajalla ja y:n seuraajalla
 
 a jakovälivaiheena nollalla ja y:llä on a
 a:n seuraaja jakovälivaiheena x:llä vähennettynä nollasta ja y:llä on a
 a jakovälivaiheena x:n seuraajalla ja y:llä on a:n seuraaja jakovälivaiheena erotuksella ja y:llä, missä erotus on x:n seuraaja miinus y
 
 # potenssiin korotus
+nolla korotettuna nollaan on virhe
 x korotettuna nollaan on yksi
-x korotettuna y:n seuraajaan on x kerrottuna x:llä korotettuna y:hyn
+nolla korotettuna x:ään on nolla
+luku korotettuna y:n seuraajaan on luku kerrottuna luvulla korotettuna y:hyn, missä luku on x:n seuraaja
 
 eksponentaatio kutsuttuna a:lla ja b:llä on a korotettuna b:hen
 
 # jakojäännös
 nolla modulo y on nolla
-x:n seuraaja modulo y on jäännöksen seuraaja alempana y:tä tai nolla, missä jäännös on x modulo y
+x:n seuraaja modulo y:n seuraaja on jäännöksen seuraaja alempana y:n seuraajaa tai nolla, missä jäännös on x modulo y:n seuraaja
 
 # apufunktioita
 nolla nollasta vähennettynä negatiivisena b:tä tai c on c
@@ -74,12 +76,12 @@ a alempana b:tä tai c on erotus negatiivisena a:ta tai c, missä erotus on a mi
 
 # vakioita
 
-yksi on 1
-kaksi on 2
-kolme on 3
-neljä on 4
-viisi on 5
-kuusi on 6
+yksi on nollan seuraaja
+kaksi on yhden seuraaja
+kolme on kahden seuraaja
+neljä on kolmen seuraaja
+viisi on neljän seuraaja
+kuusi on viiden seuraaja
 
 # esityksiä (ladataan samalla vakioiden arvot muistiin)
 
