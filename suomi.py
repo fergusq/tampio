@@ -652,7 +652,7 @@ def evals(tree):
 			break
 		a = b
 		c = a.copy()
-	if debug:
+	if debug and verbosity >= 1:
 		print("\x1b[1;4;31mEnd:\x1b[0m " + a.str())
 	return a
 
@@ -667,7 +667,7 @@ def evals_(tree, objects=[]):
 		if magic:
 			for opt in OPTIMIZATIONS:
 				if opt.match(tree):
-					if debug:
+					if debug and verbosity >= 1:
 						print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;33m(opt)\x1b[0m")
 					return opt.optimize(tree)
 		for defi in DEFS:
@@ -679,10 +679,10 @@ def evals_(tree, objects=[]):
 						raise(StopEvaluation())
 					subs[var] = body.subs(subs)
 				rightsubs = defi.right.subs(subs) if len(subs) > 0 or defi.always else defi.right
-				if debug:
+				if debug and verbosity >= 1:
 					print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;4;34m==\x1b[0m " + defi.left.str() + " \x1b[1;4;34m->\x1b[0m " + rightsubs.str())
 				return rightsubs
-			elif debug and verbose:
+			elif debug and verbosity >= 2:
 				print(" "*len(stack) + "\x1b[1;4;31mNO MATCH:\x1b[0m " + tree.str() + " \x1b[1;4;34m!=\x1b[0m " + defi.left.str() + " \x1b[1;33m(def)\x1b[0m")
 		if isinstance(tree, CallTree):
 			tree.head = evals_(tree.head, objects)
@@ -713,10 +713,10 @@ def evalLine(line, allowQueries=False):
 	output = lexLine(line)
 	if not output:
 		return
-	if debug:
+	if debug and verbosity >= 0:
 		print(" ".join(["|".join(set([a.str() for a in alternatives])) for alternatives in output]))
 	eq = parseEq(output, allowQueries)
-	if debug:
+	if debug and verbosity >= 0:
 		print(eq.str())
 	if eq.query():
 		return evals(eq.left)
@@ -748,11 +748,11 @@ OPTIMIZATIONS = [
 
 debug = False
 visualize = False
-verbose = False
+verbosity = 0
 magic = True
 
 TAMPIO_VERSION = "1.4"
-INTERPRETER_VERSION = "1.11.0"
+INTERPRETER_VERSION = "1.12.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
@@ -765,6 +765,7 @@ if __name__ == "__main__":
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
 	parser.add_argument('--debug', help='enable debug mode', action='store_true')
 	parser.add_argument('--no-magic', help='disable all optimizations', action='store_true')
+	parser.add_argument('-V', '--verbosity', help='verbosity level of debug information', action='count', default=0)
 	parser.add_argument('--visualize', help='enable inflected debug mode', action='store_true')
 	args = parser.parse_args()
 	
@@ -773,10 +774,9 @@ if __name__ == "__main__":
 		sys.exit(0)
 	
 	debug = args.debug
+	magic = not args.no_magic
+	verbosity = args.verbosity
 	visualize = args.visualize
-	
-	if args.no_magic:
-		magic = False
 	
 	if args.filename:
 		evalFile(args.filename)
