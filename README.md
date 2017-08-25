@@ -47,7 +47,19 @@ Here, `koiran nimi` matches `x:n nimi` and evaluates to `maija`.
 
 ## Syntax
 
-Every pattern and body of a transformation is an expression. All expressions can be inflected in different cases.
+Every pattern and body of a transformation is an expression.
+
+    <pattern> on <expression> [, missä <var> on <expression>]
+
+All expressions can be inflected in different cases. Both `<pattern>` and `<expression>` must be in the nominative case.
+
+Every transformation can have an optional `missä` clause, which is substituted to the pattern and the body. For example,
+
+    nolla plus luku on luku, missä luku on x:n seuraaja
+
+is equivalent to
+
+    nolla plus x:n seuraaja on x:n seuraaja
 
 Tampio supports two kinds of expressions: _words_ and _function calls_. A word is simply a word in the source code.
 
