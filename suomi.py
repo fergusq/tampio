@@ -114,6 +114,24 @@ CASES_F = {
 	"kerrontosti": ":sti"
 }
 
+CASES_ELLIPSI = {
+	"nimento": "",
+	"omanto": ":n",
+	"osanto": ":ä",
+	"olento": ":nä",
+	"tulento": ":ksi",
+	"ulkotulento": ":lle",
+	"ulkoolento": ":llä",
+	"ulkoeronto": ":ltä",
+	"sisatulento": ":iin",
+	"sisaolento": ":ssä",
+	"sisaeronto": ":stä",
+	"vajanto": ":ttä",
+	"keinonto": ":ein",
+	"seuranto": ":eineen",
+	"kerrontosti": ":sti"
+}
+
 CASE_REGEXES = {
 	"singular": {
 		"omanto": r"[^:]+:n",
@@ -373,7 +391,7 @@ class VarTree:
 				return True, {}
 			return self.name == str(tree.num), {}
 		return False, {}
-	def inflect(self, case):
+	def inflect(self, case, objects=None):
 		return inflect(self.name, case)
 	def subs(self, subs, objects=None):
 		if self.name in subs:
@@ -411,7 +429,7 @@ class NumTree:
 		return False, {}
 	def subs(self, subs, objects=None):
 		return self
-	def inflect(self, case):
+	def inflect(self, case, objects=None):
 		if self.num == 0:
 			return inflect("$nolla", case)
 		else:
@@ -505,33 +523,37 @@ class CallTree:
 		copy.args = [arg.subs(subs, objects) for arg in self.args]
 		return copy
 		#return CallTree(self.head.subs(subs), [arg.subs(subs) for arg in self.args], self.headInfl, self.argInfls)
-	def inflect(self, case):
+	def inflect(self, case, objects=[]):
+		for obj in objects:
+			if obj is self:
+				return "..." + CASES_ELLIPSI[case]
+		objects = objects[:] + [self]
 		if isinstance(self.head, VarTree) and self.head.str() in CONJUNCTIONS:
-			return self.args[0].inflect(case) + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
+			return self.args[0].inflect(case, objects) + " " + self.head.name[1:] + " " + self.args[1].inflect(case, objects)
 		if isinstance(self.head, VarTree) and self.head.str() in BINARY_OPERATORS:
-			return self.args[0].inflect("nimento") + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
+			return self.args[0].inflect("nimento", objects) + " " + self.head.name[1:] + " " + self.args[1].inflect(case, objects)
 		if self.headIs("$lisätty", "olento", ("", "sisatulento")):
 			elements = [self.args[0]]
 			tail = self.args[1]
 			while isinstance(tail, CallTree) and tail.headIs("$lisätty", "olento", ("", "sisatulento")):
 				elements += [tail.args[0]]
 				tail = tail.args[1]
-			tailString = "" if isinstance(tail, VarTree) and tail.str() == "$tyhjyys" else " ++ " + tail.inflect("nimento")
+			tailString = "" if isinstance(tail, VarTree) and tail.str() == "$tyhjyys" else " ++ " + tail.inflect("nimento", objects)
 			return '"%s" [%s]%s' % (
 				inflect("$lista", case),
-				", ".join([e.inflect("nimento") for e in elements]),
+				", ".join([e.inflect("nimento", objects) for e in elements]),
 				tailString)
 		if self.headInfl == "olento":
 			# TODO: entä jos tulevaisuudessa olisikin enemmän argumentteja???
 			if case != "omanto" and len(self.args) == 2 and self.args[1].shouldReverseOrder():
-				return (self.args[0].inflect(case) + " "
-					+ self.args[1].inflect(self.argInfls[1]) + " "
-					+ self.head.inflect("olento"))
-			a = self.args[0].inflect(case) + " " + self.head.inflect("olento")
+				return (self.args[0].inflect(case, objects) + " "
+					+ self.args[1].inflect(self.argInfls[1], objects) + " "
+					+ self.head.inflect("olento", objects))
+			a = self.args[0].inflect(case, objects) + " " + self.head.inflect("olento", objects)
 			if len(self.args) == 2:
-				a += " " + self.args[1].inflect(self.argInfls[1])
+				a += " " + self.args[1].inflect(self.argInfls[1], objects)
 			return a
-		return self.args[0].inflect("omanto") + " " + self.head.inflect(case)
+		return self.args[0].inflect("omanto", objects) + " " + self.head.inflect(case, objects)
 	def shouldReverseOrder(self):
 		return self.headInfl != "olento" and (len(self.args) > 1 and self.args[-1].shouldReverseOrder())
 	def containsFunctions(self):
@@ -820,7 +842,7 @@ freeMode = False
 impure = False
 
 TAMPIO_VERSION = "1.6"
-INTERPRETER_VERSION = "2.2.0"
+INTERPRETER_VERSION = "2.3.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
