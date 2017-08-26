@@ -143,9 +143,9 @@ For example, here's a simple program that prints `5`:
 
 `x tulostettuna m:ään` is a function that prints `x` and return a monad object. There is a bind operation `liitettynä`, which can be used to chain I/O actions. The following program will input two numbers and output their sum.
 
-   m:n tulos                        on luku m:stä luettuna        liitettynä ykkösvaiheeseen
-   x ykkösvaiheena m:lle            on luku m:stä luettuna        liitettynä kakkosvaiheeseen ja x:ään
-   y kakkosvaiheena m:lle ja x:lle  on summa tulostettuna m:ään,  missä summa on x plus y
+    m:n tulos                        on luku m:stä luettuna        liitettynä ykkösvaiheeseen
+    x ykkösvaiheena m:lle            on luku m:stä luettuna        liitettynä kakkosvaiheeseen ja x:ään
+    y kakkosvaiheena m:lle ja x:lle  on summa tulostettuna m:ään,  missä summa on x plus y
 
 ## Examples
 
