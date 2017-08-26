@@ -1,7 +1,7 @@
 The Tampio Programming Language
 ===============================
 
-Tampio is a homoiconic lazy purely functional programming language that looks like a natural language – Finnish.
+Tampio is a lazy purely functional programming language that looks like a natural language – Finnish.
 It is named after a famous Finnish programmer.
 
 ## Dependencies
@@ -28,7 +28,7 @@ There are several flags available, most notably `--free-pure` and `--free-impure
 
 ## Introduction
 
-Tampio is a purely functional programming language designed to resemble written Finnish. Each program is a list of transformations that are applied to the evaluated code. Tampio is homoiconic, meaning that the code and data are represented using the same data type.
+Tampio is a purely functional programming language designed to resemble written Finnish. Each program is a list of transformations that are applied to the evaluated code.
 
 A transformation definition consists of _pattern_ and _body_, separated by the `on` keyword. For example:
 
@@ -132,6 +132,20 @@ Now, after the next Fibonacci number after 1 and 1 is calculated, the `luvut` li
     luvut ovat epäpuhtaasti 1 lisättynä 1:een lisättynä 2:een lisättynä yhteenlaskuun sovellettuna lukujen jäseniin ja lukujen hännän jäseniin
 
 This reduces the complexity from O(2^n) to O(n). In the restricted mode, the optimizations should not cause any problems. In the impure free mode, the impurity can leak to other parts of the program and cause unintended behavior.
+
+## I/O
+
+Tampio supports a basic IO monad that can be used to do interactive I/O. To enable the monad, execute the interpreter with the `--io` flag. In `--io` mode, the starting point of the program is not `tulos`, but `m:n tulos`, where `m` is a "world object".
+
+For example, here's a simple program that prints `5`:
+
+    m:n tulos on 5 tulostettuna m:ään
+
+`x tulostettuna m:ään` is a function that prints `x` and return a monad object. There is a bind operation `liitettynä`, which can be used to chain I/O actions. The following program will input two numbers and output their sum.
+
+   m:n tulos                        on luku m:stä luettuna        liitettynä ykkösvaiheeseen
+   x ykkösvaiheena m:lle            on luku m:stä luettuna        liitettynä kakkosvaiheeseen ja x:ään
+   y kakkosvaiheena m:lle ja x:lle  on summa tulostettuna m:ään,  missä summa on x plus y
 
 ## Examples
 

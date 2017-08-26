@@ -368,15 +368,28 @@ def parseVar(name):
 	else:
 		return VarTree(name)
 
-class VarTree:
+class AtomicTree:
+	def __init__(self):
+		pass
+	def safeEq(self, tree, objects=None):
+		return self == tree
+	def match(self, tree):
+		return False, {}
+	def subs(self, subs, objects=None):
+		return self
+	def shouldReverseOrder(self):
+		return True
+	def containsFunctions(self):
+		return self in FUNCTIONS
+
+class VarTree(AtomicTree):
 	def __init__(self, name):
+		super().__init__()
 		self.name = name
 	def __eq__(self, tree):
 		return type(tree) == VarTree and self.name == tree.name
 	def __hash__(self):
 		return hash(self.name) * 7
-	def safeEq(self, tree, objects=[]):
-		return self == tree
 	def copy(self, objects=None):
 		return VarTree(self.name)
 	def str(self, objects=None):
@@ -398,20 +411,15 @@ class VarTree:
 			return subs[self.name]
 		else:
 			return self
-	def shouldReverseOrder(self):
-		return True
-	def containsFunctions(self):
-		return self in FUNCTIONS
 
-class NumTree:
+class NumTree(AtomicTree):
 	def __init__(self, num):
+		super().__init__()
 		self.num = num
 	def __eq__(self, tree):
 		return type(tree) == NumTree and self.num == tree.num
 	def __hash__(self):
 		return self.num * 7
-	def safeEq(self, tree, objects=[]):
-		return self == tree
 	def copy(self, objects=None):
 		return NumTree(self.num)
 	def str(self, objects=None):
@@ -427,17 +435,27 @@ class NumTree:
 				return True, {}
 			return str(self.num) == tree.name, {}
 		return False, {}
-	def subs(self, subs, objects=None):
-		return self
 	def inflect(self, case, objects=None):
 		if self.num == 0:
 			return inflect("$nolla", case)
 		else:
 			return '"' + inflect("$" + str(self.num), case) + '"'
-	def shouldReverseOrder(self):
-		return True
-	def containsFunctions(self):
-		return self in FUNCTIONS
+
+class WorldTree(AtomicTree):
+	def __init__(self, counter):
+		self.counter = counter
+	def __eq__(self, tree):
+		return type(tree) == WorldTree and self.counter == tree.counter
+	def __hash__(self):
+		return self.counter * 13
+	def copy(self, objects=None):
+		return WorldTree(self.counter)
+	def nextWorld(self):
+		return WorldTree(self.counter + 1)
+	def str(self, objects=None):
+		return "$maailma(" + str(self.counter) + ")"
+	def inflect(self, case, objects=None):
+		return '"' + inflect("$maailma", case) + '"'
 
 class CallTree:
 	def __init__(self, head, args, headInfl, argInfls):
@@ -725,6 +743,11 @@ def evals_(tree, objects=[]):
 					if debug and verbosity >= 1:
 						print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;33m(opt)\x1b[0m")
 					return opt.optimize(tree)
+			for bi in BUILTINS:
+				if bi.match(tree):
+					if debug and verbosity >= 1:
+						print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;33m(builtin)\x1b[0m")
+					return bi.eval(tree)
 		for defi in DEFS:
 			ok, subs = defi.left.match(tree)
 			if ok:
@@ -829,9 +852,49 @@ OPTIMIZATIONS = [
 	OptimizeOperator("$seuraaja", "", ("omanto",), lambda x: True, lambda x: x + 1),
 	OptimizeOperator("$plus", "", ("", ""), lambda x, y: True, lambda x, y: x + y),
 	OptimizeOperator("$miinus", "", ("", ""), lambda x, y: x >= y, lambda x, y: x - y),
-	OptimizeOperator("$kerrottu", "essiivi", ("", "ulkoolento"), lambda x, y: True, lambda x, y: x * y),
-	OptimizeOperator("$jaettu", "essiivi", ("", "ulkoolento"), lambda x, y: y != 0, lambda x, y: x // y),
+	OptimizeOperator("$kerrottu", "olento", ("", "ulkoolento"), lambda x, y: True, lambda x, y: x * y),
+	OptimizeOperator("$jaettu", "olento", ("", "ulkoolento"), lambda x, y: y != 0, lambda x, y: x // y),
 	OptimizeOperator("$modulo", "", ("", ""), lambda x, y: True, lambda x, y: x % y)
+]
+
+class Builtin:
+	def __init__(self, operator, opcase, argcases, ok, fun):
+		self.operator = operator
+		self.opcase = opcase
+		self.argcases = argcases
+		self.ok = ok
+		self.fun = fun
+	def match(self, tree):
+		if isinstance(tree, CallTree) and tree.headIs(self.operator, self.opcase, self.argcases):
+			return self.ok(*tree.args)
+	def eval(self, tree):
+		return self.fun(*tree.args)
+
+worldCounter = 0
+
+def checkWorld(w):
+	global worldCounter
+	if w.counter != worldCounter:
+		fatalError("Error: impossible time travel")
+	worldCounter += 1
+	return w.nextWorld()
+
+def createPair(output, w):
+	return CallTree(VarTree("$pari"), [output, checkWorld(w)], "olento", ("", "ulkotulento"))
+
+def writeOutput(tree, w):
+	print(evals(tree).inflect("nimento"))
+	return createPair(VarTree("$tyhjyys"), w)
+
+BUILTINS = [
+	Builtin("$luettu", "olento", ("", "sisaeronto"),
+		lambda l, w: isinstance(w, WorldTree),
+		lambda l, w: createPair(NumTree(int(input(l.inflect("nimento") + "> "))), w)
+	),
+	Builtin("$tulostettu", "olento", ("", "sisatulento"),
+		lambda l, w: isinstance(w, WorldTree),
+		writeOutput
+	)
 ]
 
 debug = False
@@ -841,8 +904,8 @@ magic = True
 freeMode = False
 impure = False
 
-TAMPIO_VERSION = "1.6"
-INTERPRETER_VERSION = "2.3.0"
+TAMPIO_VERSION = "1.7"
+INTERPRETER_VERSION = "2.4.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
@@ -857,6 +920,7 @@ if __name__ == "__main__":
 	free = parser.add_mutually_exclusive_group()
 	free.add_argument('-i', '--free-impure', help='enable impure free mode', action='store_true')
 	free.add_argument('-p', '--free-pure', help='enable pure free mode', action='store_true')
+	parser.add_argument('--io', help='evaluate "maailman tulos" instead of "tulos"', action='store_true')
 	parser.add_argument('--no-magic', help='disable all optimizations and builtins', action='store_true')
 	
 	debugOptions = parser.add_argument_group('debug options')
@@ -883,7 +947,10 @@ if __name__ == "__main__":
 	
 	if args.filename:
 		evalFile(args.filename)
-		print(evals(parseVar("$tulos")).inflect("nimento"))
+		if args.io:
+			print(evals(CallTree(VarTree("$tulos"), [WorldTree(worldCounter)], "", ("omanto",))).inflect("nimento"))
+		else:
+			print(evals(parseVar("$tulos")).inflect("nimento"))
 	else:
 		
 		histfile = os.path.join(os.path.expanduser("~"), ".tampio_history")
