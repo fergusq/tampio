@@ -266,8 +266,7 @@ class Conj:
 
 def next(words):
 	if len(words) == 0:
-		sys.stderr.write("Syntax error: unexpected eof\n")
-		raise(StopEvaluation())
+		fatalError("Syntax error: unexpected eof")
 	w = words[0]
 	del words[0]
 	return as2w(w)
@@ -281,8 +280,7 @@ def as2w(w):
 
 def checkCase(got, expected, place):
 	if got != expected:
-		sys.stderr.write("Syntax error: illegal case: expected " + CASES_ENGLISH[expected] + ", got " + CASES_ENGLISH[got] + " (" + place + ")\n")
-		raise(StopEvaluation())
+		fatalError("Syntax error: illegal case: expected " + CASES_ENGLISH[expected] + ", got " + CASES_ENGLISH[got] + " (" + place + ")")
 
 class EqTree:
 	def __init__(self, op, always, left, right, where):
@@ -312,8 +310,7 @@ def parseEq(words, allowQueries):
 	
 	w = next(words)
 	if w.str() not in ["#olla", "#esittää"]:
-		sys.stderr.write("Syntax error: expected 'on' or 'esitetään' (at " + w.str() + ")\n")
-		raise(StopEvaluation())
+		fatalError("Syntax error: expected 'on' or 'esitetään' (at " + w.str() + ")")
 	
 	always = True
 	if len(words) > 0 and as2w(words[0]).str() == ".epäpuhdas:D":
@@ -329,15 +326,13 @@ def parseEq(words, allowQueries):
 		
 		var = next(words)
 		if var.cl != "noun":
-			sys.stderr.write("Syntax error: expected noun (" + var.str() + ")\n")
-			raise(StopEvaluation())
+			fatalError("Syntax error: expected noun (" + var.str() + ")")
 		checkCase(var.case, "nimento", var.str())
 		varName = var.str(nocase=True)
 		
 		w = next(words)
 		if w.str() != "#olla":
-			sys.stderr.write("Syntax error: expected 'on' (at " + w.str() + ")\n")
-			raise(StopEvaluation())
+			fatalError("Syntax error: expected 'on' (at " + w.str() + ")")
 		c, body = parsePattern(words)
 		checkCase(c, "nimento", right.inflect(c))
 		
@@ -361,7 +356,7 @@ class VarTree:
 	def __eq__(self, tree):
 		return type(tree) == VarTree and self.name == tree.name
 	def __hash__(self):
-		return hash(self.name)
+		return hash(self.name) * 7
 	def safeEq(self, tree, objects=[]):
 		return self == tree
 	def copy(self, objects=None):
@@ -387,6 +382,8 @@ class VarTree:
 			return self
 	def shouldReverseOrder(self):
 		return True
+	def containsFunctions(self):
+		return self in FUNCTIONS
 
 class NumTree:
 	def __init__(self, num):
@@ -394,7 +391,7 @@ class NumTree:
 	def __eq__(self, tree):
 		return type(tree) == NumTree and self.num == tree.num
 	def __hash__(self):
-		return self.num
+		return self.num * 7
 	def safeEq(self, tree, objects=[]):
 		return self == tree
 	def copy(self, objects=None):
@@ -421,6 +418,8 @@ class NumTree:
 			return '"' + inflect("$" + str(self.num), case) + '"'
 	def shouldReverseOrder(self):
 		return True
+	def containsFunctions(self):
+		return self in FUNCTIONS
 
 class CallTree:
 	def __init__(self, head, args, headInfl, argInfls):
@@ -428,19 +427,13 @@ class CallTree:
 		self.args = args
 		self.headInfl = headInfl
 		self.argInfls = argInfls
-		#if reprStr is not None:
-		#	self.repr = reprStr
-		#else:
-		#	self.repr = self.head.str() + ":" + CASES_ABRV[self.headInfl] + "(" + ", ".join([arg.str() + ":" + CASES_ABRV[argInfl] for arg, argInfl in zip(self.args, self.argInfls)]) + ")"
-		#self.hash = hash(self.repr)
+		if self.head and not freeMode and not isinstance(head, VarTree):
+			fatalError("Syntax error: the head of the call must be a word in the restricted mode (" + self.inflect("nimento") + ")")
 	def __eq__(self, tree):
 		if type(tree) == CallTree:
-			#return self.repr == tree.repr
-			return self.head == tree.head and self.args == tree.args and self.headInfl == tree.headInfl and self.argInfls == tree.argInfls
+			return self.headInfl == tree.headInfl and self.argInfls == tree.argInfls and self.head == tree.head and self.args == tree.args
 		else:
 			return False
-	#def __hash__(self):
-	#	return self.hash
 	def safeEq(self, tree, objects=[]):
 		if not isinstance(tree, CallTree):
 			return False
@@ -468,6 +461,8 @@ class CallTree:
 			return isinstance(self.head, VarTree) and self.head.name == tree
 		else:
 			return self.head == tree and inflOk
+	def getHead(self):
+		return (self.head, self.headInfl, self.argInfls)
 	def str(self, objects=[]):
 		for i in range(len(objects)):
 			if objects[i] is self:
@@ -488,12 +483,16 @@ class CallTree:
 				if ai != ai2:
 					return False, {}
 				ok, subs2 = arg.match(arg2)
+				for key in subs2:
+					if key in subs:
+						if not subs[key].safeEq(subs2[key]):
+							return False, {}
 				subs.update(subs2)
 				if not ok:
 					return False, {}
 			return True, subs
 		if isinstance(tree, NumTree) and tree.num > 0:
-			if self.headIs(VarTree("$seuraaja"), "", ["omanto"]):
+			if self.headIs("$seuraaja", "", ("omanto",)):
 				return self.args[0].match(NumTree(tree.num - 1))
 		return False, {}
 	def subs(self, subs, objects=[]):
@@ -511,10 +510,10 @@ class CallTree:
 			return self.args[0].inflect(case) + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
 		if isinstance(self.head, VarTree) and self.head.str() in BINARY_OPERATORS:
 			return self.args[0].inflect("nimento") + " " + self.head.name[1:] + " " + self.args[1].inflect(case)
-		if self.headIs("$lisätty", "olento", ["", "sisatulento"]):
+		if self.headIs("$lisätty", "olento", ("", "sisatulento")):
 			elements = [self.args[0]]
 			tail = self.args[1]
-			while isinstance(tail, CallTree) and tail.headIs("$lisätty", "olento", ["", "sisatulento"]):
+			while isinstance(tail, CallTree) and tail.headIs("$lisätty", "olento", ("", "sisatulento")):
 				elements += [tail.args[0]]
 				tail = tail.args[1]
 			tailString = "" if isinstance(tail, VarTree) and tail.str() == "$tyhjyys" else " ++ " + tail.inflect("nimento")
@@ -535,6 +534,12 @@ class CallTree:
 		return self.args[0].inflect("omanto") + " " + self.head.inflect(case)
 	def shouldReverseOrder(self):
 		return self.headInfl != "olento" and (len(self.args) > 1 and self.args[-1].shouldReverseOrder())
+	def containsFunctions(self):
+		if self.getHead() in FUNCTIONS:
+			return True
+		for arg in self.args:
+			if arg.containsFunctions():
+				return True
 
 BINARY_OPERATORS_CASE = [".ynnä:N", "$plus:N", "$miinus:N", "$modulo:N"]
 BINARY_OPERATORS = [".ynnä", "$plus", "$miinus", "$modulo"]
@@ -552,7 +557,7 @@ def parsePattern(words):
 				checkCase(case2, case, w.str())
 			case = case2
 			
-			root = CallTree(VarTree(w.str(nocase=True)), [root, arg], "", ["", ""])
+			root = CallTree(VarTree(w.str(nocase=True)), [root, arg], "", ("", ""))
 		else:
 			break
 	return case, root
@@ -560,13 +565,12 @@ def parsePattern(words):
 def parseUnary(words, allowReverseWordOrder=True):
 	w = next(words)
 	if w.cl != "noun":
-		sys.stderr.write("Syntax error: expected noun (at " + w.str() + ")\n")
-		raise(StopEvaluation())
+		fatalError("Syntax error: expected noun (at " + w.str() + ")")
 	root = parseVar(w.str(nocase=True))
 	root = parseEssive(root, words, False)
 	while w.case == "omanto":
 		w = next(words)
-		root = CallTree(parseVar(w.str(nocase=True)), [root], "", ["omanto"])
+		root = CallTree(parseVar(w.str(nocase=True)), [root], "", ("omanto",))
 	if w.case != "nimento" and w.case != "omanto" and len(words) != 0 and as2w(words[0]).str() in CONJUNCTIONS:
 		words2 = words[:]
 		conj = as2w(words[0]).str()
@@ -576,7 +580,7 @@ def parseUnary(words, allowReverseWordOrder=True):
 		#else:
 		case, arg = parseUnary(words)
 		if case == w.case:
-			root = CallTree(parseVar(conj), [root, arg], "", ["", ""])
+			root = CallTree(parseVar(conj), [root, arg], "", ("", ""))
 		else:
 			del words[:]
 			words += words2
@@ -601,11 +605,16 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 				argInfls = []
 				if len(words) != 0:
 					if as2w(words[0]).cl == "noun":
+						words3 = words[:]
 						case, arg = parseUnary(words, False)
-						args += [arg]
-						argInfls += [case]
+						if case in ["nimento", "omanto", "olento"]:
+							del words[:]
+							words += words3
+						else:
+							args += [arg]
+							argInfls += [case]
 				root2 = applyOwners(parseVar(w.str(nocase=True)), owners)
-				root = CallTree(root2, [root]+args, "olento", [""]+argInfls)
+				root = CallTree(root2, [root]+args, "olento", tuple([""]+argInfls))
 			elif allowReverseWordOrder and w.case not in ["nimento", "omanto"]:
 				case = w.case
 				arg = applyOwners(parseVar(w.str(nocase=True)), owners)
@@ -615,13 +624,13 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 					owners, w = parseOwners(words)
 					checkCase(w.case, case, w.str() + ", after " + arg.inflect(case) + " " + c.str()[1:])
 					arg2 = applyOwners(parseVar(w.str(nocase=True)), owners)
-					arg = CallTree(VarTree(c.str(nocase=True)), [arg, arg2], "", ["", ""])
+					arg = CallTree(VarTree(c.str(nocase=True)), [arg, arg2], "", ("", ""))
 				
 				owners, w = parseOwners(words)
 				checkCase(w.case, "olento", w.str() + ", after " + arg.inflect(case))
 				root2 = applyOwners(parseVar(w.str(nocase=True)), owners)
 				
-				root = CallTree(root2, [root, arg], "olento", ["", case])
+				root = CallTree(root2, [root, arg], "olento", ("", case))
 			elif allowFullPattern:
 				del words[:]
 				words += words2
@@ -640,14 +649,19 @@ def parseOwners(words):
 
 def applyOwners(root, owners):
 	for o in owners[::-1]:
-		root = CallTree(root, [parseVar(o.str(nocase=True))], "", ["omanto"])
+		root = CallTree(root, [parseVar(o.str(nocase=True))], "", ("omanto",))
 	return root
 
 stack = []
 
+def fatalError(msg):
+	sys.stderr.write(msg + "\n")
+	raise(StopEvaluation())
+
 class StopEvaluation(Exception):
 	pass
 
+# Prints stack traces
 def printStack():
 	sys.stderr.write("Stack:\n")
 	for val in stack:
@@ -658,6 +672,7 @@ def printStack():
 			sys.stderr.write("  " + defi.str() + "\n")
 	raise(StopEvaluation())
 
+# Fully evaluates an expression
 def evals(tree):
 	a = evals_(tree)
 	c = a.copy()
@@ -673,6 +688,7 @@ def evals(tree):
 		print("\x1b[1;4;31mEnd:\x1b[0m " + a.str())
 	return a
 
+# Evaluates an expression lazily (ie. evaluates the uppermost calls, but not arguments)
 def evals_(tree, objects=[]):
 	for obj in objects:
 		if obj is tree:
@@ -695,7 +711,7 @@ def evals_(tree, objects=[]):
 						sys.stderr.write("Error: Illegal redefinition of " + var + "\n")
 						raise(StopEvaluation())
 					subs[var] = body.subs(subs)
-				rightsubs = defi.right.subs(subs) if len(subs) > 0 or defi.always else defi.right
+				rightsubs = defi.right.subs(subs) if len(subs) > 0 or (defi.always and (impure or not freeMode)) else defi.right
 				if debug and verbosity >= 1:
 					print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;4;34m==\x1b[0m " + defi.left.str() + " \x1b[1;4;34m->\x1b[0m " + rightsubs.str())
 				return rightsubs
@@ -719,11 +735,15 @@ def evals_(tree, objects=[]):
 		del stack[-1]
 
 DEFS = []
+FUNCTIONS = set()
 
 def evalFile(filename):
 	with open(filename) as f:
 		for line in f:
-			evalLine(line)
+			try:
+				evalLine(line)
+			except StopEvaluation:
+				pass
 
 def evalLine(line, allowQueries=False):
 	global DEFS
@@ -739,7 +759,36 @@ def evalLine(line, allowQueries=False):
 		return evals(eq.left)
 	elif eq.op == "#olla":
 		DEFS += [eq]
+		if not freeMode:
+			if isinstance(eq.left, CallTree):
+				FUNCTIONS.add(eq.left.getHead())
+			else:
+				FUNCTIONS.add(eq.left)
 
+# In the restricted mode, pattern matching against functions is forbidden.
+# This function checks if there are any such forbidden patterns and
+# reports the errors.
+def checkFunctionMatching():
+	a = True
+	if not freeMode:
+		for defi in DEFS:
+			if isinstance(defi.left, CallTree):
+				if defi.left.head.containsFunctions():
+					functionMatchingError(defi.left)
+					a = False
+				for arg in defi.left.args:
+					if arg.containsFunctions():
+						functionMatchingError(defi.left)
+						a = False
+						break
+	return a
+
+def functionMatchingError(left):
+	sys.stderr.write("Error: pattern matching against functions is forbidden in the restricted mode (" + left.inflect("nimento") + ")\n")
+
+# This class represents an optimization of a operator handling numbers
+# It allows together with NumTree efficient calculations even though
+# the standard library implementation of integers is very unefficient.
 class OptimizeOperator:
 	def __init__(self, operator, opcase, argcases, ok, fun):
 		self.operator = operator
@@ -755,21 +804,23 @@ class OptimizeOperator:
 		return NumTree(self.fun(*[arg.num for arg in tree.args]))
 
 OPTIMIZATIONS = [
-	OptimizeOperator("$seuraaja", "", ["omanto"], lambda x: True, lambda x: x + 1),
-	OptimizeOperator("$plus", "", ["", ""], lambda x, y: True, lambda x, y: x + y),
-	OptimizeOperator("$miinus", "", ["", ""], lambda x, y: x >= y, lambda x, y: x - y),
-	OptimizeOperator("$kerrottu", "essiivi", ["", "ulkoolento"], lambda x, y: True, lambda x, y: x * y),
-	OptimizeOperator("$jaettu", "essiivi", ["", "ulkoolento"], lambda x, y: y != 0, lambda x, y: x // y),
-	OptimizeOperator("$modulo", "", ["", ""], lambda x, y: True, lambda x, y: x % y)
+	OptimizeOperator("$seuraaja", "", ("omanto",), lambda x: True, lambda x: x + 1),
+	OptimizeOperator("$plus", "", ("", ""), lambda x, y: True, lambda x, y: x + y),
+	OptimizeOperator("$miinus", "", ("", ""), lambda x, y: x >= y, lambda x, y: x - y),
+	OptimizeOperator("$kerrottu", "essiivi", ("", "ulkoolento"), lambda x, y: True, lambda x, y: x * y),
+	OptimizeOperator("$jaettu", "essiivi", ("", "ulkoolento"), lambda x, y: y != 0, lambda x, y: x // y),
+	OptimizeOperator("$modulo", "", ("", ""), lambda x, y: True, lambda x, y: x % y)
 ]
 
 debug = False
 visualize = False
 verbosity = 0
 magic = True
+freeMode = False
+impure = False
 
-TAMPIO_VERSION = "1.5"
-INTERPRETER_VERSION = "2.1.0"
+TAMPIO_VERSION = "1.6"
+INTERPRETER_VERSION = "2.2.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
@@ -780,22 +831,33 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Interprets Tampio code.')
 	parser.add_argument('filename', type=str, nargs='?', help='source code file')
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
-	parser.add_argument('--debug', help='enable debug mode', action='store_true')
-	parser.add_argument('--no-magic', help='disable all optimizations', action='store_true')
-	parser.add_argument('-V', '--verbosity', help='verbosity level of debug information', action='count', default=0)
-	parser.add_argument('--visualize', help='enable inflected debug mode', action='store_true')
+	
+	free = parser.add_mutually_exclusive_group()
+	free.add_argument('-i', '--free-impure', help='enable impure free mode', action='store_true')
+	free.add_argument('-p', '--free-pure', help='enable pure free mode', action='store_true')
+	parser.add_argument('--no-magic', help='disable all optimizations and builtins', action='store_true')
+	
+	debugOptions = parser.add_argument_group('debug options')
+	debugOptions.add_argument('--debug', help='enable debug mode', action='store_true')
+	debugOptions.add_argument('-V', '--verbosity', help='verbosity level of debug information', action='count', default=0)
+	debugOptions.add_argument('--visualize', help='enable inflected debug mode', action='store_true')
 	args = parser.parse_args()
 	
 	if args.version:
 		print(VERSION_STRING)
 		sys.exit(0)
 	
+	freeMode = args.free_impure or args.free_pure
+	impure = args.free_impure
 	debug = args.debug
 	magic = not args.no_magic
 	verbosity = args.verbosity
 	visualize = args.visualize
 	
 	evalFile(STD_LIB)
+	
+	if not checkFunctionMatching():
+		sys.exit(1)
 	
 	if args.filename:
 		evalFile(args.filename)
@@ -828,5 +890,7 @@ Read the LICENSE file for details.""")
 				out = evalLine(line, True)
 				if out:
 					print(out.inflect("nimento"))
+				else:
+					checkFunctionMatching()
 			except StopEvaluation:
 				continue

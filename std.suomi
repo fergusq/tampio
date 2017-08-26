@@ -32,7 +32,9 @@ x summattuna y:hyn on x plus y
 yhteenlasku kutsuttuna x:llä ja y:llä on x plus y
 
 # vähennyslasku
+nolla vähennettynä nollasta on nolla
 nolla vähennettynä x:stä on x
+luku nollasta vähennettynä on luku negatiivisena, missä luku on x:n seuraaja
 x:n seuraaja vähennettynä y:n seuraajasta on x vähennettynä y:stä
 
 x miinus y on y vähennettynä x:stä
@@ -51,7 +53,7 @@ x jaettuna nollalla on virhe
 x:n seuraaja jaettuna y:n seuraajalla on nolla jakovälivaiheena x:n seuraajalla ja y:n seuraajalla
 
 a jakovälivaiheena nollalla ja y:llä on a
-a:n seuraaja jakovälivaiheena x:llä vähennettynä nollasta ja y:llä on a
+a:n seuraaja jakovälivaiheena x:llä negatiivisena ja y:llä on a
 a jakovälivaiheena x:n seuraajalla ja y:llä on a:n seuraaja jakovälivaiheena erotuksella ja y:llä, missä erotus on x:n seuraaja miinus y
 
 # potenssiin korotus
@@ -67,8 +69,8 @@ nolla modulo y on nolla
 x:n seuraaja modulo y:n seuraaja on jäännöksen seuraaja alempana y:n seuraajaa tai nolla, missä jäännös on x modulo y:n seuraaja
 
 # apufunktioita
-nolla nollasta vähennettynä negatiivisena b:tä tai c on c
-a nollasta vähennettynä negatiivisena b:tä tai c on b
+nolla negatiivisena negatiivisena b:tä tai c on c
+a negatiivisena negatiivisena b:tä tai c on b
 nolla negatiivisena b:tä tai c on c
 a:n seuraaja negatiivisena b:tä tai c on c
 
