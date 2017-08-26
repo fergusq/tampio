@@ -24,6 +24,8 @@ To evaluate a file:
 
 The output will be the value of `tulos`.
 
+There are several flags available, most notably `--free-pure` and `--free-impure`, which enable pure and impure free mode, respectively. The interpreter is by default in the restricted mode, which allows some optimizations but removes certain language features at the same time. The pure free mode allows all features but does not have impure optimizations. The impure free mode allows all features and all optimizations, but is impure (ie. functions do not always evaluate to same values).
+
 ## Introduction
 
 Tampio is a purely functional programming language designed to resemble written Finnish. Each program is a list of transformations that are applied to the evaluated code. Tampio is homoiconic, meaning that the code and data are represented using the same data type.
@@ -129,7 +131,7 @@ Now, after the next Fibonacci number after 1 and 1 is calculated, the `luvut` li
 
     luvut ovat epäpuhtaasti 1 lisättynä 1:een lisättynä 2:een lisättynä yhteenlaskuun sovellettuna lukujen jäseniin ja lukujen hännän jäseniin
 
-This reduces the complexity from O(2^n) to O(n). However, the impurity can leak to other parts of the program and cause it to behave in unintended ways.
+This reduces the complexity from O(2^n) to O(n). In the restricted mode, the optimizations should not cause any problems. In the impure free mode, the impurity can leak to other parts of the program and cause unintended behavior.
 
 ## Examples
 
