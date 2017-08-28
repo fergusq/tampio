@@ -247,7 +247,7 @@ def lexLine(line):
 				alternatives += [Verb(bf)]
 			elif cl == "sidesana":
 				alternatives += [Conj(bf)]
-			else:
+			elif debug:
 				print("Unknown word:", bf, analysis)
 		if len(alternatives) == 0:
 			alternatives += [Noun(word, "nimento", "singular")]
@@ -986,7 +986,7 @@ freeMode = False
 impure = False
 
 TAMPIO_VERSION = "1.8"
-INTERPRETER_VERSION = "2.5.0"
+INTERPRETER_VERSION = "2.5.1"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 
