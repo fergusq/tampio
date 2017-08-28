@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Tampio Interpreter
 # Copyright (C) 2017 Iikka Hauhio
 
