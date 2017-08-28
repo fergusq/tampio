@@ -282,7 +282,7 @@ class Conj:
 	def str(self, nocase=False):
 		return "&" + self.bf
 
-def next(words):
+def nextWord(words):
 	if len(words) == 0:
 		fatalError("Syntax error: unexpected eof")
 	w = words[0]
@@ -290,11 +290,18 @@ def next(words):
 	return as2w(w)
 
 PROMOTE = [
-	"yksi"
+	"yksi",
+	"ehto"
 ]
 
 def as2w(w):
-	return sorted(w, key=lambda a: 1 if a.cl == "noun" or a.bf in PROMOTE else 0)[-1]
+	return sorted(w, key=lambda a: 2 if a.bf in PROMOTE else 1 if a.cl == "noun" else 0)[-1]
+
+def isNext(words, s):
+	if isinstance(s, list):
+		return len(words) > 0 and as2w(words[0]).str() in s
+	else:
+		return len(words) > 0 and as2w(words[0]).str() == s
 
 def checkCase(got, expected, place):
 	if got != expected:
@@ -317,21 +324,69 @@ class EqTree:
 	def query(self):
 		return self.right == None
 
-def parseEq(words, allowQueries):
-	words = words[:]
+eqCounter = 0
+def createEqName(counter):
+	return VarTree("$<vaihe " + str(counter) + ">", "$funktio")
+
+def makeArgChain(args):
+	arg = args[-1]
+	for a in args[-2::-1]:
+		arg = CallTree(VarTree("&ja"), [a, arg], "", ("", ""))
+	return arg
+
+def parseWhen(words):
+	global eqCounter
+	eq = parseEq(words, False)
+	if eq.op != "#olla" or not eq.always:
+		return [eq]
 	
+	eqs = []
+	variables = []
+	while isNext(words, "&kun"):
+		del words[0]
+		eqCounter += 1
+		
+		when = parseEq(words, False)
+		
+		arg = makeArgChain([createEqName(eqCounter+1)] + variables)
+		right = CallTree(VarTree("$liitetty"), [when.right, arg], "olento", ("", "sisatulento"))
+		
+		if len(eqs) == 0:
+			eqs += [EqTree("#olla", True, eq.left, right, when.where)]
+		else:
+			name = createEqName(eqCounter)
+			arg = makeArgChain([VarTree("$m")] + variables[1:])
+			left = CallTree(name, [variables[0], arg], "olento", ("", "ulkotulento"))
+			eqs += [EqTree("#olla", True, left, right, when.where)]
+		
+		if not isinstance(when.left, VarTree):
+			fatalError("Syntax error: expected identifier after 'kun', got a more complex expression (" + when.left.inflect("nimento") + ")")
+		variables = [when.left] + variables
+	
+	if len(eqs) == 0:
+		return [eq]
+	else:
+		eqCounter += 1
+		name = createEqName(eqCounter)
+		arg = makeArgChain([VarTree("$m")] + variables[1:])
+		left = CallTree(name, [variables[0], arg], "olento", ("", "ulkotulento"))
+		eqs += [EqTree("#olla", True, left, eq.right, eq.where)]
+		
+		return eqs
+
+def parseEq(words, allowQueries):
 	c, left = parsePattern(words)
 	checkCase(c, "nimento", left.inflect(c))
 	
 	if len(words) == 0 and allowQueries:
 		return EqTree("", True, left, None, None)
 	
-	w = next(words)
+	w = nextWord(words)
 	if w.str() not in ["#olla", "#esittää"]:
 		fatalError("Syntax error: expected 'on' or 'esitetään' (at " + w.str() + ")")
 	
 	always = True
-	if len(words) > 0 and as2w(words[0]).str() == ".epäpuhdas:D":
+	if isNext(words, ".epäpuhdas:D"):
 		del words[0]
 		always = False
 	
@@ -339,16 +394,16 @@ def parseEq(words, allowQueries):
 	checkCase(c, "nimento", right.inflect(c))
 	
 	where = []
-	if len(words) > 0 and as2w(words[0]).str() == "?mikä:S_":
+	if isNext(words, "?mikä:S_"):
 		del words[0]
 		
-		var = next(words)
+		var = nextWord(words)
 		if var.cl != "noun":
 			fatalError("Syntax error: expected noun (" + var.str() + ")")
 		checkCase(var.case, "nimento", var.str())
 		varName = var.str(nocase=True)
 		
-		w = next(words)
+		w = nextWord(words)
 		if w.str() != "#olla":
 			fatalError("Syntax error: expected 'on' (at " + w.str() + ")")
 		c, body = parsePattern(words)
@@ -383,9 +438,10 @@ class AtomicTree:
 		return self in FUNCTIONS
 
 class VarTree(AtomicTree):
-	def __init__(self, name):
+	def __init__(self, name, alias=None):
 		super().__init__()
 		self.name = name
+		self.alias = alias
 	def __eq__(self, tree):
 		return type(tree) == VarTree and self.name == tree.name
 	def __hash__(self):
@@ -405,7 +461,10 @@ class VarTree(AtomicTree):
 			return self.name == str(tree.num), {}
 		return False, {}
 	def inflect(self, case, objects=None):
-		return inflect(self.name, case)
+		if self.alias is not None:
+			return '"' + inflect(self.alias, case) + '"'
+		else:
+			return inflect(self.name, case)
 	def subs(self, subs, objects=None):
 		if self.name in subs:
 			return subs[self.name]
@@ -603,15 +662,17 @@ def parsePattern(words):
 	return case, root
 
 def parseUnary(words, allowReverseWordOrder=True):
-	w = next(words)
+	w = nextWord(words)
 	if w.cl != "noun":
 		fatalError("Syntax error: expected noun (at " + w.str() + ")")
 	root = parseVar(w.str(nocase=True))
 	root = parseEssive(root, words, False)
-	while w.case == "omanto":
-		w = next(words)
+	while isinstance(w, Noun) and w.case == "omanto":
+		w = nextWord(words)
 		root = CallTree(parseVar(w.str(nocase=True)), [root], "", ("omanto",))
-	if w.case != "nimento" and w.case != "omanto" and len(words) != 0 and as2w(words[0]).str() in CONJUNCTIONS:
+	if not isinstance(w, Noun):
+		fatalError("Syntax error: expected noun, got " + w.str())
+	if w.case != "nimento" and w.case != "omanto" and isNext(words, CONJUNCTIONS):
 		words2 = words[:]
 		conj = as2w(words[0]).str()
 		del words[0]
@@ -638,7 +699,7 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 				del words[0]
 				while w.case == "omanto":
 					owners += [w]
-					w = next(words)
+					w = nextWord(words)
 			#print([o.str() for o in owners])
 			if w.case == "olento":
 				args = []
@@ -659,8 +720,8 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 				case = w.case
 				arg = applyOwners(parseVar(w.str(nocase=True)), owners)
 				
-				if len(words) != 0 and as2w(words[0]).str() in CONJUNCTIONS:
-					c = next(words)
+				if isNext(words, CONJUNCTIONS):
+					c = nextWord(words)
 					owners, w = parseOwners(words)
 					checkCase(w.case, case, w.str() + ", after " + arg.inflect(case) + " " + c.str()[1:])
 					arg2 = applyOwners(parseVar(w.str(nocase=True)), owners)
@@ -681,10 +742,10 @@ def parseEssive(root, words, allowReverseWordOrder, allowFullPattern=True):
 
 def parseOwners(words):
 	owners = []
-	w = next(words)
+	w = nextWord(words)
 	while w.case == "omanto":
 		owners += [w]
-		w = next(words)
+		w = nextWord(words)
 	return owners, w
 
 def applyOwners(root, owners):
@@ -783,12 +844,21 @@ DEFS = []
 FUNCTIONS = set()
 
 def evalFile(filename):
-	with open(filename) as f:
-		for line in f:
-			try:
-				evalLine(line)
-			except StopEvaluation:
-				pass
+	with open(filename) as lines:
+		try:
+			while True:
+				line = next(lines)
+				if line == "\n":
+					continue
+				while line[-2] == "\\":
+					line = line[:-2]
+					line += next(lines)
+				try:
+					evalLine(line)
+				except StopEvaluation:
+					pass
+		except StopIteration:
+			pass
 
 def evalLine(line, allowQueries=False):
 	global DEFS
@@ -797,18 +867,29 @@ def evalLine(line, allowQueries=False):
 		return
 	if debug and verbosity >= 0:
 		print(" ".join(["|".join(set([a.str() for a in alternatives])) for alternatives in output]))
-	eq = parseEq(output, allowQueries)
-	if debug and verbosity >= 0:
-		print(eq.str())
-	if eq.query():
-		return evals(eq.left)
-	elif eq.op == "#olla":
-		DEFS += [eq]
-		if not freeMode:
-			if isinstance(eq.left, CallTree):
-				FUNCTIONS.add(eq.left.getHead())
-			else:
-				FUNCTIONS.add(eq.left)
+	if not allowQueries:
+		eqs = parseWhen(output)
+	else:
+		eqs = [parseEq(output, True)]
+	for eq in eqs:
+		if debug and verbosity >= 0:
+			print(eq.str())
+		if eq.query():
+			return evals(eq.left)
+		elif eq.op == "#olla":
+			DEFS += [eq]
+			if not freeMode:
+				if isinstance(eq.left, CallTree):
+					FUNCTIONS.add(eq.left.getHead())
+				else:
+					FUNCTIONS.add(eq.left)
+
+def evalExpression(string):
+	output = lexLine(string)
+	eq = parseEq(output, True)
+	if not eq.query():
+		fatalError("Syntax error: expected expression, got declaration")
+	return evals(eq.left)
 
 # In the restricted mode, pattern matching against functions is forbidden.
 # This function checks if there are any such forbidden patterns and
@@ -889,7 +970,7 @@ def writeOutput(tree, w):
 BUILTINS = [
 	Builtin("$luettu", "olento", ("", "sisaeronto"),
 		lambda l, w: isinstance(w, WorldTree),
-		lambda l, w: createPair(NumTree(int(input(l.inflect("nimento") + "> "))), w)
+		lambda l, w: createPair(evalExpression(input(l.inflect("nimento") + "> ")), w)
 	),
 	Builtin("$tulostettu", "olento", ("", "sisatulento"),
 		lambda l, w: isinstance(w, WorldTree),
@@ -904,8 +985,8 @@ magic = True
 freeMode = False
 impure = False
 
-TAMPIO_VERSION = "1.7"
-INTERPRETER_VERSION = "2.4.0"
+TAMPIO_VERSION = "1.8"
+INTERPRETER_VERSION = "2.5.0"
 
 VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERSION)
 

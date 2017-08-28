@@ -141,11 +141,17 @@ For example, here's a simple program that prints `5`:
 
     m:n tulos on 5 tulostettuna m:ään
 
-`x tulostettuna m:ään` is a function that prints `x` and return a monad object. There is a bind operation `liitettynä`, which can be used to chain I/O actions. The following program will input two numbers and output their sum.
+`x tulostettuna m:ään` is a function that prints `x` and returns a monad object. There is a bind operation `liitettynä`, which can be used to chain I/O actions. The following program will input two numbers and output their sum.
 
     m:n tulos                        on luku m:stä luettuna        liitettynä ykkösvaiheeseen
     x ykkösvaiheena m:lle            on luku m:stä luettuna        liitettynä kakkosvaiheeseen ja x:ään
     y kakkosvaiheena m:lle ja x:lle  on summa tulostettuna m:ään,  missä summa on x plus y
+
+`kun` clauses are syntax sugar for this kind of pattern code (inspired by Haskell's `do` notation):
+
+    m:n tulos on summa tulostettuna m:ään, missä summa on x plus y \
+        kun x on luku m:stä luettuna                               \
+        kun y on luku m:stä luettuna
 
 ## Examples
 
