@@ -147,7 +147,7 @@ For example, here's a simple program that prints `5`:
     x ykkösvaiheena m:lle            on luku m:stä luettuna        liitettynä kakkosvaiheeseen ja x:ään
     y kakkosvaiheena m:lle ja x:lle  on summa tulostettuna m:ään,  missä summa on x plus y
 
-`kun` clauses are syntax sugar for this kind of pattern code (inspired by Haskell's `do` notation):
+`kun` clauses are syntax sugar for this kind of code (inspired by Haskell's `do` notation):
 
     m:n tulos on summa tulostettuna m:ään, missä summa on x plus y \
         kun x on luku m:stä luettuna                               \
