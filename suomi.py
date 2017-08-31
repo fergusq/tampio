@@ -256,6 +256,9 @@ def lexLine(line):
 		output += [alternatives]
 	return output
 
+def tokensToString(tokens):
+	return " ".join(["|".join(set([a.str() for a in alternatives])) for alternatives in tokens])
+
 class Noun:
 	def __init__(self, bf, case, num, cl = "noun"):
 		self.cl = cl
@@ -532,7 +535,9 @@ class CallTree:
 		else:
 			return False
 	def safeEq(self, tree, objects=[]):
-		if not isinstance(tree, CallTree):
+		if isinstance(tree, NumTree) and tree.num > 0 and self.headIs("$seuraaja", "", ("omanto",)):
+				return self.args[0].safeEq(NumTree(tree.num - 1))
+		elif not isinstance(tree, CallTree):
 			return False
 		for obj in objects:
 			if obj is self:
@@ -857,8 +862,8 @@ def evalFile(filename):
 					line += next(lines)
 				try:
 					evalLine(line)
-				except StopEvaluation:
-					pass
+				except StopEvaluation as e:
+					raise(e)
 		except StopIteration:
 			pass
 
@@ -868,11 +873,13 @@ def evalLine(line, allowQueries=False):
 	if not output:
 		return
 	if debug and verbosity >= 0:
-		print(" ".join(["|".join(set([a.str() for a in alternatives])) for alternatives in output]))
+		print(tokensToString(output))
 	if not allowQueries:
 		eqs = parseWhen(output)
 	else:
 		eqs = [parseEq(output, True)]
+	if len(output) != 0:
+		fatalError("Syntax error: expected eof, got " + tokensToString(output))
 	for eq in eqs:
 		if debug and verbosity >= 0:
 			print(eq.str())
@@ -889,6 +896,8 @@ def evalLine(line, allowQueries=False):
 def evalExpression(string):
 	output = lexLine(string)
 	eq = parseEq(output, True)
+	if len(output) != 0:
+		fatalError("Syntax error: expected eof, got " + tokensToString(output))
 	if not eq.query():
 		fatalError("Syntax error: expected expression, got declaration")
 	return evals(eq.left)
@@ -995,7 +1004,8 @@ VERSION_STRING = "Tampio %s Interpreter v%s" % (TAMPIO_VERSION, INTERPRETER_VERS
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 STD_LIB = os.path.join(SCRIPT_DIR, 'std.suomi')
 
-if __name__ == "__main__":
+def main():
+	global debug, visualize, verbosity, magic, freeMode, impure
 	parser = argparse.ArgumentParser(description='Interprets Tampio code.')
 	parser.add_argument('filename', type=str, nargs='?', help='source code file')
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
@@ -1023,17 +1033,23 @@ if __name__ == "__main__":
 	verbosity = args.verbosity
 	visualize = args.visualize
 	
-	evalFile(STD_LIB)
+	try:
+		evalFile(STD_LIB)
+	except StopEvaluation:
+		return
 	
 	if not checkFunctionMatching():
 		sys.exit(1)
 	
 	if args.filename:
-		evalFile(args.filename)
-		if args.io:
-			print(evals(CallTree(VarTree("$tulos"), [WorldTree(worldCounter)], "", ("omanto",))).inflect("nimento"))
-		else:
-			print(evals(parseVar("$tulos")).inflect("nimento"))
+		try:
+			evalFile(args.filename)
+			if args.io:
+				print(evals(CallTree(VarTree("$tulos"), [WorldTree(worldCounter)], "", ("omanto",))).inflect("nimento"))
+			else:
+				print(evals(parseVar("$tulos")).inflect("nimento"))
+		except StopEvaluation:
+			return
 	else:
 		
 		histfile = os.path.join(os.path.expanduser("~"), ".tampio_history")
@@ -1066,3 +1082,7 @@ Read the LICENSE file for details.""")
 					checkFunctionMatching()
 			except StopEvaluation:
 				continue
+
+
+if __name__ == "__main__":
+	main()
