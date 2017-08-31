@@ -431,7 +431,7 @@ def parseVar(name):
 class AtomicTree:
 	def __init__(self):
 		pass
-	def safeEq(self, tree, objects=None):
+	def safeEq(self, tree, objects=None, numOpt=True):
 		return self == tree
 	def match(self, tree):
 		return False, {}
@@ -455,8 +455,10 @@ class VarTree(AtomicTree):
 		return VarTree(self.name)
 	def str(self, objects=None):
 		return self.name
+	def isWildcard(self):
+		return re.fullmatch(r".[^0-9]", self.name)
 	def match(self, tree):
-		if re.fullmatch(r".[^0-9]", self.name):
+		if self.isWildcard():
 			return True, {self.name: tree}
 		if isinstance(tree, VarTree):
 			return self.name == tree.name, {}
@@ -534,9 +536,9 @@ class CallTree:
 			return self.headInfl == tree.headInfl and self.argInfls == tree.argInfls and self.head == tree.head and self.args == tree.args
 		else:
 			return False
-	def safeEq(self, tree, objects=[]):
-		if isinstance(tree, NumTree) and tree.num > 0 and self.headIs("$seuraaja", "", ("omanto",)):
-				return self.args[0].safeEq(NumTree(tree.num - 1))
+	def safeEq(self, tree, objects=[], numOpt=True):
+		if numOpt and isinstance(tree, NumTree) and tree.num > 0 and self.headIs("$seuraaja", "", ("omanto",)):
+				return self.args[0].safeEq(NumTree(tree.num - 1), numOpt)
 		elif not isinstance(tree, CallTree):
 			return False
 		for obj in objects:
@@ -546,8 +548,8 @@ class CallTree:
 		return (len(self.args) == len(tree.args)
 			and self.headInfl == tree.headInfl
 			and self.argInfls == tree.argInfls
-			and self.head.safeEq(tree.head, objects)
-			and all([arg.safeEq(arg2, objects) for arg, arg2 in zip(self.args, tree.args)]))
+			and self.head.safeEq(tree.head, objects, numOpt)
+			and all([arg.safeEq(arg2, objects, numOpt) for arg, arg2 in zip(self.args, tree.args)]))
 	def copy(self, objects=[]):
 		for obj, copy in objects:
 			if obj is self:
@@ -788,7 +790,7 @@ def evals(tree):
 		if visualize:
 			print(a.inflect("nimento"))
 		b = evals_(a)
-		if c.safeEq(b):
+		if c.safeEq(b, numOpt=False):
 			break
 		a = b
 		c = a.copy()
@@ -808,9 +810,10 @@ def evals_(tree, objects=[]):
 		if magic:
 			for opt in OPTIMIZATIONS:
 				if opt.match(tree):
+					new_tree = opt.optimize(tree)
 					if debug and verbosity >= 1:
-						print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;33m(opt)\x1b[0m")
-					return opt.optimize(tree)
+						print(" "*len(stack) + "\x1b[1;4;31mMatch:\x1b[0m " + tree.str() + " \x1b[1;33m(opt) \x1b[1;4;34m->\x1b[0m " + new_tree.str())
+					return new_tree
 			for bi in BUILTINS:
 				if bi.match(tree):
 					if debug and verbosity >= 1:
@@ -832,7 +835,10 @@ def evals_(tree, objects=[]):
 				print(" "*len(stack) + "\x1b[1;4;31mNO MATCH:\x1b[0m " + tree.str() + " \x1b[1;4;34m!=\x1b[0m " + defi.left.str() + " \x1b[1;33m(def)\x1b[0m")
 		if isinstance(tree, CallTree):
 			tree.head = evals_(tree.head, objects)
-			tree.args = [evals_(arg, objects) for arg in tree.args]
+			if tree.getHead() in FUNCTIONS:
+				tree.args = [evals_(arg, objects) if not wildcard else arg for arg, wildcard in zip(tree.args, FUNCTIONS[tree.getHead()])]
+			else:
+				tree.args = [evals_(arg, objects) for arg in tree.args]
 		return tree
 	except StopEvaluation as e:
 		raise(e)
@@ -848,7 +854,7 @@ def evals_(tree, objects=[]):
 		del stack[-1]
 
 DEFS = []
-FUNCTIONS = set()
+FUNCTIONS = {}
 
 def evalFile(filename):
 	with open(filename) as lines:
@@ -889,9 +895,13 @@ def evalLine(line, allowQueries=False):
 			DEFS += [eq]
 			if not freeMode:
 				if isinstance(eq.left, CallTree):
-					FUNCTIONS.add(eq.left.getHead())
+					t = eq.left.getHead()
+					FUNCTIONS[t] = [
+						flag and (isinstance(arg, VarTree) and arg.isWildcard())
+						for arg, flag in zip(eq.left.args, FUNCTIONS[t] if t in FUNCTIONS else [True for x in range(len(eq.left.args))])
+					]
 				else:
-					FUNCTIONS.add(eq.left)
+					FUNCTIONS[eq.left] = []
 
 def evalExpression(string):
 	output = lexLine(string)
