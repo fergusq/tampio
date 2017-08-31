@@ -22,6 +22,11 @@
 
 ## luvut
 
+# edeltäjä
+x:n seuraajan edeltäjä on x
+x:n negatiivisena edeltäjä on x:n seuraaja negatiivisena
+nollan edeltäjä on yksi negatiivisena
+
 # yhteenlasku
 x plus nolla on x
 nolla plus x on x
@@ -44,6 +49,9 @@ vähennyslasku kutsuttuna a:lla ja b:llä on a miinus b
 # kertolasku
 x kerrottuna nollalla on nolla
 nolla kerrottuna x:llä on nolla
+x:n seuraaja negatiivisena kerrottuna y:n seuraajalla on summa, missä summa on x:n seuraaja plus luku kerrottuna y:llä
+x:n seuraaja kerrottuna y:n seuraajalla negatiivisena on summa, missä summa on x:n seuraaja plus luku kerrottuna y:llä
+luku negatiivisena kerrottuna y:n seuraajalla negatiivisena on luku plus luku kerrottuna y:llä, missä luku on x:n seuraaja
 luku kerrottuna y:n seuraajalla on luku plus luku kerrottuna y:llä, missä luku on x:n seuraaja
 
 kertolasku kutsuttuna a:lla ja b:llä on a kerrottuna b:llä
@@ -61,6 +69,7 @@ nolla korotettuna nollaan on virhe
 x korotettuna nollaan on yksi
 nolla korotettuna x:ään on nolla
 luku korotettuna y:n seuraajaan on luku kerrottuna luvulla korotettuna y:hyn, missä luku on x:n seuraaja
+luku korotettuna y:n seuraajaan on luku kerrottuna luvulla korotettuna y:hyn, missä luku on x negatiivisena
 
 eksponentaatio kutsuttuna a:lla ja b:llä on a korotettuna b:hen
 
