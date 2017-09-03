@@ -111,6 +111,17 @@ def evalFile(filename):
 				line = next(lines)
 				if line == "\n":
 					continue
+				if line[0] == "%":
+					args = line[:-1].split()
+					if (args[0] == "%ifdef" and args[1] not in PP_DEFS) or (args[0] == "%ifndef" and args[1] in PP_DEFS):
+						depth = 1
+						while depth > 0:
+							line = next(lines)
+							if line.startswith("%ifdef") or line.startswith("%ifndef"):
+								depth += 1
+							elif line.startswith("%endif"):
+								depth -= 1
+					continue
 				while line[-2] == "\\":
 					line = line[:-2]
 					line += next(lines)
@@ -251,7 +262,6 @@ BUILTINS = [
 
 def compileToHaskell():
 	type_constructors = []
-	print(TREES, "\n", FUNCTIONS)
 	for tree in TREES:
 		if tree not in FUNCTIONS:
 			if isinstance(tree, tuple):
@@ -260,13 +270,19 @@ def compileToHaskell():
 				s = "T" + varToHaskell(tree)
 			if not isinstance(tree, NumTree):
 				type_constructors += [s]
-	print("data STree = " + " | ".join(type_constructors))
+	print("data STree = " + " | ".join(sorted(type_constructors)))
 	
+	defs = []
 	for defi in DEFS:
-		print(exprToHaskell(defi.left) + " = " + exprToHaskell(defi.right))
+		subs = {}
+		for var, body in defi.where[::-1]:
+			subs[var] = body.subs(subs)
+		defs += [exprToHaskell(defi.left) + " = " + exprToHaskell(defi.right.subs(subs))]
+	
+	print("\n".join(sorted(defs)))
 
 def varToHaskell(tree):
-	return tree.name.replace("@", "m").replace("$", "s").replace(".", "x").replace("&", "k").replace("ä", "A").replace("ö", "O")
+	return tree.name.replace("@", "m").replace("$", "s").replace(".", "x").replace("&", "k").replace("ä", "A").replace("ö", "O").replace("<", "_").replace(">", "_").replace(" ", "_")
 
 def headToHaskell(head):
 	head, headInfl, argInfls = head
@@ -284,8 +300,10 @@ def exprToHaskell(expr):
 		else:
 			return "T" + varToHaskell(expr)
 	elif isinstance(expr, NumTree):
-		return str(expr.num)
+		return "Tsnolla" if expr.num == 0 else exprToHaskell(CallTree(VarTree("$seuraaja"), [NumTree(expr.num-1)], "", ("omanto",)))
 	elif isinstance(expr, CallTree):
+		#if expr.headIs("$seuraaja", "", ("omanto",)):
+		#	return "(" + exprToHaskell(expr.args[0]) + ")+1"
 		if expr.getHead() in FUNCTIONS:
 			prefix = "f"
 		else:
@@ -297,6 +315,8 @@ visualize = False
 verbosity = 0
 impure = False
 
+PP_DEFS = []
+
 TAMPIO_VERSION = "1.8"
 INTERPRETER_VERSION = "2.6.0"
 
@@ -306,7 +326,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 STD_LIB = os.path.join(SCRIPT_DIR, 'std.suomi')
 
 def main():
-	global debug, visualize, verbosity, magic, freeMode, impure
+	global debug, visualize, verbosity, magic, freeMode, impure, PP_DEFS
 	parser = argparse.ArgumentParser(description='Interprets Tampio code.')
 	parser.add_argument('filename', type=str, nargs='?', help='source code file')
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
@@ -337,6 +357,9 @@ def main():
 	magic = not args.no_magic
 	verbosity = args.verbosity
 	visualize = args.visualize
+	
+	if args.to_haskell:
+		PP_DEFS += ["CH"]
 	
 	try:
 		evalFile(STD_LIB)

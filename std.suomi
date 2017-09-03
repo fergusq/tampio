@@ -123,8 +123,10 @@ a lisättynä b:hen plus c on a lisättynä b:hen yhdistettynä c:hen
 l yhdistettynä k:hon on l plus k
 
 # map
+%ifndef CH
 f sovellettuna tyhjyyden jäseniin on tyhjyys
 f sovellettuna a:n lisättynä b:hen jäseniin on a:n f lisättynä f:ään sovellettuna b:n jäseniin
+%endif
 
 # zip
 f sovellettuna tyhjyyden jäseniin ja tyhjyyden jäseniin on tyhjyys

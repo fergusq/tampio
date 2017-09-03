@@ -770,3 +770,5 @@ def applyOwners(root, owners):
 DEFS = []
 TREES = set()
 FUNCTIONS = {}
+
+TREES.add(VarTree("$nolla"))
