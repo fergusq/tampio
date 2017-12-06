@@ -8,7 +8,7 @@ It is named after a famous Finnish programmer.
 
 * Python 3
 * Libvoikko (package `libvoikko` in Ubuntu and Fedora)
-* Finnish morphological dictionary (eg. [this](http://www.puimula.org/htp/testing/voikko-snapshot/dict-morpho.zip))
+* Finnish morphological dictionary (Eg. [this](http://www.puimula.org/htp/testing/voikko-snapshot/dict-morpho.zip) or [this](https://www.puimula.org/htp/testing/voikko-snapshot-v5/dict-morpho.zip). The latter may work better with newer versions of libvoikko, but the former is confirmed to work with libvoikko 3.8.)
 
 The morphological dictionary must be unzipped to `~/.voikko/`.
 
