@@ -100,25 +100,24 @@ def parseSentence(tokens):
 		cls=ADJ+NUMERAL+NAME+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
 	if word.isAdjective() or word.isOrdinal() or word.isName():
-		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento", "osanto"])
-		if case not in ["nimento", "osanto"]:
-			fatalError("Syntax error: subject is not in nominative / passive argument is not in nominative or partitive: " + str(subject) + " (in \""+tokens.context()+"\")")
+		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 		
 		word = tokens.next().toWord(
 			cls=VERB,
 			forms=["indicative_present_simple3", "indicative_present_simple4"])
-		tokens.setStyle("function")
 		
 		if not word.isVerb() or word.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
 			fatalError("Syntax error: predicate is not in indicative simple present (in \""+tokens.context()+"\")")
-		predicate = word.baseform
-		subjectless = word.form[-1] == "4"
+		tokens.setStyle("function")
 		
-		if case == "osanto" and not subjectless:
-			fatalError("Syntax error: subject may be in partitive only if predicate is passive (in \""+tokens.context()+"\")")
+		predicate = word.baseform + readVerbModifiers(tokens)
+		passive = word.form[-1] == "4"
 		
-		if subjectless:
-			args[case] = subject
+		if case != "nimento" and not passive:
+			fatalError("Syntax error: subject must be in nominative case (in \""+tokens.context()+"\")")
+		
+		subjectless = False
+		subject_case = case
 	elif word.isVerb():
 		tokens.next()
 		tokens.setStyle("function")
@@ -126,7 +125,7 @@ def parseSentence(tokens):
 		if word.form == "imperative_present_simple2":
 			predicate = word.baseform + "!"
 		elif word.form == "indicative_present_simple4":
-			predicate = word.baseform
+			predicate = word.baseform + readVerbModifiers(tokens)
 		else:
 			fatalError("Syntax error: predicate ("+word.word+") is not in indicative or imperative simple present (in \""+tokens.context()+"\")")
 	else:
@@ -154,7 +153,19 @@ def parseSentence(tokens):
 	if subjectless:
 		return ProcedureCallStatement(predicate, args, wheres)
 	else:
-		return MethodCallStatement(subject, predicate, args, wheres)
+		return MethodCallStatement(subject, subject_case, predicate, args, wheres)
+
+def readVerbModifiers(tokens):
+	ans = ""
+	while not tokens.eof():
+		token = tokens.peek()
+		if token.isWord() and token.toWord(cls=NOUN).isNoun():
+			tokens.next()
+			tokens.setStyle("function")
+			ans += "_" + token.token.lower()
+		else:
+			break
+	return ans
 
 ARI_OPERATORS = {
 	"lisättynä": ("sisatulento", "+"),

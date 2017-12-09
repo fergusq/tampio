@@ -42,7 +42,7 @@ For example, here is a simple program that calculates the factorial of a given n
     Olkoon pieni muuttuja uusi muuttuja, jonka arvo on nolla.
     
     Kun nykyinen sivu avautuu,
-    	nykyinen sivu lukee pieneen muuttujaan
+    	pieneen muuttujaan luetaan luku
     	ja nykyinen sivu näyttää pienen muuttujan arvon kertoman.
 
 It contains two functions declarations, one variable declaration and one method declaration.
@@ -92,12 +92,11 @@ It begins with the `Kun` keyword.
 The name of the method is `avautuu` and the name of the this object is `nykyinen sivu`.
 (As in Python, the this object must be named in the signature of a method.)
 
-    nykyinen sivu lukee pieneen muuttujaan
+    pieneen muuttujaan luetaan luku
 
-This is a method call.
-The `lukee` method of `nykyinen sivu` object is called with one argument, `pieni muuttuja`.
+Here we call the `luetaan luku` method of `pieni muuttuja`.
 The method will prompt a number from the used and store it to the `arvo` field of `pieni muuttuja`.
-`pieni muuttuja` is in the illative case, because the `lukee` method requires that case.
+`pieni muuttuja` is in the illative case, because the `luetaan luku` method requires that case.
 
     ja nykyinen sivu näyttää pienen muuttujan arvon kertoman.
 

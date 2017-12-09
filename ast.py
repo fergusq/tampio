@@ -135,13 +135,16 @@ class ProcedureCallStatement(CallStatement):
 		return self.name + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 
 class MethodCallStatement(CallStatement):
-	def __init__(self, obj, name, args, wheres):
+	def __init__(self, obj, obj_case, name, args, wheres):
 		self.obj = obj
+		self.obj_case = obj_case
 		self.name = name
 		self.args = args
 		self.wheres = wheres
 	def __str__(self):
-		return str(self.obj) + "." + self.name + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
+		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
+	def compileName(self):
+		return super(MethodCallStatement, self).compileName() + "_" + CASES_ABRV[self.obj_case]
 	def compile(self, semicolon=True):
 		ans = self.compileWheres() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
 		if semicolon:

@@ -26,8 +26,8 @@ def compileCode(code):
 		decls += [parseDeclaration(tokens)]
 	return tokens, "\n".join([d.compile() for d in decls])
 
-TAMPIO_VERSION = "1.0"
-COMPILER_VERSION = "1.0"
+TAMPIO_VERSION = "1.1"
+COMPILER_VERSION = "1.1"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
