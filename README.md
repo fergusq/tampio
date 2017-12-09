@@ -1,7 +1,7 @@
 The Tampio Programming Language
 ===============================
 
-Tampio is a programming language that looks like a natural language – Finnish.
+Tampio is an object-oriented programming language that looks like a natural language – Finnish.
 It is named after a famous Finnish programmer.
 
 This branch currently contains a new iteration of the language that is not functional. The functional language is in the `functional` branch.
@@ -26,7 +26,85 @@ To evaluate a file (TODO):
 
 ## Introduction
 
-TODO
+Tampio is an object-oriented language that compiles to JavaScript.
+Its syntax is directly inspired by the Finnish language and is therefore based on inflecting words.
+
+A Tampio file is a list of declarations. Each declaration defines either a class, a function, a method or a global variable.
+For example, here is a simple program that calculates the factorial of a given number.
+
+    Pienen luvun kertoma on
+    	riippuen siitä, onko pieni luku pienempi tai yhtä suuri kuin yksi,
+    	joko pieni luku
+    	tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
+    
+    Luonnollisen luvun edeltäjä on luonnollinen luku vähennettynä yhdellä.
+    
+    Olkoon pieni muuttuja uusi muuttuja, jonka arvo on nolla.
+    
+    Kun nykyinen sivu avautuu,
+    	nykyinen sivu lukee pieneen muuttujaan
+    	ja nykyinen sivu näyttää pienen muuttujan arvon kertoman.
+
+It contains two functions declarations, one variable declaration and one method declaration.
+Let's iterate these line by line.
+
+    Pienen luvun kertoma on
+
+This is the signature of the `kertoma` function, which has one parameter `pieni luku`.
+As you can see, the name of the parameter comes before the name of the function and is in the genitive case.
+The last word, `on`, is a keyword that separates the signature of the function and its body.
+
+    riippuen siitä, onko pieni luku pienempi tai yhtä suuri kuin yksi,
+
+This is a conditional expression.
+It tests if `pieni luku` is less than or equal to (`pienempi tai yhtä suuri kuin`) one (`yksi`).
+
+    joko pieni luku
+
+If the condition is true, the function returns the value of its argument, `pieni luku`.
+`joko` is a keyword that comes after the condition of `riippuen siitä` expression.
+
+    tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
+
+If the condition is false (`pieni luku` is greater than one), the function returns the value of this expression.
+It is a product (`kerrottuna` is the multiplication operation) of `pieni luku` and `pienen luvun edeltäjän kertoma`.
+The right operand of `kerrottuna` consists of two function calls (which are similar to the signature of the function).
+First, the predecessor (`edeltäjä`) of `pieni luku` is calculated, and then its factorial (`kertoma`).
+The arguments of functions are in the genitive case.
+
+    Luonnollisen luvun edeltäjä on luonnollinen luku vähennettynä yhdellä.
+
+This is a helper function that calculates the predecessor of a natural number.
+It simply consists of a `vähennettynä` operator that operands `luonnollinen luku` (the parameter) and `yksi` (one).
+
+    Olkoon pieni muuttuja uusi muuttuja, jonka arvo on nolla.
+
+`Olkoon` is a keyword that is used to define global variables.
+The name of the variable is `pieni muuttuja` and its value is a new object.
+The object is created using the `uusi` keyword and its type is the `muuttuja` class.
+`jonka` keyword is used to set the initial values of the fields of the object.
+In this case, the `arvo` field is initialized to `nolla` (zero).
+
+    Kun nykyinen sivu avautuu,
+
+This line declares a new method for the `sivu` class. (`sivu` is an alias to the `HTMLDocument` JavaScript class.)
+It begins with the `Kun` keyword.
+The name of the method is `avautuu` and the name of the this object is `nykyinen sivu`.
+(As in Python, the this object must be named in the signature of a method.)
+
+    nykyinen sivu lukee pieneen muuttujaan
+
+This is a method call.
+The `lukee` method of `nykyinen sivu` object is called with one argument, `pieni muuttuja`.
+The method will prompt a number from the used and store it to the `arvo` field of `pieni muuttuja`.
+`pieni muuttuja` is in the illative case, because the `lukee` method requires that case.
+
+    ja nykyinen sivu näyttää pienen muuttujan arvon kertoman.
+
+`ja` keyword is used to specify that this is the last statement in the body of the method.
+It is another method call, calling the `näyttää` method of `nykyinen sivu`. (An alias to `HTMLDocument.write`.)
+The argument of the method is a function call and the argument of `kertoma` is `pienen muuttujan arvo` (note the genitive case of both arguments).
+The field access syntax is identical to the function call syntax.
 
 ## Finnish declension
 
