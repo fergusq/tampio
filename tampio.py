@@ -26,15 +26,29 @@ def compileCode(code):
 		decls += [parseDeclaration(tokens)]
 	return tokens, "\n".join([d.compile() for d in decls])
 
-TAMPIO_VERSION = "1.2"
-COMPILER_VERSION = "1.2"
+def createHTML(code):
+	tokens, compiled = compileCode(code)
+	ans = """<html><head><meta charset="utf-8" /><title>Imperatiivinen Tampio</title>"""
+	ans += """<script type="text/javascript" src="itp.js" charset="utf-8"></script>"""
+	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body><pre>"""
+	ans += tokens.prettyPrint()
+	ans += """</pre><script type="text/javascript">\n"""
+	ans += compiled
+	ans += """\n</script></body></html>"""
+	return ans
+
+TAMPIO_VERSION = "1.3"
+COMPILER_VERSION = "1.3"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
 	parser = argparse.ArgumentParser(description='Compile Tampio to JavaScript.')
-	parser.add_argument('filename', type=str, nargs='?', help='source code file')
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
-	parser.add_argument('-s', '--syntax-markup', help='do not compile, instead print the source code with syntax markup', action='store_true')
+	compiler_group = parser.add_argument_group('compiler options')
+	compiler_group.add_argument('filename', type=str, nargs='?', help='source code file')
+	output_mode = compiler_group.add_mutually_exclusive_group()
+	output_mode.add_argument('-s', '--syntax-markup', help='do not compile, instead print the source code with syntax markup', action='store_true')
+	output_mode.add_argument('-p', '--html-page', help='print a html page containing both compiled code and syntax markup', action='store_true')
 	
 	args = parser.parse_args()
 	
@@ -46,11 +60,14 @@ def main():
 		try:
 			with open(args.filename) as f:
 				code = f.read()
-				tokens, compiled = compileCode(code)
-				if args.syntax_markup:
-					print(tokens.prettyPrint())
+				if args.html_page:
+					print(createHTML(code))
 				else:
-					print(compiled)
+					tokens, compiled = compileCode(code)
+					if args.syntax_markup:
+						print(tokens.prettyPrint())
+					else:
+						print(compiled)
 		except Exception:
 			traceback.print_exc()
 	else:
