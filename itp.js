@@ -1,5 +1,9 @@
-Array.prototype.työntää_N_St = function(kiva_arvo) { this.push(kiva_arvo); }
-Array.prototype.f_pituus = function() { return this.length; };
+Array.prototype.lisätä_N_T = function(kiva_arvo) { this.push(kiva_arvo); }
+Array.prototype.f_määrä = function() { return this.length; };
+
+var power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};
+Number.prototype.f_potenssi = function() { return new Proxy(this, power_handler); };
+
 HTMLDocument.prototype.näyttää_G_N = HTMLDocument.prototype.write;
 
 function muuttuja(vals) { this.arvo = ("arvo" in vals) ? vals["arvo"] : undefined; }; muuttuja.prototype.f_arvo = function() { return this.arvo; };
