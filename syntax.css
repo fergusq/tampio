@@ -1,0 +1,24 @@
+span.type {
+	font-variant: small-caps;
+	font-size: large;
+}
+
+span.keyword {
+	font-weight: bold;
+}
+
+span.field {
+	text-decoration: underline dotted;
+}
+
+span.variable {
+	font-variant: small-caps;
+	font-size: large;
+}
+
+span.function {
+	font-style: italic;
+}
+
+span.literal {
+}
