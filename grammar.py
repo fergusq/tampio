@@ -161,7 +161,7 @@ def readVerbModifiers(tokens):
 	ans = ""
 	while not tokens.eof():
 		token = tokens.peek()
-		if token.isWord() and token.toWord(cls=NOUN).isNoun():
+		if token.isWord() and token.toWord(cls=ADJ+NUMERAL+CONJ).isNoun():
 			tokens.next()
 			tokens.setStyle("function")
 			ans += "_" + token.token.lower()
@@ -205,6 +205,7 @@ def parseCondition(tokens, prefix=False):
 	if prefix:
 		checkEof(tokens)
 		if tokens.peek().token.lower() == "eikö":
+			tokens.next()
 			tokens.setStyle("keyword")
 			checkEof(tokens)
 			accept(["ole"], tokens)
@@ -220,6 +221,7 @@ def parseCondition(tokens, prefix=False):
 	if not prefix:
 		checkEof(tokens)
 		if tokens.peek().token.lower() == "ei":
+			tokens.next()
 			tokens.setStyle("keyword")
 			checkEof(tokens)
 			accept(["ole"], tokens)
@@ -331,7 +333,6 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		
 		if not tokens.eof() and tokens.peek().isWord():
 			word = tokens.peek().toWord(cls=NUMERAL, forms=["sisatulento", "sisaeronto"])
-			print(word.baseform, word.form, tokens.peek(2).token)
 			if word.isOrdinal() and word.form in ["sisatulento", "sisaeronto"] and tokens.peek(2) and tokens.peek(2).token.lower() in ["alkaen", "päättyen"]:
 				tokens.next()
 				tokens.setStyle("literal")
@@ -348,16 +349,30 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			token = tokens.peek()
 			if not token.isWord():
 				break
-			word = token.toWord(cls=NOUN, forms=["omanto"])
-			if not word.isNoun() or (must_be_in_genitive and word.form != "omanto"):
+			word = token.toWord(cls=NOUN+NUMERAL, forms=["omanto"])
+			if must_be_in_genitive and word.form != "omanto":
 				break
-			tokens.next()
-			tokens.setStyle("field")
-			case = word.form
-			field = word.baseform
-			
-			expr = FieldExpr(expr, field)
-			cont = True
+			if word.isOrdinal() and tokens.peek(2) and tokens.peek(2).toWord(cls=NOUN, forms=[word.form]).isNoun():
+				tokens.next()
+				tokens.setStyle("literal")
+				index = NumExpr(ORDINALS.index(word.baseform))
+				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
+				if not word2.isNoun() or word2.form != word.form:
+					fatalError("Syntax error: expected a noun in " + CASES_ENGLISH[word.form] + " case (in \"" + tokens.context() + "\")")
+				case = word.form
+				field = word2.baseform
+				expr = SubscriptExpr(FieldExpr(expr, field), index)
+				cont = True
+			elif word.isNoun():
+				tokens.next()
+				tokens.setStyle("field")
+				case = word.form
+				field = word.baseform
+				
+				expr = FieldExpr(expr, field)
+				cont = True
+			else:
+				break
 		
 		require_ja = False
 		while not tokens.eof() and tokens.peek().token.lower() in ARI_OPERATORS.keys():
@@ -396,20 +411,23 @@ def parseAssignment(tokens):
 
 def parseCtorArg(tokens):
 	checkEof(tokens)
-	word = tokens.next().toWord(cls=NOUN, forms=["nimento"])
-	if not word.isNoun() or word.form != "nimento":
-		fatalError("Syntax error: constructor argument name is not a noun in nominative case (in \""+tokens.context()+"\")")
+	word = tokens.next().toWord(cls=NOUN, forms=["nimento", "partitive"])
+	if not word.isNoun() or not (word.form == "nimento" or (word.form == "osanto" and word.number == "plural")):
+		fatalError("Syntax error: constructor argument name is not a noun in nominative case or a plural noun in partitive case (in \""+tokens.context()+"\")")
 	tokens.setStyle("field")
 	checkEof(tokens)
 	token = tokens.peek().token.lower()
-	accept(["on", "ovat"], tokens)
+	if word.number == "plural":
+		accept(["ovat"], tokens)
+	else:
+		accept(["on"], tokens)
 	tokens.setStyle("keyword")
-	if token == "on":
+	if token == "on" or word.form == "nimento": # (esim. alkio on x, alkiot ovat y:t)
 		value, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 		if case != "nimento":
 			fatalError("Syntax error: contructor argument value is not in nominative case (in \""+tokens.context()+"\")")
 		return CtorArgExpr(word.baseform, value)
-	else: # ovat
+	else: # partitiivi, ovat (esim. alkioita ovat x ja y)
 		values_cases = parseList(parseNominalPhrase, tokens)
 		values = []
 		for value, case in values_cases:
