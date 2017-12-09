@@ -15,12 +15,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from inflect import CASES_ABRV
+from fatal_error import fatalError
 
 def typeToJs(typename):
 	if typename == "luku":
 		return "Number"
-	elif typename == "lista":
-		return "Array"
 	elif typename == "sivu":
 		return "HTMLDocument"
 	else:
@@ -177,6 +176,21 @@ class SubscriptExpr:
 		return str(self.obj) + "[" + str(self.index) + "]"
 	def compile(self):
 		return self.obj.compile() + "[" + self.index.compile() + "]"
+
+class SliceExpr:
+	def __init__(self, obj, start, end):
+		self.obj = obj
+		self.start = start
+		self.end = end
+	def __str__(self):
+		return str(self.obj) + "[" + str(self.start) + ":" + str(self.end if self.end else "") + "]"
+	def compile(self):
+		ans = self.obj.compile() + ".slice("
+		ans += self.start.compile()
+		if self.end:
+			ans += ", " + self.end.compile()
+		ans += ")"
+		return ans
 
 class NumExpr:
 	def __init__(self, num):

@@ -61,6 +61,8 @@ def parseDeclaration(tokens):
 				fatalError("Syntax error: predicative is in "+CASES_ENGLISH[case]+" case (should be in nominative case) (in \"" + tokens.context() + "\")")
 			eatPeriod(tokens)
 			return FunctionDecl(word2.baseform, field, word.baseform + "_" + word2.baseform, body)
+	tokens.next()
+	fatalError("Syntax error: unexpected token \"" + token.token + "\" (in \"" + tokens.context() + "\")")
 
 def parseVariable(tokens, word=None, case="nimento"):
 	if not word:
@@ -326,6 +328,22 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	cont = True
 	while cont:
 		cont = False
+		
+		if not tokens.eof() and tokens.peek().isWord():
+			word = tokens.peek().toWord(cls=NUMERAL, forms=["sisatulento", "sisaeronto"])
+			print(word.baseform, word.form, tokens.peek(2).token)
+			if word.isOrdinal() and word.form in ["sisatulento", "sisaeronto"] and tokens.peek(2) and tokens.peek(2).token.lower() in ["alkaen", "päättyen"]:
+				tokens.next()
+				tokens.setStyle("literal")
+				if word.form == "sisaeronto":
+					accept(["alkaen"], tokens)
+					expr = SliceExpr(expr, NumExpr(ORDINALS.index(word.baseform)), None)
+				elif word.form == "sisatulento":
+					accept(["päättyen"], tokens)
+					expr = SliceExpr(expr, NumExpr(0), NumExpr(ORDINALS.index(word.baseform)))
+				tokens.setStyle("keyword")
+				cont = True
+		
 		while case == "omanto" and not tokens.eof():
 			token = tokens.peek()
 			if not token.isWord():
