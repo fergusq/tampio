@@ -105,6 +105,35 @@ It is another method call, calling the `näyttää` method of `nykyinen sivu`. (
 The argument of the method is a function call and the argument of `kertoma` is `pienen muuttujan arvo` (note the genitive case of both arguments).
 The field access syntax is identical to the function call syntax.
 
+## Classes
+
+As Tampio is an object-oriented language, classes are a crucial feature.
+Each class is defined using a set of fields and number of methods.
+The fields must be definde together with the class, but methods can be added afterwards.
+
+A class declaration consists of the name of the class in the adessive case and the `on` keyword.
+
+    Vektorilla on komponentit.
+
+This very simple class, `vektori`, has one field: `komponentit`. As the name of the field is plural, it is a list.
+
+We can now define a function using that class:
+
+    Lyhyen vektorin dimensio on lyhyen vektorin komponenttien määrä.
+
+This function will return the dimension of a vector, that is, the number of its components.
+The name of the function is `dimensio` and it has one parameter, `lyhyt vektori`.
+`määrä` is a function that return the size of a list.
+
+    Lyhyen vektorin häntä on uusi vektori, jonka komponentit ovat lyhyen vektorin komponentit toisesta alkaen.
+
+The following method iterates the components of a vector and prints them:
+
+    Kun lyhyt vektori painetaan nykyiselle sivulle,
+    	jos lyhyen vektorin dimensio ei ole nolla,
+    		nykyinen sivu näyttää lyhyen vektorin ensimmäisen komponentin
+    		ja lyhyen vektorin häntä painetaan nykyiselle sivulle.
+
 ## Finnish declension
 
 In Finnish nouns are inflected in [cases][wp-case]. There are a few of them, listed below. The exact meanings of the cases are not important to understand the programming language.
