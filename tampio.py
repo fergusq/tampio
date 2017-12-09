@@ -34,11 +34,11 @@ def createHTML(code):
 	ans += tokens.prettyPrint()
 	ans += """</pre><script type="text/javascript">\n"""
 	ans += compiled
-	ans += """\n</script></body></html>"""
+	ans += """\ndocument.avautua__N();\n</script></body></html>"""
 	return ans
 
 TAMPIO_VERSION = "1.3"
-COMPILER_VERSION = "1.3"
+COMPILER_VERSION = "1.4"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
