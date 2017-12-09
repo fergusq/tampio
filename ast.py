@@ -42,17 +42,17 @@ class ProcedureDecl:
 		return "prodecure " + str(self.signature) + " { " + " ".join([str(s) for s in self.body]) + " }"
 	def compile(self):
 		if isinstance(self.signature, ProcedureCallStatement):
-			return "function " + self.signature.compile(semicolon=False) + " { " + " ".join([s.compile() for s in self.body]) + " };"
+			return "function " + self.signature.compile(semicolon=False) + " {\n" + "".join([s.compile(indent=1) for s in self.body]) + "};"
 		elif isinstance(self.signature, MethodCallStatement):
 			if not isinstance(self.signature.obj, VariableExpr):
 				fatalError("Illegal method declaration: subject is not a variable (in \"" + str(self.signature) + "\")")
 			return (
 				typeToJs(self.signature.obj.type) + ".prototype."
 				+ self.signature.compileName()
-				+ " = function" + self.signature.compileArgs() + " { "
-				+ "var " + self.signature.obj.name + " = this; "
-				+ " ".join([s.compile() for s in self.body])
-				+ " };")
+				+ " = function" + self.signature.compileArgs() + " {\n"
+				+ " var " + self.signature.obj.name + " = this;\n"
+				+ "".join([s.compile(indent=1) for s in self.body])
+				+ "};")
 		else:
 			fatalError("TODO")
 
@@ -63,16 +63,16 @@ class ClassDecl:
 	def __str__(self):
 		return self.name + " := class { " + ", ".join(self.fields) + "};"
 	def compile(self):
-		ans = "function " + self.name + "(vals) { "
+		ans = "function " + self.name + "(vals) {\n"
 		for name, number in self.fields:
-			ans += "this." + name + " = (\"" + name + "\" in vals) ? vals[\"" + name + "\"] : "
+			ans += " this." + name + " = (\"" + name + "\" in vals) ? vals[\"" + name + "\"] : "
 			if number == "plural":
-				ans += "[]; "
+				ans += "[];\n"
 			else:
-				ans += "undefined; "
+				ans += "undefined;\n"
 		ans += "};"
 		for name, number in self.fields:
-			ans += " " + typeToJs(self.name) + ".prototype.f_" + name + " = function() { return this." + name + "; };"
+			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + name + " = function() { return this." + name + "; };"
 		return ans
 
 class FunctionDecl:
@@ -84,7 +84,7 @@ class FunctionDecl:
 	def __str__(self):
 		return self.type + "." + self.field + " := " + self.param + " => " + str(self.body)
 	def compile(self):
-		return typeToJs(self.type) + ".prototype.f_" + self.field + " = function() { var " + self.param + " = this; return " + self.body.compile() + " };"
+		return typeToJs(self.type) + ".prototype.f_" + self.field + " = function() {\n var " + self.param + " = this;\n return " + self.body.compile() + ";\n};"
 
 class IfStatement:
 	def __init__(self, conditions, block):
@@ -92,8 +92,11 @@ class IfStatement:
 		self.block = block
 	def __str__(self):
 		return "if (" + " and ".join([str(c) for c in self.conditions]) + ") { " + " ".join([str(s) for s in self.block]) + " }"
-	def compile(self):
-		return "if ((" + ") && (".join([c.compile() for c in self.conditions]) + ")) { " + " ".join([s.compile() for s in self.block]) + " }"
+	def compile(self, indent=0):
+		return (" "*indent
+			+ "if ((" + ") && (".join([c.compile() for c in self.conditions]) + ")) {\n"
+			+ "".join([s.compile(indent=indent+1) for s in self.block])
+			+ " "*indent + "}\n")
 
 class CondExpr:
 	def __init__(self, negation, operator, left, right):
@@ -123,10 +126,10 @@ class CallStatement:
 		return "(" + ", ".join([self.args[key].compile() for key in keys]) + ")"
 	def compileWheres(self):
 		return "".join(["var "+where[0]+" = "+where[1].compile()+"; " for where in self.wheres])
-	def compile(self, semicolon=True):
-		ans = self.compileWheres() + self.compileName() + self.compileArgs()
+	def compile(self, semicolon=True, indent=0):
+		ans = " "*indent + self.compileWheres() + self.compileName() + self.compileArgs()
 		if semicolon:
-			ans += ";"
+			ans += ";\n"
 		return ans
 
 class ProcedureCallStatement(CallStatement):
@@ -144,10 +147,10 @@ class MethodCallStatement(CallStatement):
 		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 	def compileName(self):
 		return super(MethodCallStatement, self).compileName() + "_" + CASES_ABRV[self.obj_case]
-	def compile(self, semicolon=True):
-		ans = self.compileWheres() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
+	def compile(self, semicolon=True, indent=0):
+		ans = " "*indent + self.compileWheres() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
 		if semicolon:
-			ans += ";"
+			ans += ";\n"
 		return ans
 
 class VariableExpr:
