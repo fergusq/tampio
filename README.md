@@ -20,16 +20,24 @@ To open an interactive prompt:
 
     python3 tampio.py
 
-To evaluate a file (TODO):
+To compile a file to JavaScript:
 
     python3 tampio.py file.itp
+
+To print HTML code that contains the syntax highlighting data of the file:
+
+    python3 tampio.py -s file.itp
+
+To print a HTML page that contains both JavaScript and the syntax highlighted code:
+
+    python3 tampio.py -p file.itp
 
 ## Introduction
 
 Tampio is an object-oriented language that compiles to JavaScript.
 Its syntax is directly inspired by the Finnish language and is therefore based on inflecting words.
 
-A Tampio file is a list of defefinition, each which defines either a class, a function, a method or a global variable.
+A Tampio file is a list of definitions, each which defines either a class, a function, a method or a global variable.
 For example, here is a simple program that calculates the factorial of a given number.
 
     Pienen luvun kertoma on
@@ -387,6 +395,25 @@ The inflection of nouns is a pretty complicated process. The exact suffix depend
 
 [wp-case]: https://en.wikipedia.org/wiki/Finnish_noun_cases
 [Wiktionary]: https://en.wiktionary.org/wiki/kissa
+
+## Finnish conjugation
+
+[Finnish verb conjugation] is very complicated. In Tampio, only some of the forms are used.
+
+In the table below, the verbs *lisätä* (to add) and *tulostaa* (to print) are conjugated in the relevant forms.
+
+|Form      |Tense  |Voice  |Person|Number  |lisä*tä*   |tulost*aa*    | 
+|:---------|:------|:------|:----:|:-------|:---------:|:------------:|
+|Imperative|Present|Active |2     |singular|lisä*ä*    |tulost*a*     |
+|Indicative|Present|Active |3     |singular|lis*ää*    |tulost*aa*    |
+|Indicative|Present|Active |3     |plural  |lisä*ävät* |tulost*avat*  |
+|Indicative|Present|Passive|      |        |lisä*tään* |tulost*etaan* |
+|Participle|Present|Active |      |        |lisä*ävä*  |tulost*ava*   |
+|Participle|Present|Passive|      |        |lisä*ttävä*|tulost*ettava*|
+|Participle|Past   |Active |      |        |lisä*nnyt* |tulost*anut*  |
+|Participle|Past   |Passive|      |        |lisä*tty*  |tulost*ettu*  |
+
+[Finnish verb conjugation]: https://en.wikipedia.org/wiki/Finnish_verb_conjugation
 
 ## License
 
