@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, readline, traceback
+import argparse, readline, sys, traceback
 from fatal_error import fatalError, StopEvaluation
 from lex import lexCode
 from grammar import parseDeclaration
@@ -23,7 +23,12 @@ def compileCode(code):
 	tokens = lexCode(code)
 	decls = []
 	while not tokens.eof():
-		decls += [parseDeclaration(tokens)]
+		try:
+			decls += [parseDeclaration(tokens)]
+		except StopEvaluation as e:
+			sys.stderr.write(str(e)+"\n")
+			while not tokens.eof() and tokens.next().token != ".":
+				pass
 	return tokens, "\n".join([d.compile() for d in decls])
 
 def createHTML(code):
@@ -37,8 +42,8 @@ def createHTML(code):
 	ans += """\ndocument.avautua__N();\n</script></body></html>"""
 	return ans
 
-TAMPIO_VERSION = "1.4"
-COMPILER_VERSION = "1.5"
+TAMPIO_VERSION = "1.5"
+COMPILER_VERSION = "1.6"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
