@@ -1,11 +1,31 @@
+Monikolla on alkiot.
+
 Vektorilla on komponentit.
 
 Lyhyen vektorin dimensio on lyhyen vektorin komponenttien määrä.
+Lyhyen vektorin pää on lyhyen vektorin ensimmäinen komponentti.
 Lyhyen vektorin häntä on uusi vektori, jonka komponentit ovat lyhyen vektorin komponentit toisesta alkaen.
 Lyhyen vektorin summa on
 	riippuen siitä, onko lyhyen vektorin dimensio nolla,
 	joko	nolla
-	tai	lyhyen vektorin ensimmäinen komponentti lisättynä lyhyen vektorin hännän summaan.
+	tai	lyhyen vektorin pää lisättynä lyhyen vektorin hännän summaan.
+Lyhyen vektorin pituus on
+	riippuen siitä, onko lyhyen vektorin dimensio nolla,
+	joko	nolla
+	tai	lyhyen vektorin pään toisen potenssin
+			lisättynä lyhyen vektorin hännän pituuden toiseen potenssiin
+		neliöjuuri.
+
+Mahtavan monikon pistetulo on
+	riippuen siitä, onko mahtavan monikon ensimmäisen alkion dimensio nolla,
+	joko	nolla
+	tai	mahtavan monikon ensimmäisen alkion pää
+		kerrottuna mahtavan monikon toisen alkion päällä
+		ja lisättynä uuden monikon, jonka
+			alkioita ovat
+				mahtavan monikon ensimmäisen alkion häntä
+			ja	mahtavan monikon toisen alkion häntä
+		eikä muuta, pistetuloon.
 
 Kun lyhyeen vektoriin lisätään kiva komponentti,
 	lyhyen vektorin komponentiksi lisätään kiva komponentti.
@@ -20,5 +40,6 @@ Olkoon pieni luku villin vektorin toinen komponentti.
 
 Kun nykyinen sivu avautuu,
 	villiin vektoriin lisätään pieni luku,
-	villi vektori painetaan nykyiselle sivulle
-ja	nykyinen sivu näyttää villin vektorin summan.
+	villi vektori painetaan nykyiselle sivulle,
+	nykyinen sivu näyttää villin vektorin summan
+ja	nykyinen sivu näyttää uuden monikon, jonka alkioita ovat villi vektori ja villi vektori eikä muuta, pistetulon.
