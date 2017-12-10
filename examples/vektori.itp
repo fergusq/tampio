@@ -16,9 +16,9 @@ Kun lyhyt vektori painetaan nykyiselle sivulle,
 	ja	lyhyen vektorin häntä painetaan nykyiselle sivulle.
 
 Olkoon villi vektori uusi vektori, jonka komponentteja ovat yksi, kaksi ja kolme.
-Olkoon pieni luku toinen villin vektorin komponentti.
+Olkoon pieni luku villin vektorin toinen komponentti.
 
 Kun nykyinen sivu avautuu,
-	villiin vektoriin lisätään viisi,
+	villiin vektoriin lisätään pieni luku,
 	villi vektori painetaan nykyiselle sivulle
 ja	nykyinen sivu näyttää villin vektorin summan.
