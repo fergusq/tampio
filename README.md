@@ -402,16 +402,16 @@ The inflection of nouns is a pretty complicated process. The exact suffix depend
 
 In the table below, the verbs *lisätä* (to add) and *tulostaa* (to print) are conjugated in the relevant forms.
 
-|Form      |Tense  |Voice  |Person|Number  |lisä*tä*   |tulost*aa*    | 
-|:---------|:------|:------|:----:|:-------|:---------:|:------------:|
-|Imperative|Present|Active |2     |singular|lisä*ä*    |tulost*a*     |
-|Indicative|Present|Active |3     |singular|lis*ää*    |tulost*aa*    |
-|Indicative|Present|Active |3     |plural  |lisä*ävät* |tulost*avat*  |
-|Indicative|Present|Passive|      |        |lisä*tään* |tulost*etaan* |
-|Participle|Present|Active |      |        |lisä*ävä*  |tulost*ava*   |
-|Participle|Present|Passive|      |        |lisä*ttävä*|tulost*ettava*|
-|Participle|Past   |Active |      |        |lisä*nnyt* |tulost*anut*  |
-|Participle|Past   |Passive|      |        |lisä*tty*  |tulost*ettu*  |
+|Form      |Tense  |Voice  |Person|Number  |Suffix|lisä*tä*   |tulost*aa*    | 
+|:---------|:------|:------|:----:|:-------|:----:|:---------:|:------------:|
+|Imperative|Present|Active |2     |singular|-A    |lisä*ä*    |tulost*a*     |
+|Indicative|Present|Active |3     |singular|-AA   |lis*ää*    |tulost*aa*    |
+|Indicative|Present|Active |3     |plural  |-AvAt |lisä*ävät* |tulost*avat*  |
+|Indicative|Present|Passive|      |        |-tAAn |lisä*tään* |tulost*etaan* |
+|Participle|Present|Active |      |        |-AvA  |lisä*ävä*  |tulost*ava*   |
+|Participle|Present|Passive|      |        |-ttAvA|lisä*ttävä*|tulost*ettava*|
+|Participle|Past   |Active |      |        |-nUt  |lisä*nnyt* |tulost*anut*  |
+|Participle|Past   |Passive|      |        |-ttU  |lisä*tty*  |tulost*ettu*  |
 
 [Finnish verb conjugation]: https://en.wikipedia.org/wiki/Finnish_verb_conjugation
 
