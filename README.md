@@ -29,7 +29,7 @@ To evaluate a file (TODO):
 Tampio is an object-oriented language that compiles to JavaScript.
 Its syntax is directly inspired by the Finnish language and is therefore based on inflecting words.
 
-A Tampio file is a list of declarations. Each declaration defines either a class, a function, a method or a global variable.
+A Tampio file is a list of defefinition, each which defines either a class, a function, a method or a global variable.
 For example, here is a simple program that calculates the factorial of a given number.
 
     Pienen luvun kertoma on
@@ -45,7 +45,7 @@ For example, here is a simple program that calculates the factorial of a given n
     	pieneen muuttujaan luetaan luku
     	ja nykyinen sivu näyttää pienen muuttujan arvon kertoman.
 
-It contains two functions declarations, one variable declaration and one method declaration.
+It contains two functions definitions, one variable definition and one method definition.
 Let's iterate these line by line.
 
     Pienen luvun kertoma on
@@ -105,6 +105,29 @@ It is another method call, calling the `näyttää` method of `nykyinen sivu`. (
 The argument of the method is a function call and the argument of `kertoma` is `pienen muuttujan arvo` (note the genitive case of both arguments).
 The field access syntax is identical to the function call syntax.
 
+## Lists
+
+List syntax is used always when there is a block containing multiple items.
+The block can be a body of a class, function, if statement or an array.
+
+In many programming languages blocks are created with keywords or symbols
+that mark the beginning and the end of the block, for example `begin`/`end` or `{`/`}`.
+In Tampio, as in natural languages, the block (called a list) is instead defined by using special separators
+that mark either continuation or ending of the list.
+
+After each item in the lsit except the last, there must be a separator token.
+A comma (`,`) is used when the list continues after the following item,
+and `ja` is used when the list ends after the following item.
+
+    [first item], [second item], ..., [second-last item] ja [last item]
+
+There is a special syntax that must be used when there is only one item in the list:
+
+    [only item] eikä muuta
+
+However, if the current definition would end immediately after the list (ie. there is a period),
+it is allowed to leave `eikä muuta` out.
+
 ## Classes
 
 As Tampio is an object-oriented language, classes are a crucial feature.
@@ -113,9 +136,13 @@ The fields must be definde together with the class, but methods can be added aft
 
 A class declaration consists of the name of the class in the adessive case and the `on` keyword.
 
+    [name/adessive] on [field list/nominative].
+
+For example:
+
     Vektorilla on komponentit.
 
-This very simple class, `vektori`, has one field: `komponentit`. As the name of the field is plural, it is a list.
+This very simple class, `vektori`, has one field: `komponentit`. As the name of the field is plural, it is an array.
 
 We can now define a function using that class:
 
