@@ -178,7 +178,7 @@ class SubscriptExpr:
 	def __str__(self):
 		return str(self.obj) + "[" + str(self.index) + "]"
 	def compile(self):
-		return self.obj.compile() + "[" + self.index.compile() + "]"
+		return self.obj.compile() + "[" + self.index.compile() + "-1]"
 
 class SliceExpr:
 	def __init__(self, obj, start, end):
@@ -189,7 +189,7 @@ class SliceExpr:
 		return str(self.obj) + "[" + str(self.start) + ":" + str(self.end if self.end else "") + "]"
 	def compile(self):
 		ans = self.obj.compile() + ".slice("
-		ans += self.start.compile()
+		ans += self.start.compile() + "-1"
 		if self.end:
 			ans += ", " + self.end.compile()
 		ans += ")"

@@ -118,6 +118,7 @@ def checkEof(tokens):
 		fatalError("Syntax error: unexpected eof (in \""+tokens.context()+"\")")
 
 def accept(accepted, tokens):
+	checkEof(tokens)
 	if tokens.next().token.lower() not in accepted:
 		fatalError("Syntax error: unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in accepted]) + " (in \"" + tokens.context() + "\")")
 

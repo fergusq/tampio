@@ -104,6 +104,7 @@ def parseSentence(tokens):
 	if word.isAdjective() or word.isOrdinal() or word.isName():
 		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 		
+		checkEof(tokens)
 		word = tokens.next().toWord(
 			cls=VERB,
 			forms=["indicative_present_simple3", "indicative_present_simple4"])
@@ -274,7 +275,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	if word.isOrdinal():
 		tokens.setStyle("literal")
 		case = word.form
-		index = NumExpr(ORDINALS.index(word.baseform))
+		index = NumExpr(ORDINALS.index(word.baseform)+1)
 		expr, case2 = parseNominalPhrase(tokens, case == "omanto")
 		if case != case2:
 			fatalError("Syntax error: an ordinal and its nominal phrase must be in the same case (in \""+tokens.context()+"\")")
@@ -339,10 +340,10 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				tokens.setStyle("literal")
 				if word.form == "sisaeronto":
 					accept(["alkaen"], tokens)
-					expr = SliceExpr(expr, NumExpr(ORDINALS.index(word.baseform)), None)
+					expr = SliceExpr(expr, NumExpr(ORDINALS.index(word.baseform)+1), None)
 				elif word.form == "sisatulento":
 					accept(["päättyen"], tokens)
-					expr = SliceExpr(expr, NumExpr(0), NumExpr(ORDINALS.index(word.baseform)))
+					expr = SliceExpr(expr, NumExpr(1), NumExpr(ORDINALS.index(word.baseform)+1))
 				tokens.setStyle("keyword")
 				cont = True
 		
@@ -356,10 +357,11 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			if word.isOrdinal() and tokens.peek(2) and tokens.peek(2).toWord(cls=NOUN, forms=[word.form]).isNoun():
 				tokens.next()
 				tokens.setStyle("literal")
-				index = NumExpr(ORDINALS.index(word.baseform))
+				index = NumExpr(ORDINALS.index(word.baseform)+1)
 				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
 				if not word2.isNoun() or word2.form != word.form:
 					fatalError("Syntax error: expected a noun in " + CASES_ENGLISH[word.form] + " case (in \"" + tokens.context() + "\")")
+				tokens.setStyle("field")
 				case = word.form
 				field = word2.baseform
 				expr = SubscriptExpr(FieldExpr(expr, field), index)
