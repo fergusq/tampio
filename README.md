@@ -161,6 +161,22 @@ The following method iterates the components of a vector and prints them:
     		nykyinen sivu näyttää lyhyen vektorin ensimmäisen komponentin
     		ja lyhyen vektorin häntä painetaan nykyiselle sivulle.
 
+## Finnish-English mini dictionary
+
+|Finnish                         |English                                |Example
+|--------------------------------|---------------------------------------|-------
+|alkaen                          |starting from                          |lyhyen vektorin komponentit toisesta **alkaen**<br/>_the components of the short vector **starting from** the second._
+|ei ole                          |is not                                 |pieni luku **ei ole** pienempi kuin kaksi<br/>_the small number **is not** less than two_
+|ja                              |and                                    |yksi, kaksi **ja** kolme<br/>_one, two **and** three_
+|kun                             |when                                   |**Kun** nykyinen sivu avautuu<br/>_**When** the current page opens_
+|lisättynä                       |added to                               |yksi **lisättynä** kahteen<br/>_one **added to** two_
+|luku                            |number                                 |pieni **luku**<br/>_the small **number**_
+|olkoon                          |let .. be                              |**Olkoon** pieni luku kaksi.<br/>_**Let** the small number **be** two._
+|on                              |is, has                                |pieni luku **on** pienempi kuin kaksi<br/>_the small number **is** less than two_<br/>Vektorilla **on** komponentit.<br/>_A vector **has** components._
+|ovat                            |are                                    |uusi vektori, jonka komponentit **ovat** yksi, kaksi ja kolme.<br/>_A new vector thats components **are** one, two and three._
+|riippuen siitä .. joko .. tai ..|depending on whether .. either .. or ..|Olkoon pieni luku, **riippuen siitä**, onko kiva luku nolla, **joko** yksi **tai** kaksi.<br/>_Let the small number be, **depending on whether** the nice number is zero, **either** one **or** two._
+|sivu                            |page                                   |nykyinen **sivu**<br/>_the current **page**_
+
 ## Finnish declension
 
 In Finnish nouns are inflected in [cases][wp-case]. There are a few of them, listed below. The exact meanings of the cases are not important to understand the programming language.
