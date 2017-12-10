@@ -99,7 +99,7 @@ def parseSentence(tokens):
 		eatComma(tokens)
 		return IfStatement(conditions, block)
 	word = tokens.peek().toWord(
-		cls=ADJ+NUMERAL+NAME+VERB,
+		cls=ADJ*2+NUMERAL*2+NAME*2+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
 	if word.isAdjective() or word.isOrdinal() or word.isName():
 		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
@@ -207,9 +207,6 @@ def parseCondition(tokens, prefix=False):
 		if tokens.peek().token.lower() == "eikö":
 			tokens.next()
 			tokens.setStyle("keyword")
-			checkEof(tokens)
-			accept(["ole"], tokens)
-			tokens.setStyle("keyword")
 			negation = True
 		else:
 			accept(["onko"], tokens)
@@ -231,6 +228,10 @@ def parseCondition(tokens, prefix=False):
 			accept(["on"], tokens)
 			tokens.setStyle("keyword")
 			negation = False
+	elif negation:
+		checkEof(tokens)
+		accept(["ole"], tokens)
+		tokens.setStyle("keyword")
 	operator = parseOperator(tokens)
 	operand2, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 	if case != "nimento":
