@@ -49,7 +49,7 @@ def parseDeclaration(tokens):
 			fields = parseList(parseFieldName, tokens)
 			eatPeriod(tokens)
 			return ClassDecl(word.baseform, fields)
-		elif (word.isAdjective() or word.isNoun()) and word.form == "omanto":
+		elif (word.isAdjective() or word.isNoun()) and word.form in ["nimento", "omanto"]:
 			if word.isAdjective():
 				tokens.next()
 				tokens.setStyle("variable")
@@ -60,7 +60,7 @@ def parseDeclaration(tokens):
 				tokens.next()
 				tokens.setStyle("type")
 				varname = ""
-			field, _ = parseFieldName(tokens)
+			field, _ = parseFieldName(tokens, word.form)
 			if typeword.number == "plural":
 				accept(["ovat"], tokens)
 			else:
@@ -90,13 +90,17 @@ def parseVariable(tokens, word=None, case="nimento"):
 	tokens.setStyle("type")
 	return word, word2
 
-def parseFieldName(tokens):
+def parseFieldName(tokens, form="omanto"):
+	expected_form = "nimento" if form == "omanto" else "olento"
 	checkEof(tokens)
-	word = tokens.next().toWord(cls=NOUN,forms=["nimento"])
-	if word.form != "nimento":
-		fatalError("Syntax error: malformed member name, expected nominative noun (in \""+tokens.context()+"\"")
+	word = tokens.next().toWord(cls=NOUN,forms=[expected_form])
+	if word.form != expected_form:
+		fatalError("Syntax error: malformed member name, expected " + CASES_ENGLISH[expected_form] + " noun (in \""+tokens.context()+"\"")
 	tokens.setStyle("field")
-	return word.baseform, word.number
+	field = word.baseform
+	if word.form == "olento":
+		field += "_E"
+	return field, word.number
 
 def parseSentence(tokens):
 	args = {}
@@ -177,7 +181,7 @@ def readVerbModifiers(tokens):
 		token = tokens.peek()
 		if token.isWord():
 			word = token.toWord(cls=ADJ+NUMERAL+CONJ+PRONOUN)
-			if word.isNoun() and (word.baseform not in ["teksti", "merkkijono"] or not tokens.peek(2) or not tokens.peek(2).isString()):
+			if word.isNoun() and (word.baseform not in ["teksti", "merkkijono"] or not tokens.peek(2) or not tokens.peek(2).isString()) and word.form != "olento":
 				tokens.next()
 				tokens.setStyle("function")
 				ans += "_" + token.token.lower()
@@ -289,7 +293,10 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			fatalError("Syntax error: both operands of \"tai\" must be in the same case (in \"" + tokens.context() + "\")")
 		return TernaryExpr(conds, alt1, alt2), case1
 	word = tokens.next().toWord(cls=ADJ+NAME+NUMERAL+PRONOUN,forms=promoted_cases)
-	if word.isOrdinal():
+	if word.isNoun() and word.form == "olento":
+		tokens.setStyle("field")
+		expr, case = parseNominalPhrase(tokens)
+	elif word.isOrdinal():
 		tokens.setStyle("literal")
 		case = word.form
 		index = NumExpr(ORDINALS.index(word.baseform)+1)
@@ -301,6 +308,10 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		tokens.setStyle("literal")
 		case = word.form
 		expr = NumExpr(CARDINALS.index(word.baseform))
+	elif re.fullmatch(r'\d+', word.baseform):
+		tokens.setStyle("literal")
+		case = word.form
+		expr = NumExpr(int(word.baseform))
 	elif word.isNoun() and word.baseform in ["teksti", "merkkijono"] and tokens.peek() and tokens.peek().isString():
 		tokens.setStyle("keyword")
 		case = word.form
@@ -357,6 +368,8 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	while cont:
 		cont = False
 		
+		# slice
+		
 		if not tokens.eof() and tokens.peek().isWord():
 			word = tokens.peek().toWord(cls=NUMERAL, forms=["sisatulento", "sisaeronto"])
 			if word.isOrdinal() and word.form in ["sisatulento", "sisaeronto"] and tokens.peek(2) and tokens.peek(2).token.lower() in ["alkaen", "päättyen"]:
@@ -370,6 +383,8 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 					expr = SliceExpr(expr, NumExpr(1), NumExpr(ORDINALS.index(word.baseform)+1))
 				tokens.setStyle("keyword")
 				cont = True
+		
+		# omistusrakenne
 		
 		while case == "omanto" and not tokens.eof():
 			token = tokens.peek()
@@ -401,17 +416,34 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			else:
 				break
 		
+		# essiiviketju
+		# esim. <lauseke> kerrottuna <lausekkeella> ja <toisella>
+		# esim. <luku> pyöristettynä ja merkkijonona
+		
 		require_ja = False
-		while not tokens.eof() and tokens.peek().token.lower() in ARI_OPERATORS.keys():
-			operator = tokens.next().token.lower()
-			tokens.setStyle("keyword")
-			required_arg_case, op = ARI_OPERATORS[operator]
-			arg, arg_case = parseNominalPhrase(tokens, promoted_cases=[required_arg_case])
-			if arg_case != required_arg_case:
-				fatalError("Syntax error: the operand of \"" + operator + "\" must be in " + CASES_ENGLISH[required_arg_case] + " case (in \"" + tokens.context() + "\")")
-			expr = ArithmeticExpr(op, expr, arg)
-			cont = True
-			if tokens.peek(1) and tokens.peek(2) and tokens.peek(1).token.lower() in [",", "ja"] and tokens.peek(2).token.lower() in ARI_OPERATORS.keys():
+		while not tokens.eof() and tokens.peek().isWord():
+			word = tokens.peek().toWord(cls=NOUN, forms="olento")
+			if word.word.lower() in ARI_OPERATORS.keys():
+				operator = tokens.next().token.lower()
+				tokens.setStyle("keyword")
+				required_arg_case, op = ARI_OPERATORS[operator]
+				arg, arg_case = parseNominalPhrase(tokens, promoted_cases=[required_arg_case])
+				if arg_case != required_arg_case:
+					fatalError("Syntax error: the operand of \"" + operator + "\" must be in "
+						+ CASES_ENGLISH[required_arg_case] + " case (in \"" + tokens.context() + "\")")
+				expr = ArithmeticExpr(op, expr, arg)
+				cont = True
+			elif word.isNoun() and word.form == "olento":
+				tokens.next()
+				tokens.setStyle("field")
+				expr = FieldExpr(expr, word.baseform + "_E")
+				cont = True
+			peek1 = tokens.peek(1)
+			peek2 = tokens.peek(2)
+			word2 = peek2.toWord(cls=NOUN, forms="olento") if peek2 and peek2.isWord() else None
+			if (peek1 and peek2 and peek1.token.lower() in [",", "ja"]
+				and (peek2.token.lower() in ARI_OPERATORS.keys()
+					or (peek2.isWord() and word2.isNoun() and word2.form == "olento"))):
 				if tokens.next().token == ",":
 					require_ja = True
 				else: # ja
@@ -420,7 +452,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				continue
 			else:
 				if require_ja:
-					fatalError("Syntax error: an operator chain must end with \"ja\" (in \"" + tokens.context() + "\")")
+					fatalError("Syntax error: an essive chain must end with \"ja\" (in \"" + tokens.context() + "\")")
 				break
 	
 	return expr, case

@@ -25,7 +25,10 @@ def typeToJs(typename):
 	elif typename == "sivu":
 		return "HTMLDocument"
 	else:
-		return typename
+		return escapeIdentifier(typename)
+
+def escapeIdentifier(identifier):
+	return identifier.replace("-", "_")
 
 class VariableDecl:
 	def __init__(self, var, value):
@@ -34,7 +37,7 @@ class VariableDecl:
 	def __str__(self):
 		return self.var + " := " + str(self.value)
 	def compile(self):
-		return "var " + self.var + " = " + self.value.compile() + ";"
+		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile() + ";"
 
 class ProcedureDecl:
 	def __init__(self, signature, body):
@@ -52,7 +55,7 @@ class ProcedureDecl:
 				typeToJs(self.signature.obj.type) + ".prototype."
 				+ self.signature.compileName()
 				+ " = function" + self.signature.compileArgs() + " {\n"
-				+ " var " + self.signature.obj.name + " = this;\n"
+				+ " var " + escapeIdentifier(self.signature.obj.name) + " = this;\n"
 				+ "".join([s.compile(indent=1) for s in self.body])
 				+ "};")
 		else:
@@ -88,7 +91,7 @@ class FunctionDecl:
 	def compile(self):
 		ans = typeToJs(self.type) + ".prototype.f_" + self.field + " = function() {\n"
 		if self.param != "":
-			ans += " var " + self.param + " = this;\n"
+			ans += " var " + escapeIdentifier(self.param) + " = this;\n"
 		ans += " return " + self.body.compile() + ";\n};"
 		return ans
 
@@ -126,12 +129,12 @@ class CallStatement:
 		self.wheres = wheres
 	def compileName(self):
 		keys = sorted(self.args.keys())
-		return self.name + "_" + "".join([CASES_ABRV[case] for case in keys])
+		return escapeIdentifier(self.name) + "_" + "".join([CASES_ABRV[case] for case in keys])
 	def compileArgs(self):
 		keys = sorted(self.args.keys())
 		return "(" + ", ".join([self.args[key].compile() for key in keys]) + ")"
 	def compileWheres(self):
-		return "".join(["var "+where[0]+" = "+where[1].compile()+"; " for where in self.wheres])
+		return "".join(["var "+escapeIdentifier(where[0])+" = "+where[1].compile()+"; " for where in self.wheres])
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent + self.compileWheres() + self.compileName() + self.compileArgs()
 		if semicolon:
@@ -159,7 +162,7 @@ class MethodCallStatement(CallStatement):
 			and self.obj_case == "tulento"
 			and list(self.args.keys()) == ["nimento"]):
 			if isinstance(self.obj, FieldExpr):
-				ans += self.obj.obj.compile() + "." + self.obj.field
+				ans += self.obj.obj.compile() + "." + escapeIdentifier(self.obj.field)
 			else:
 				ans += self.obj.compile()
 			ans += " = " + self.args["nimento"].compile()
@@ -176,7 +179,7 @@ class VariableExpr:
 	def __str__(self):
 		return self.name
 	def compile(self):
-		return self.name
+		return escapeIdentifier(self.name)
 
 class FieldExpr:
 	def __init__(self, obj, field):
@@ -185,7 +188,7 @@ class FieldExpr:
 	def __str__(self):
 		return str(self.obj) + "." + self.field
 	def compile(self):
-		return self.obj.compile() + ".f_" + self.field + "()"
+		return self.obj.compile() + ".f_" + escapeIdentifier(self.field) + "()"
 
 class SubscriptExpr:
 	def __init__(self, obj, index):

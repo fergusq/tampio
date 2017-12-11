@@ -23,12 +23,12 @@ def compileCode(code):
 	tokens = lexCode(code)
 	decls = []
 	while not tokens.eof():
-		try:
+		#try:
 			decls += [parseDeclaration(tokens)]
-		except StopEvaluation as e:
-			sys.stderr.write(str(e)+"\n")
-			while not tokens.eof() and tokens.next().token != ".":
-				pass
+		#except StopEvaluation as e:
+		#	sys.stderr.write(str(e)+"\n")
+		#	while not tokens.eof() and tokens.next().token != ".":
+		#		pass
 	return tokens, "\n".join([d.compile() for d in decls])
 
 def createHTML(code):
@@ -42,8 +42,8 @@ def createHTML(code):
 	ans += """\ndocument.avautua__N();\n</script></body></html>"""
 	return ans
 
-TAMPIO_VERSION = "1.6"
-COMPILER_VERSION = "1.7"
+TAMPIO_VERSION = "1.7"
+COMPILER_VERSION = "1.8"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
