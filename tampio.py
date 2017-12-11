@@ -41,17 +41,18 @@ def compileCode(code):
 
 def createHTML(code):
 	tokens, compiled, _ = compileCode(code)
-	ans = """<html><head><meta charset="utf-8" /><title>Imperatiivinen Tampio</title>"""
+	ans = """<!DOCTYPE html><html><head><meta charset="utf-8" /><title>Imperatiivinen Tampio</title>"""
 	ans += """<script type="text/javascript" src="itp.js" charset="utf-8"></script>"""
-	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body><pre>"""
+	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body>"""
+	ans += """<div style="max-height:98vh;overflow:auto;float:left;width:50%;"><pre style="margin:0px;white-space:pre-wrap;">"""
 	ans += prettyPrint(tokens, "html")
-	ans += """</pre><script type="text/javascript">\n"""
+	ans += """</pre></div><div style="max-height:98vh;overflow:auto;float:right;width:calc(50% - 5px);padding-left:5px;"><script type="text/javascript">\n"""
 	ans += compiled
-	ans += """\ndocument.avautua_A__N();\n</script></body></html>"""
+	ans += """\ndocument.avautua_A__N();\n</script></div></body></html>"""
 	return ans
 
 TAMPIO_VERSION = "1.7"
-COMPILER_VERSION = "1.12.1"
+COMPILER_VERSION = "1.13.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
