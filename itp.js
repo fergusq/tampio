@@ -6,12 +6,13 @@ Array.prototype.f_määrä = function() { return this.length; };
 var power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};
 Number.prototype.f_potenssi = function() { return new Proxy(this, power_handler); };
 Number.prototype.f_neliöjuuri = function() { return Math.sqrt(this); };
+Number.prototype.f_merkkijono_E = Number.prototype.toString;
 
 // String
 String.prototype.f_pituus = function() { return this.length; };
 
 // HTMLDocument/sivu
-HTMLDocument.prototype.näyttää_G_N = function(x) { this.write(x); };
+HTMLDocument.prototype.näyttää_G_N = HTMLDocument.prototype.toString;
 
 // Date
 Date.prototype.f_päivämäärämerkkijono_E = function() { return this.getLocaleDateString(); };
