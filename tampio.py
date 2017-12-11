@@ -18,6 +18,7 @@ import argparse, readline, sys, traceback
 from fatal_error import fatalError, StopEvaluation
 from lex import lexCode
 from grammar import parseDeclaration
+from highlighter import prettyPrint, HIGHLIGHTERS
 
 def compileCode(code):
 	tokens = lexCode(code)
@@ -36,14 +37,14 @@ def createHTML(code):
 	ans = """<html><head><meta charset="utf-8" /><title>Imperatiivinen Tampio</title>"""
 	ans += """<script type="text/javascript" src="itp.js" charset="utf-8"></script>"""
 	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body><pre>"""
-	ans += tokens.prettyPrint()
+	ans += prettyPrint(tokens, "html")
 	ans += """</pre><script type="text/javascript">\n"""
 	ans += compiled
 	ans += """\ndocument.avautua__N();\n</script></body></html>"""
 	return ans
 
 TAMPIO_VERSION = "1.7"
-COMPILER_VERSION = "1.8"
+COMPILER_VERSION = "1.9"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
@@ -52,7 +53,7 @@ def main():
 	compiler_group = parser.add_argument_group('compiler options')
 	compiler_group.add_argument('filename', type=str, nargs='?', help='source code file')
 	output_mode = compiler_group.add_mutually_exclusive_group()
-	output_mode.add_argument('-s', '--syntax-markup', help='do not compile, instead print the source code with syntax markup', action='store_true')
+	output_mode.add_argument('-s', '--syntax-markup', type=str, choices=HIGHLIGHTERS.keys(), help='do not compile, instead print the source code with syntax markup')
 	output_mode.add_argument('-p', '--html-page', help='print a html page containing both compiled code and syntax markup', action='store_true')
 	
 	args = parser.parse_args()
@@ -70,7 +71,7 @@ def main():
 				else:
 					tokens, compiled = compileCode(code)
 					if args.syntax_markup:
-						print(tokens.prettyPrint())
+						print(prettyPrint(tokens, args.syntax_markup))
 					else:
 						print(compiled)
 		except Exception:
@@ -81,7 +82,7 @@ def main():
 				code = input(">>> ")
 				tokens, compiled = compileCode(code)
 				if args.syntax_markup:
-					print(tokens.prettyPrint())
+					print(prettyPrint(tokens, args.syntax_markup))
 				else:
 					print(compiled)
 			except Exception:

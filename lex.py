@@ -88,14 +88,6 @@ class TokenList:
 		return not self.peek()
 	def setStyle(self, style):
 		self.styles[self.i] = style
-	def prettyPrint(self):
-		out = ""
-		for token, style in zip(self.tokens, self.styles):
-			if style != "":
-				out += "<span class=\"" + style + "\">" + html.escape(token.token) + "</span>"
-			else:
-				out += html.escape(token.token)
-		return out
 	def context(self):
 		a = max(0, self.i-10)
 		b = min(len(self.tokens), self.i+10)
