@@ -4,7 +4,7 @@ The Tampio Programming Language
 Tampio is an object-oriented programming language that looks like a natural language – Finnish.
 It is named after a famous Finnish programmer.
 
-This branch currently contains a new iteration of the language that is not functional. The functional language is in the `functional` branch.
+This branch currently contains a new iteration of the language that is not functional. The functional language is in the [`functional`](https://github.com/fergusq/tampio/tree/functional) branch.
 
 ## Dependencies
 
