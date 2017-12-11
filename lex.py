@@ -16,7 +16,7 @@
 
 import html, re
 from voikko.libvoikko import Voikko, Token
-from fatal_error import fatalError
+from fatal_error import syntaxError
 from inflect import *
 
 LANGUAGE = "fi-x-morpho"
@@ -67,8 +67,17 @@ class TokenList:
 		self.styles = [""]*len(tokens)
 		self.i = -1
 		
+		# rivinumero jokaiselle tokenille
+		self.lines = []
+		line = 1
 		for token in tokens:
 			token.tokens = self
+			line += token.token.count("\n")
+			self.lines.append(line)
+	def setPlace(self, i):
+		self.i = 0
+	def place(self):
+		return self.i
 	def peek(self, n=1):
 		j = self.i+1
 		while j < len(self.tokens):
@@ -88,14 +97,25 @@ class TokenList:
 		return not self.peek()
 	def setStyle(self, style):
 		self.styles[self.i] = style
-	def context(self):
-		a = max(0, self.i-10)
-		b = min(len(self.tokens), self.i+10)
+	def context(self, place):
+		a = max(0, place-10)
+		b = min(len(self.tokens), place+10)
 		out = ""
 		for i in range(a, b):
-			if i == self.i:
+			if i == place:
 				out += "<here>"
 			out += self.tokens[i].token
+		return out
+	def fancyContext(self, place):
+		a = max(0, place-10)
+		b = min(len(self.tokens), place+10)
+		out = "Line " + str(self.lines[place]) + ": "
+		for i in range(a, b):
+			if i == place:
+				column = len(out)
+			if self.lines[i] == self.lines[place] and "\n" not in self.tokens[i].token:
+				out += self.tokens[i].token
+		out += "\n" + " "*column + "^" + "~"*(len(self.tokens[place].token)-1)
 		return out
 
 def eat(tokens, token):
@@ -107,12 +127,12 @@ eatPeriod = lambda tokens: eat(tokens, ".")
 
 def checkEof(tokens):
 	if tokens.eof():
-		fatalError("Syntax error: unexpected eof (in \""+tokens.context()+"\")")
+		syntaxError("unexpected eof", tokens)
 
 def accept(accepted, tokens):
 	checkEof(tokens)
 	if tokens.next().token.lower() not in accepted:
-		fatalError("Syntax error: unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in accepted]) + " (in \"" + tokens.context() + "\")")
+		syntaxError("unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in accepted]), tokens)
 
 CARDINALS = ["nolla", "yksi", "kaksi", "kolme", "neljä", "viisi", "kuusi", "seitsemän", "kahdeksan", "yhdeksän", "kymmenen"]
 ORDINALS = ["ensimmäinen", "toinen", "kolmas", "neljäs", "viides", "kuudes", "seitsemäs", "kahdeksas", "yhdeksäs", "kymmenes"]
@@ -128,7 +148,7 @@ class Punctuation:
 	def isString(self):
 		return not not re.fullmatch(r'"[^"]*"', self.token)
 	def toWord(self, cls=[], forms=[], numbers=[]):
-		fatalError("Syntax error: unexpected token, expected a word (in \"" + self.tokens.context() + "\")")
+		syntaxError("unexpected token, expected a word", tokens)
 	def __str__(self):
 		return self.token
 	def __repr__(self):

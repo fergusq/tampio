@@ -15,7 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse, readline, sys, traceback
-from fatal_error import fatalError, StopEvaluation
+from fatal_error import TampioSyntaxError
 from lex import lexCode
 from grammar import parseDeclaration
 from highlighter import prettyPrint, HIGHLIGHTERS
@@ -29,11 +29,11 @@ def compileCode(code):
 	while not tokens.eof():
 		try:
 			decls += [parseDeclaration(tokens)]
-		except StopEvaluation as e:
+		except TampioSyntaxError as e:
 			if DEBUG:
 				traceback.print_exc()
 			else:
-				sys.stderr.write(str(e)+"\n")
+				e.printMe(sys.stderr)
 			while not tokens.eof() and tokens.next().token != ".":
 				pass
 			num_errors += 1
@@ -51,7 +51,7 @@ def createHTML(code):
 	return ans
 
 TAMPIO_VERSION = "1.7"
-COMPILER_VERSION = "1.11"
+COMPILER_VERSION = "1.12"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
