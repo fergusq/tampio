@@ -290,8 +290,8 @@ In genitive calls, the argument is in the genitive case:
 
 For example:
 
-    viiden kertoma	# factorial(5)
-    neljän neliöjuuri	# sqrt(4)
+    viiden kertoma      # factorial(5)
+    neljän neliöjuuri   # sqrt(4)
 
 The essive calls are typically used to convert a value to another type.
 The function name is in the essive case and can appear either before or after the argument.
@@ -301,7 +301,7 @@ The function name is in the essive case and can appear either before or after th
 
 For example:
 
-    viisi merkkijonona	# toString(5)
+    viisi merkkijonona  # toString(5)
 
 ### Object initialization
 
@@ -334,6 +334,12 @@ If the array is in a field inside an object or a return value of a function, the
 If the array is instead a variable, the following is used.
 
     [ordinal] [array object]
+
+For example:
+
+    villin vektorin neljäs komponentti  # villi_vektori.komponentti[4]
+    nätin luvun toinen potenssi         # nätti_luku.potenssi[2] = nätti_luku^2
+    viides luku                         # luku[5]
 
 The available ordinals are listed below.
 
@@ -379,6 +385,96 @@ Conditions must be in one of these forms:
 
 The operators are as in if statements, see the table in the If statements chapter.
 
+## Standard library
+
+### Array class
+
+The array class does not have a name in Tampio, and is the JavaScript class `Array`.
+
+Pseudodeclaration:
+
+    "Arrayn" määrä on ...
+    Kun kivaksi "arrayksi" lisätään kiva arvo, ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`määrä`     |Function|The length of this array (`this.length`).
+|`lisätään`  |Method  |Appends the given value to this array (`this.push(arg)`).
+
+### `ajankohta` class
+
+`Ajankohta` is an alias to the JavaScript class `Date`.
+
+Pseudodeclaration:
+
+    Ajankohdalla on vuosi, kuukausi, päivä, tunti, minuutti, sekunti.
+    Ajankohta millisekunteina on ...
+    Ajankohta merkkijonona on ...
+    Ajankohta päivämäärämerkkijonona on ...
+    Ajankohta kellonaikamerkkijonona on ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`vuosi`     |Field   |The year (`this.getFullYear()`).
+|`kuukausi`  |Field   |The month (0-11, `this.getMonth()`).
+|`päivä`     |Field   |The day (`this.getHours()`).
+|`tunti`     |Field   |The hour (0-23, `this.getHours()`).
+|`minuutti`  |Field   |The hour (0-59, `this.getMinutes()`).
+|`sekunti`   |Field   |The second (0-59, `this.getMinutes()`).
+|`millisekunteina`|Function|Milliseconds since 1970-01-01 00:00:00 UTC (`this.getTime()`).
+|`merkkijonona`|Function|String representation (`this.toLocaleString()`).
+|`päivämäärämerkkijonona`|Function|String representation (`this.toLocaleDateString()`).
+|`kellonaikamerkkijonona`|Function|String representation (`this.toLocaleTimeString()`).
+
+### `luku` class
+
+`luku` is an alias to the JavaScript class `Number`.
+
+Pseudodeclaration:
+
+    Luvun neliöjuuri on ...
+    Luvun vastaluku on ...
+    Luvun potenssit ovat ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`neliöjuuri`|Function|The square root of this number (`sqrt(this)`).
+|`vastaluku` |Function|The opposite of this number (`-this`).
+|`potenssit` |Function|An infinite array of the powers of this number.
+
+### `merkkijono` class
+
+`merkkijono` is an alias to the JavaScript class `String`.
+
+Pseudodeclaration:
+
+    Merkkijonon pituus on ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`pituus`    |Function|The length of this string (`this.length`).
+
+### `muuttuja` class
+
+    Muuttujalla on arvo.
+    Kun mukavaan muuttujaan luetaan luku, ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`luetaan`   |Method  |Prompts a number and stores it in this variable.
+
+### `sivu` class
+
+`sivu` is an alias to the JavaScript class `HTMLDocument`.
+
+Pseudodeclaration:
+
+    Kun nykyinen sivu näyttää mielenkiintoisen tekstin, ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`näyttää`   |Method  |Writes the given HTML code to the document (`this.write(arg)`)
+
 ## Finnish-English mini dictionary
 
 |Finnish                         |English                                |Example
@@ -397,6 +493,7 @@ The operators are as in if statements, see the table in the If statements chapte
 |ovat                            |are                                    |uusi vektori, jonka komponentit **ovat** yksi, kaksi ja kolme.<br/>_A new vector thats components **are** one, two and three._
 |päättyen                        |ending to                              |neljänteen **päättyen**<br/>_**ending to** the fourth_
 |riippuen siitä .. joko .. tai ..|depending on whether .. either .. or ..|Olkoon pieni luku **riippuen siitä**, onko kiva luku nolla, **joko** yksi **tai** kaksi.<br/>_Let the small number be, **depending on whether** the nice number is zero, **either** one **or** two._
+|se                              |it                                     |**sen** nimi<br/>_**its** name_
 |sivu                            |page                                   |nykyinen **sivu**<br/>_the current **page**_
 
 ## Finnish declension
