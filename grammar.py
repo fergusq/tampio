@@ -132,8 +132,8 @@ def parseSentence(tokens):
 			syntaxError("predicate is not in indicative simple present", tokens)
 		tokens.setStyle("function")
 		
-		predicate = word.baseform + readVerbModifiers(tokens)
 		passive = word.form[-1] == "4"
+		predicate = word.baseform + readVerbModifiers(tokens) + ("_P" if passive else "_A")
 		
 		if case != "nimento" and not passive:
 			tokens.setPlace(place)
@@ -443,6 +443,8 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				tokens.setStyle("field")
 				expr = FieldExpr(expr, word.baseform + "_E")
 				cont = True
+			else:
+				break
 			peek1 = tokens.peek(1)
 			peek2 = tokens.peek(2)
 			word2 = peek2.toWord(cls=NOUN, forms="olento") if peek2 and peek2.isWord() else None

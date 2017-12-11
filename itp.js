@@ -1,5 +1,5 @@
 // Array
-Array.prototype.lisätä_N_T = function(kiva_arvo) { this.push(kiva_arvo); };
+Array.prototype.lisätä_P_N_T = function(kiva_arvo) { this.push(kiva_arvo); };
 Array.prototype.f_määrä = function() { return this.length; };
 
 // Number/luku
@@ -13,7 +13,7 @@ Number.prototype.f_merkkijono_E = Number.prototype.toString;
 String.prototype.f_pituus = function() { return this.length; };
 
 // HTMLDocument/sivu
-HTMLDocument.prototype.näyttää_G_N = HTMLDocument.prototype.toString;
+HTMLDocument.prototype.näyttää_A_G_N = HTMLDocument.prototype.write;
 
 // Date/aika
 Date.prototype.f_päivämäärämerkkijono_E = function() { return this.getLocaleDateString(); };
@@ -33,4 +33,4 @@ function muuttuja(vals) {
  this.arvo = ("arvo" in vals) ? vals["arvo"] : undefined;
 };
 muuttuja.prototype.f_arvo = function() { return this.arvo; };
-muuttuja.prototype.lukea_luku__St = function() { this.arvo = Number.parseInt(prompt("Syötä luku")); };
+muuttuja.prototype.lukea_luku_P__St = function() { this.arvo = Number.parseInt(prompt("Syötä luku")); };

@@ -161,6 +161,7 @@ class MethodCallStatement(CallStatement):
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
 		if ((isinstance(self.obj, VariableExpr) or isinstance(self.obj, SubscriptExpr) or isinstance(self.obj, FieldExpr))
+			and self.name == "asettaa_P"
 			and self.obj_case == "tulento"
 			and list(self.args.keys()) == ["nimento"]):
 			if isinstance(self.obj, FieldExpr):
