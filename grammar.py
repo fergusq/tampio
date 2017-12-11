@@ -49,18 +49,28 @@ def parseDeclaration(tokens):
 			fields = parseList(parseFieldName, tokens)
 			eatPeriod(tokens)
 			return ClassDecl(word.baseform, fields)
-		elif word.isAdjective() and word.form == "omanto":
-			tokens.next()
-			tokens.setStyle("variable")
-			_, word2 = parseVariable(tokens, word=word, case="omanto")
+		elif (word.isAdjective() or word.isNoun()) and word.form == "omanto":
+			if word.isAdjective():
+				tokens.next()
+				tokens.setStyle("variable")
+				_, typeword = parseVariable(tokens, word=word, case="omanto")
+				varname = word.baseform + "_" + typeword.baseform
+			elif word.isNoun():
+				typeword = word
+				tokens.next()
+				tokens.setStyle("type")
+				varname = ""
 			field, _ = parseFieldName(tokens)
-			accept(["on", "ovat"], tokens)
+			if typeword.number == "plural":
+				accept(["ovat"], tokens)
+			else:
+				accept(["on"], tokens)
 			tokens.setStyle("keyword")
 			body, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 			if case != "nimento":
 				fatalError("Syntax error: predicative is in "+CASES_ENGLISH[case]+" case (should be in nominative case) (in \"" + tokens.context() + "\")")
 			eatPeriod(tokens)
-			return FunctionDecl(word2.baseform, field, word.baseform + "_" + word2.baseform, body)
+			return FunctionDecl(typeword.baseform, field, varname, body)
 	tokens.next()
 	fatalError("Syntax error: unexpected token \"" + token.token + "\" (in \"" + tokens.context() + "\")")
 
@@ -75,10 +85,13 @@ def parseVariable(tokens, word=None, case="nimento"):
 	word2 = tokens.next().toWord(cls=NOUN, forms=[case])
 	if not word2.isNoun() or word2.form != case:
 		fatalError("Syntax error: this variable must end with a noun in "+CASES_ENGLISH[case]+" case (in \""+tokens.context()+"\")")
+	if word.number != word2.number:
+		fatalError("Syntax error: variable words do not accept in number (in \"" + tokens.context() + "\")")
 	tokens.setStyle("type")
 	return word, word2
 
 def parseFieldName(tokens):
+	checkEof(tokens)
 	word = tokens.next().toWord(cls=NOUN,forms=["nimento"])
 	if word.form != "nimento":
 		fatalError("Syntax error: malformed member name, expected nominative noun (in \""+tokens.context()+"\"")
@@ -101,7 +114,7 @@ def parseSentence(tokens):
 	word = tokens.peek().toWord(
 		cls=ADJ*2+NUMERAL*2+NAME*2+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
-	if word.isAdjective() or word.isOrdinal() or word.isName():
+	if word.isAdjective() or word.isOrdinal() or word.isName() or word.isPronoun():
 		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 		
 		checkEof(tokens)
@@ -162,10 +175,14 @@ def readVerbModifiers(tokens):
 	ans = ""
 	while not tokens.eof():
 		token = tokens.peek()
-		if token.isWord() and token.toWord(cls=ADJ+NUMERAL+CONJ).isNoun():
-			tokens.next()
-			tokens.setStyle("function")
-			ans += "_" + token.token.lower()
+		if token.isWord():
+			word = token.toWord(cls=ADJ+NUMERAL+CONJ+PRONOUN)
+			if word.isNoun() and (word.baseform not in ["teksti", "merkkijono"] or not tokens.peek(2) or not tokens.peek(2).isString()):
+				tokens.next()
+				tokens.setStyle("function")
+				ans += "_" + token.token.lower()
+			else:
+				break
 		else:
 			break
 	return ans
@@ -271,7 +288,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		if case1 != case2:
 			fatalError("Syntax error: both operands of \"tai\" must be in the same case (in \"" + tokens.context() + "\")")
 		return TernaryExpr(conds, alt1, alt2), case1
-	word = tokens.next().toWord(cls=ADJ+NAME+NUMERAL,forms=promoted_cases)
+	word = tokens.next().toWord(cls=ADJ+NAME+NUMERAL+PRONOUN,forms=promoted_cases)
 	if word.isOrdinal():
 		tokens.setStyle("literal")
 		case = word.form
@@ -283,14 +300,21 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	elif word.isCardinal():
 		tokens.setStyle("literal")
 		case = word.form
-		num = NumExpr(CARDINALS.index(word.baseform))
-		expr = num
+		expr = NumExpr(CARDINALS.index(word.baseform))
+	elif word.isNoun() and word.baseform in ["teksti", "merkkijono"] and tokens.peek() and tokens.peek().isString():
+		tokens.setStyle("keyword")
+		case = word.form
+		expr = StrExpr(tokens.next().token[1:-1])
+		tokens.setStyle("literal")
 	elif word.isName():
 		tokens.setStyle("variable")
 		case = word.form
 		variable = word.baseform
-		
 		expr = VariableExpr(variable)
+	elif word.isPronoun() and word.baseform == "se":
+		tokens.setStyle("variable")
+		case = word.form
+		expr = VariableExpr("this")
 	elif word.isAdjective() and word.baseform == "uusi":
 		tokens.setStyle("keyword")
 		checkEof(tokens)

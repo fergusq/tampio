@@ -20,6 +20,8 @@ from fatal_error import fatalError
 def typeToJs(typename):
 	if typename == "luku":
 		return "Number"
+	elif typename == "merkkijono":
+		return "String"
 	elif typename == "sivu":
 		return "HTMLDocument"
 	else:
@@ -84,7 +86,11 @@ class FunctionDecl:
 	def __str__(self):
 		return self.type + "." + self.field + " := " + self.param + " => " + str(self.body)
 	def compile(self):
-		return typeToJs(self.type) + ".prototype.f_" + self.field + " = function() {\n var " + self.param + " = this;\n return " + self.body.compile() + ";\n};"
+		ans = typeToJs(self.type) + ".prototype.f_" + self.field + " = function() {\n"
+		if self.param != "":
+			ans += " var " + self.param + " = this;\n"
+		ans += " return " + self.body.compile() + ";\n};"
+		return ans
 
 class IfStatement:
 	def __init__(self, conditions, block):
@@ -148,7 +154,17 @@ class MethodCallStatement(CallStatement):
 	def compileName(self):
 		return super(MethodCallStatement, self).compileName() + "_" + CASES_ABRV[self.obj_case]
 	def compile(self, semicolon=True, indent=0):
-		ans = " "*indent + self.compileWheres() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
+		ans = " "*indent
+		if ((isinstance(self.obj, VariableExpr) or isinstance(self.obj, SubscriptExpr) or isinstance(self.obj, FieldExpr))
+			and self.obj_case == "tulento"
+			and list(self.args.keys()) == ["nimento"]):
+			if isinstance(self.obj, FieldExpr):
+				ans += self.obj.obj.compile() + "." + self.obj.field
+			else:
+				ans += self.obj.compile()
+			ans += " = " + self.args["nimento"].compile()
+		else:
+			ans += self.compileWheres() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
 		if semicolon:
 			ans += ";\n"
 		return ans
@@ -202,6 +218,14 @@ class NumExpr:
 		return str(self.num)
 	def compile(self):
 		return "(" + str(self.num) + ")"
+
+class StrExpr:
+	def __init__(self, string):
+		self.str = string
+	def __str__(self):
+		return repr(self.str)
+	def compile(self):
+		return repr(self.str)
 
 class NewExpr:
 	def __init__(self, typename, args):

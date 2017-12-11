@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import re
+import html, re
 from voikko.libvoikko import Voikko, Token
 from fatal_error import fatalError
 from inflect import *
@@ -26,10 +26,10 @@ voikko = Voikko(LANGUAGE)
 
 def lexCode(code):
 	output = []
-	for word in re.split("(\\s|\\.|,)", code):
+	for word in re.split(r'(\s|\.|,|"[^"]*")', code):
 		if word == "":
 			continue
-		if re.fullmatch("\\s+|\\.|,", word):
+		if re.fullmatch(r'\s|\.|,|"[^"]*"', word):
 			output += [Punctuation(word)]
 			continue
 		
@@ -92,9 +92,9 @@ class TokenList:
 		out = ""
 		for token, style in zip(self.tokens, self.styles):
 			if style != "":
-				out += "<span class=\"" + style + "\">" + token.token + "</span>"
+				out += "<span class=\"" + style + "\">" + html.escape(token.token) + "</span>"
 			else:
-				out += token.token
+				out += html.escape(token.token)
 		return out
 	def context(self):
 		a = max(0, self.i-10)
@@ -133,6 +133,8 @@ class Punctuation:
 		return False
 	def isSpace(self):
 		return not not re.fullmatch("\\s*", self.token)
+	def isString(self):
+		return not not re.fullmatch(r'"[^"]*"', self.token)
 	def toWord(self, cls=[], forms=[], numbers=[]):
 		fatalError("Syntax error: unexpected token, expected a word (in \"" + self.tokens.context() + "\")")
 	def __str__(self):
@@ -147,6 +149,10 @@ class AltWords:
 		self.tokens = None
 	def isWord(self):
 		return True
+	def isSpace(self):
+		return False
+	def isString(self):
+		return False
 	def toWord(self, cls=[], forms=[], numbers=[]):
 		def score(w):
 			return cls.count(w.word_class) + forms.count(w.form) + numbers.count(w.number)

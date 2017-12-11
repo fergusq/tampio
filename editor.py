@@ -28,12 +28,12 @@ FONT_SIZE = 20
 
 FONTS = {}
 
-default_font = pygame.font.SysFont("monospace", FONT_SIZE)
-italic_font = pygame.font.SysFont("monospace", FONT_SIZE)
+default_font = pygame.font.SysFont("liberationserif", FONT_SIZE)
+italic_font = pygame.font.SysFont("liberationserif", FONT_SIZE)
 italic_font.set_italic(True)
-bold_font = pygame.font.SysFont("monospace", FONT_SIZE)
+bold_font = pygame.font.SysFont("liberationserif", FONT_SIZE)
 bold_font.set_bold(True)
-underline_font = pygame.font.SysFont("monospace", FONT_SIZE)
+underline_font = pygame.font.SysFont("liberationserif", FONT_SIZE)
 underline_font.set_underline(True)
 FONTS["default"] = default_font
 FONTS["small-caps"] = default_font

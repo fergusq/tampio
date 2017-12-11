@@ -2,25 +2,25 @@ Monikolla on alkiot.
 
 Vektorilla on komponentit.
 
-Lyhyen vektorin dimensio on lyhyen vektorin komponenttien määrä.
-Lyhyen vektorin pää on lyhyen vektorin ensimmäinen komponentti.
-Lyhyen vektorin häntä on uusi vektori, jonka komponentit ovat lyhyen vektorin komponentit toisesta alkaen.
-Lyhyen vektorin summa on
-	riippuen siitä, onko lyhyen vektorin dimensio nolla,
+Vektorin dimensio on sen komponenttien määrä.
+Vektorin pää on sen ensimmäinen komponentti.
+Vektorin häntä on uusi vektori, jonka komponentit ovat sen komponentit toisesta alkaen.
+Vektorin summa on
+	riippuen siitä, onko sen dimensio nolla,
 	joko	nolla
-	tai	lyhyen vektorin pää lisättynä lyhyen vektorin hännän summaan.
-Lyhyen vektorin pituus on
-	riippuen siitä, onko lyhyen vektorin dimensio nolla,
+	tai	sen pää lisättynä sen hännän summaan.
+Vektorin pituus on
+	riippuen siitä, onko sen dimensio nolla,
 	joko	nolla
-	tai	lyhyen vektorin pään toisen potenssin
-			lisättynä lyhyen vektorin hännän pituuden toiseen potenssiin
+	tai	sen pään toisen potenssin
+			lisättynä sen hännän pituuden toiseen potenssiin
 		neliöjuuri.
 
 Mahtavan monikon pistetulo on
-	riippuen siitä, onko mahtavan monikon ensimmäisen alkion dimensio nolla,
+	riippuen siitä, onko sen ensimmäisen alkion dimensio nolla,
 	joko	nolla
-	tai	mahtavan monikon ensimmäisen alkion pää
-		kerrottuna mahtavan monikon toisen alkion päällä
+	tai	sen ensimmäisen alkion pää
+		kerrottuna sen toisen alkion päällä
 		ja lisättynä uuden monikon, jonka
 			alkioita ovat
 				mahtavan monikon ensimmäisen alkion häntä
@@ -31,15 +31,26 @@ Kun lyhyeen vektoriin lisätään kiva komponentti,
 	lyhyen vektorin komponentiksi lisätään kiva komponentti.
 
 Kun lyhyt vektori painetaan nykyiselle sivulle,
+	nykyinen sivu näyttää tekstin "[",
+	lyhyt vektori painetaan sulutta nykyiselle sivulle
+ja	nykyinen sivu näyttää tekstin "]".
+
+Kun lyhyt vektori painetaan sulutta nykyiselle sivulle,
 	jos	lyhyen vektorin dimensio ei ole nolla,
-	niin	nykyinen sivu näyttää lyhyen vektorin ensimmäisen komponentin
-	ja	lyhyen vektorin häntä painetaan nykyiselle sivulle.
+	niin	nykyinen sivu näyttää lyhyen vektorin ensimmäisen komponentin,
+		jos lyhyen vektorin dimensio on suurempi kuin yksi, niin nykyinen sivu näyttää tekstin "," eikä muuta
+	ja	lyhyen vektorin häntä painetaan sulutta nykyiselle sivulle.
 
 Olkoon villi vektori uusi vektori, jonka komponentteja ovat yksi, kaksi ja kolme.
 Olkoon pieni luku villin vektorin toinen komponentti.
 
 Kun nykyinen sivu avautuu,
 	villiin vektoriin lisätään pieni luku,
+	nykyinen sivu näyttää tekstin "Vektori: ",
 	villi vektori painetaan nykyiselle sivulle,
-	nykyinen sivu näyttää villin vektorin summan
+	nykyinen sivu näyttää tekstin "<br/>Summa: ",
+	nykyinen sivu näyttää villin vektorin summan,
+	nykyinen sivu näyttää tekstin "<br/>Pituus: ",
+	nykyinen sivu näyttää villin vektorin pituuden,
+	nykyinen sivu näyttää tekstin "<br/>Pistetulo: "
 ja	nykyinen sivu näyttää uuden monikon, jonka alkioita ovat villi vektori ja villi vektori eikä muuta, pistetulon.
