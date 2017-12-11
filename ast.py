@@ -24,6 +24,8 @@ def typeToJs(typename):
 		return "String"
 	elif typename == "sivu":
 		return "HTMLDocument"
+	elif typename == "ajankohta":
+		return "Date"
 	else:
 		return escapeIdentifier(typename)
 
