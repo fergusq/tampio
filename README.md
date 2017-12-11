@@ -97,8 +97,8 @@ In this case, the `arvo` field is initialized to `nolla` (zero).
 
 This line declares a new method for the `sivu` class. (`sivu` is an alias to the `HTMLDocument` JavaScript class.)
 It begins with the `Kun` keyword.
-The name of the method is `avautuu` and the name of the this object is `nykyinen sivu`.
-(As in Python, the this object must be named in the signature of a method.)
+The name of the method is `avautuu` and the name of the "self" object is `nykyinen sivu`.
+(As in Python, the "self" object must be named in the signature of a method.)
 
     pieneen muuttujaan luetaan luku
 
@@ -159,7 +159,8 @@ This means that it is possible to define the same function differently for multi
 
 A function always has one parameter and one expression that is the return value.
 
-    [parameter/genitive] on [expression/nominative].
+    [parameter/genitive] [function name] on [expression/nominative].
+    [parameter/nominative] [function name/essive] on [expression/nominative]
 
 The name of the parameter must have two words: an adjective and the name of the class.
 For example, to define a function called `dimensio` for the `vektori` class,
@@ -177,6 +178,11 @@ Here's another function that return the "tail" of a vector:
 
 Again, its parameter is `lyhyt vektori`.
 The function returns a new vector (using the `uusi` keyword) thats components are formed using the slice syntax.
+
+It is possible to not name the parameter, in which case only the class name appears in the signature.
+In the body, the word `se` can be used to refer to the unnamed parameter.
+
+    Vektorin dimensio on sen komponenttien määrä.
 
 ## Methods
 
@@ -273,6 +279,29 @@ Below is a table of available comparison operators.
 |`suurempi tai yhtä suuri kuin`|`>=`                 |
 
 ## Expressions
+
+### Function calls
+
+There are two kinds of function calls in Tampio: genitive calls and essive calls.
+
+In genitive calls, the argument is in the genitive case:
+
+    [argument/genitive] [function name]
+
+For example:
+
+    viiden kertoma	# factorial(5)
+    neljän neliöjuuri	# sqrt(4)
+
+The essive calls are typically used to convert a value to another type.
+The function name is in the essive case and can appear either before or after the argument.
+
+    [argument] [function name/essive]
+    [function name/essive] [argument]
+
+For example:
+
+    viisi merkkijonona	# toString(5)
 
 ### Object initialization
 
