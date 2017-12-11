@@ -20,20 +20,27 @@ from lex import lexCode
 from grammar import parseDeclaration
 from highlighter import prettyPrint, HIGHLIGHTERS
 
+DEBUG = False
+
 def compileCode(code):
 	tokens = lexCode(code)
 	decls = []
+	num_errors = 0
 	while not tokens.eof():
-		#try:
+		try:
 			decls += [parseDeclaration(tokens)]
-		#except StopEvaluation as e:
-		#	sys.stderr.write(str(e)+"\n")
-		#	while not tokens.eof() and tokens.next().token != ".":
-		#		pass
-	return tokens, "\n".join([d.compile() for d in decls])
+		except StopEvaluation as e:
+			if DEBUG:
+				traceback.print_exc()
+			else:
+				sys.stderr.write(str(e)+"\n")
+			while not tokens.eof() and tokens.next().token != ".":
+				pass
+			num_errors += 1
+	return tokens, "\n".join([d.compile() for d in decls]), num_errors
 
 def createHTML(code):
-	tokens, compiled = compileCode(code)
+	tokens, compiled, _ = compileCode(code)
 	ans = """<html><head><meta charset="utf-8" /><title>Imperatiivinen Tampio</title>"""
 	ans += """<script type="text/javascript" src="itp.js" charset="utf-8"></script>"""
 	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body><pre>"""
@@ -44,17 +51,20 @@ def createHTML(code):
 	return ans
 
 TAMPIO_VERSION = "1.7"
-COMPILER_VERSION = "1.10"
+COMPILER_VERSION = "1.11"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
+	global DEBUG
 	parser = argparse.ArgumentParser(description='Compile Tampio to JavaScript.')
 	parser.add_argument('-v', '--version', help='show version number and exit', action='store_true')
+	parser.add_argument('--debug', help='enable debug mode', action='store_true')
 	compiler_group = parser.add_argument_group('compiler options')
 	compiler_group.add_argument('filename', type=str, nargs='?', help='source code file')
 	output_mode = compiler_group.add_mutually_exclusive_group()
 	output_mode.add_argument('-s', '--syntax-markup', type=str, choices=HIGHLIGHTERS.keys(), help='do not compile, instead print the source code with syntax markup')
 	output_mode.add_argument('-p', '--html-page', help='print a html page containing both compiled code and syntax markup', action='store_true')
+	output_mode.add_argument('-V', '--validate-syntax', help='parse the code and print syntax errors', action='store_true')
 	
 	args = parser.parse_args()
 	
@@ -62,26 +72,32 @@ def main():
 		print(VERSION_STRING)
 		return
 	
+	if args.debug:
+		DEBUG = True
+	
 	if args.filename:
-		try:
-			with open(args.filename) as f:
-				code = f.read()
-				if args.html_page:
-					print(createHTML(code))
+		with open(args.filename) as f:
+			code = f.read()
+			if args.html_page:
+				print(createHTML(code))
+			else:
+				tokens, compiled, n = compileCode(code)
+				if args.validate_syntax:
+					print("OK" if n == 0 else "ERROR")
+				elif args.syntax_markup:
+					print(prettyPrint(tokens, args.syntax_markup))
 				else:
-					tokens, compiled = compileCode(code)
-					if args.syntax_markup:
-						print(prettyPrint(tokens, args.syntax_markup))
-					else:
-						print(compiled)
-		except Exception:
-			traceback.print_exc()
+					print(compiled)
+				if n > 0:
+					sys.exit(1)
 	else:
 		while True:
 			try:
 				code = input(">>> ")
-				tokens, compiled = compileCode(code)
-				if args.syntax_markup:
+				tokens, compiled, _ = compileCode(code)
+				if args.validate_syntax:
+					print("OK" if n == 0 else "ERROR")
+				elif args.syntax_markup:
 					print(prettyPrint(tokens, args.syntax_markup))
 				else:
 					print(compiled)
