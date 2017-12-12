@@ -123,7 +123,7 @@ that mark the beginning and the end of the block, for example `begin`/`end` or `
 In Tampio, as in natural languages, the block (called a list) is instead defined by using special separators
 that mark either continuation or ending of the list.
 
-After each item in the lsit except the last, there must be a separator token.
+After each item in the list except the last, there must be a separator token.
 A comma (`,`) is used when the list continues after the following item,
 and `ja` is used when the list ends after the following item.
 
@@ -140,7 +140,7 @@ it is allowed to leave `eikä muuta` out.
 
 As Tampio is an object-oriented language, classes are a crucial feature.
 Each class is defined using a set of fields and number of methods.
-The fields must be definde together with the class, but methods can be added afterwards.
+The fields must be defined together with the class, but methods can be added afterwards.
 
 A class declaration consists of the name of the class in the adessive case and the `on` keyword.
 
@@ -186,7 +186,7 @@ In the body, the word `se` can be used to refer to the unnamed parameter.
 
 ## Methods
 
-A method is a procedure that can take multiple argumets.
+A method is a procedure that can take multiple arguments.
 
     Kun [self parameter] [verb] [parameters], [statement list].
 
@@ -315,7 +315,52 @@ For example:
 
     kivan kaverin ystäväksi lisätään mukava kaveri
 
+### Method assignments
+
+It is possible to dynamically add new methods to a class.
+These methods are closures and can capture local variables in the context where they are created.
+It is not possible to specify names of these methods in the class declaration.
+
+    [expression/genitive] [method/e-infinitive inessive] [parameter list] käyköön niin, että [statement list],
+
+For example:
+
+    nättiä nappia painettaessa käyköön niin, että kiva alue pyyhitään,
+    napakan neuronin lauetessa sähäkästä syötteestä käyköön niin, että napakan neuronin ulostuloksi asetetaan sähäkän syötteen summan neliöjuuri,
+
 ## Expressions
+
+### Literal number
+
+Literal numbers can appear in the code both written with digits or as words.
+
+    Olkoon pieni luku nolla.
+    Olkoon pieni luku 0.
+
+|Literal      |Value              |
+|:------------|:------------------|
+|`nolla`      |0                  |
+|`yksi`       |1                  |
+|`kaksi`      |2                  |
+|`kolme`      |3                  |
+|`neljä`      |4                  |
+|`viisi`      |5                  |
+|`kuusi`      |6                  |
+|`seitsemän`  |7                  |
+|`kahdeksan`  |8                  |
+|`yhdeksän`   |9                  |
+|`kymmenen`   |10                 |
+
+### Literal strings
+
+Literal strings are written inside `"quotation marks"`.
+There is currently no escape code, so there must be no quotation marks inside strings.
+
+Before a string literal there must be a noun that is inflected in the case that is the case of the string literal expression.
+The noun can be anything.
+
+    nykyinen sivu näyttää tekstin "Hello world!"
+    Olkoon kiva merkkijono lause "Hei maailma!".
 
 ### Function calls
 
@@ -463,6 +508,21 @@ Pseudodeclaration:
 |`päivämäärämerkkijonona`|Function|String representation (`this.toLocaleDateString()`).
 |`kellonaikamerkkijonona`|Function|String representation (`this.toLocaleTimeString()`).
 
+### Element class
+
+The element class does not have a name in Tampio, and is the JavaScript class `HTMLElement`.
+
+Pseudodeclaration:
+
+    Kun kivalle "elementille" kirjoitetaan annettu teksti, ...
+    Kun kiva "elementti" pyyhitään, ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`kirjoitetaan`|Method|Appends the given text to the innerHTML field (`this.innerHTML += arg`).
+|`pyyhitään` |Method  |Clears the innerHTML field (`this.innerHTML = ""`).
+|`painettaessa`|Method field|This method is called when a `click` event is fired.
+
 ### `luku` class
 
 `luku` is an alias to the JavaScript class `Number`.
@@ -490,6 +550,7 @@ Pseudodeclaration:
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
 |`pituus`    |Function|The length of this string (`this.length`).
+|`näytetään käyttäjälle`|Method|Displays this string to the user (`alert(this)`).
 
 ### `muuttuja` class
 
@@ -507,10 +568,12 @@ Pseudodeclaration:
 Pseudodeclaration:
 
     Kun nykyinen sivu näyttää mielenkiintoisen tekstin, ...
+    Kun nykyinen sivu etsii elementin annetulla nimellä, ...
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
-|`näyttää`   |Method  |Writes the given HTML code to the document (`this.write(arg)`)
+|`etsii elementin`|Method|Returns the element with the given id (`this.getElementById(arg)`).
+|`näyttää`   |Method  |Writes the given HTML code to the document (`this.write(arg)`).
 
 ## Finnish-English mini dictionary
 
