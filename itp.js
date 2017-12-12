@@ -11,9 +11,25 @@ Number.prototype.f_merkkijono_E = Number.prototype.toString;
 
 // String/merkkijono
 String.prototype.f_pituus = function() { return this.length; };
+String.prototype.näyttää_käyttäjälle_P__N = function() { alert(this); };
 
 // HTMLDocument/sivu
 HTMLDocument.prototype.näyttää_A_G_N = HTMLDocument.prototype.write;
+HTMLDocument.prototype.etsiä_elementin_A_StUo_N = function(muuttuja, id) {
+ muuttuja.arvo = this.getElementById(id);
+};
+
+// HTMLElement/elementti
+HTMLElement.prototype.assign = function(n, v) {
+ switch (n) {
+  case "painaa_P__P":
+   this.addEventListener("click", v);
+   break;
+ }
+ this[n] = v;
+};
+HTMLElement.prototype.kirjoittaa_P_N_Ut = function(text) { this.innerHTML += text; };
+HTMLElement.prototype.pyyhkiä_P__N = function() { this.innerHTML = ""; };
 
 // Date/aika
 Date.prototype.f_päivämäärämerkkijono_E = function() { return this.getLocaleDateString(); };
