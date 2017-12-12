@@ -180,6 +180,7 @@ def parseSentence(tokens):
 		tokens.setStyle("function")
 		place = tokens.place()
 		subjectless = True
+		passive = True
 		if word.form == "imperative_present_simple2":
 			predicate = word.baseform + "!"
 		elif word.form == "indicative_present_simple4":
@@ -191,12 +192,23 @@ def parseSentence(tokens):
 		syntaxError("malformed sentence", tokens)
 	
 	while not tokens.eof():
-		if tokens.peek().token.lower() in [",", ".", "eikä", "ja"]:
+		if tokens.peek().token.lower() in [",", ".", "eikä", "ja", "tuloksenaan"]:
 			break
 		arg, case = parseNominalPhrase(tokens)
 		if case in args:
 			syntaxError(CASES_ENGLISH[case] + " argument repeated twice", tokens)
 		args[case] = arg
+	
+	if (not tokens.eof() and (
+			(tokens.peek().token.lower() == "tuloksenaan" and not passive)
+			or (tokens.peek().token.lower() == "tuloksena" and passive)
+			)):
+		tokens.next()
+		tokens.setStyle("keyword")
+		w1, w2 = parseVariable(tokens)
+		output_var = w1.baseform + "_" + w2.baseform
+	else:
+		output_var = None
 	
 	eatComma(tokens)
 	
@@ -210,9 +222,9 @@ def parseSentence(tokens):
 		wheres = []
 	
 	if subjectless:
-		return ProcedureCallStatement(predicate, args, wheres)
+		return ProcedureCallStatement(predicate, args, wheres, output_var)
 	else:
-		return MethodCallStatement(subject, subject_case, predicate, args, wheres)
+		return MethodCallStatement(subject, subject_case, predicate, args, wheres, output_var)
 
 def readVerbModifiers(tokens):
 	ans = ""
@@ -332,7 +344,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			syntaxError("both operands of \"tai\" must be in the same case", tokens)
 		return TernaryExpr(conds, alt1, alt2), case1
 	word = tokens.next().toWord(cls=ADJ+NAME+NUMERAL+PRONOUN,forms=promoted_cases)
-	if word.isNoun() and word.form == "olento":
+	if word.isNoun() and word.possessive == "" and word.form == "olento" and word.word != "tuloksena":
 		tokens.setStyle("field")
 		expr, case = parseNominalPhrase(tokens)
 	elif word.isOrdinal():
@@ -454,7 +466,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				field = word2.baseform
 				expr = SubscriptExpr(FieldExpr(expr, field), index)
 				cont = True
-			elif word.isNoun():
+			elif word.isNoun() and word.possessive == "":
 				tokens.next()
 				tokens.setStyle("field")
 				case = word.form
@@ -482,7 +494,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 						+ CASES_ENGLISH[required_arg_case] + " case", tokens)
 				expr = ArithmeticExpr(op, expr, arg)
 				cont = True
-			elif word.isNoun() and word.form == "olento":
+			elif word.isNoun() and word.form == "olento" and word.possessive == "" and word.word != "tuloksena":
 				tokens.next()
 				tokens.setStyle("field")
 				expr = FieldExpr(expr, word.baseform + "_E")
@@ -558,7 +570,7 @@ def parseList(parseChild, tokens, custom_endings=[]):
 		else:
 			force = False
 	checkEof(tokens)
-	if tokens.peek().token == ".":
+	if len(ans) == 1 and tokens.peek().token == ".":
 		return ans
 	token = tokens.next()
 	tokens.setStyle("keyword")
@@ -568,4 +580,6 @@ def parseList(parseChild, tokens, custom_endings=[]):
 		tokens.setStyle("keyword")
 	elif token.token.lower() == "ja":
 		ans += [parseChild(tokens)]
+	elif token.token.lower() not in custom_endings:
+		syntaxError("unexpected token, expected " + ", ".join(custom_endings+["ja"]) + " or \"eikä\"", tokens)
 	return ans

@@ -18,6 +18,7 @@ HTMLDocument.prototype.näyttää_A_G_N = HTMLDocument.prototype.write;
 HTMLDocument.prototype.etsiä_elementin_A_StUo_N = function(muuttuja, id) {
  muuttuja.arvo = this.getElementById(id);
 };
+HTMLDocument.prototype.etsiä_elementin_A_Uo_N = HTMLDocument.prototype.getElementById;
 
 // HTMLElement/elementti
 HTMLElement.prototype.assign = function(n, v) {

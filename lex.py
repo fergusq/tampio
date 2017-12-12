@@ -49,6 +49,7 @@ def lexCode(code):
 			cl = analysis["CLASS"]
 			number = analysis["NUMBER"] if "NUMBER" in analysis else ""
 			person = analysis["PERSON"] if "PERSON" in analysis else ""
+			possessive = analysis["POSSESSIVE"] if "POSSESSIVE" in analysis else ""
 			if "SIJAMUOTO" in analysis:
 				form = analysis["SIJAMUOTO"]
 			elif "MOOD" in analysis and "TENSE" in analysis:
@@ -72,7 +73,7 @@ def lexCode(code):
 				form = analysis["MOOD"]
 			else:
 				form = ""
-			alternatives += [Word(word, bf, form + person, number, cl)]
+			alternatives += [Word(word, bf, form + person, number, cl, possessive)]
 		if len(alternatives) == 0:
 			alternatives = [Word(word, word, "", "", "")]
 		output += [AltWords(word, alternatives)]
@@ -200,13 +201,14 @@ VERB = ["teonsana", "kieltosana"]
 CONJ = ["sidesana"]
 
 class Word:
-	def __init__(self, word, baseform, form, number, word_class):
+	def __init__(self, word, baseform, form, number, word_class, possessive=""):
 		#print(word, baseform, form, number, word_class)
 		self.word = word
 		self.baseform = baseform
 		self.form = form
 		self.number = number
 		self.word_class = word_class
+		self.possessive = possessive
 	def isNoun(self):
 		return self.word_class in ["nimisana"]
 	def isName(self):

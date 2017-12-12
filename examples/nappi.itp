@@ -1,14 +1,8 @@
-Olkoon mukava muuttuja uusi muuttuja.
-
 Kun nykyinen sivu avautuu,
-
-	nykyinen sivu etsii elementin mukavaan muuttujaan nimellä "output",
-	kivaksi alueeksi asetetaan mukavan muuttujan arvo,
 	
+	nykyinen sivu etsii elementin nimellä "output" tuloksenaan kiva alue,
 	kivalle alueelle kirjoitetaan koodi "<a id=nappi-id>Paina tästä!</a>",
-	
-	nykyinen sivu etsii elementin mukavaan muuttujaan nimellä "nappi-id",
-	nätiksi napiksi asetetaan mukavan muuttujan arvo
+	nykyinen sivu etsii elementin nimellä "nappi-id" tuloksenaan nätti nappi
 	
 ja	nättiä nappia painettaessa käyköön niin, että
 		teksti "Hei maailma!" näytetään käyttäjälle.

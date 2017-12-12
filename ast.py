@@ -126,10 +126,11 @@ class CondExpr:
 			return ans
 
 class CallStatement:
-	def __init__(self, name, args, wheres):
+	def __init__(self, name, args, wheres, output_var):
 		self.name = name
 		self.args = args
 		self.wheres = wheres
+		self.output_var = output_var
 	def compileName(self):
 		keys = sorted(self.args.keys())
 		return escapeIdentifier(self.name) + "_" + "".join([CASES_ABRV[case] for case in keys])
@@ -138,8 +139,13 @@ class CallStatement:
 		return "(" + ", ".join([self.args[key].compile() for key in keys]) + ")"
 	def compileWheres(self):
 		return "".join(["var "+escapeIdentifier(where[0])+" = "+where[1].compile()+"; " for where in self.wheres])
+	def compileAssignment(self):
+		if self.output_var:
+			return "var " + self.output_var + " = "
+		else:
+			return ""
 	def compile(self, semicolon=True, indent=0):
-		ans = " "*indent + self.compileWheres() + self.compileName() + self.compileArgs()
+		ans = " "*indent + self.compileWheres() + self.compileAssignment() + self.compileName() + self.compileArgs()
 		if semicolon:
 			ans += ";\n"
 		return ans
@@ -149,12 +155,13 @@ class ProcedureCallStatement(CallStatement):
 		return self.name + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 
 class MethodCallStatement(CallStatement):
-	def __init__(self, obj, obj_case, name, args, wheres):
+	def __init__(self, obj, obj_case, name, args, wheres, output_var):
 		self.obj = obj
 		self.obj_case = obj_case
 		self.name = name
 		self.args = args
 		self.wheres = wheres
+		self.output_var = output_var
 	def __str__(self):
 		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 	def compileName(self):
@@ -170,8 +177,10 @@ class MethodCallStatement(CallStatement):
 			else:
 				ans += self.obj.compile()
 			ans += " = " + self.args["nimento"].compile()
+		elif self.name == "palauttaa_P" and self.obj_case == "nimento" and len(self.args) == 0:
+			ans += "return " + self.obj.compile()
 		else:
-			ans += self.compileWheres() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
+			ans += self.compileWheres() + self.compileAssignment() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
 		if semicolon:
 			ans += ";\n"
 		return ans
