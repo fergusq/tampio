@@ -119,14 +119,42 @@ def parseSentence(tokens):
 		cls=ADJ*2+NUMERAL*2+NAME*2+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
 	if word.isAdjective() or word.isOrdinal() or word.isName() or word.isPronoun():
-		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
+		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento", "omanto"])
 		
 		place = tokens.place()
 		
 		checkEof(tokens)
 		word = tokens.next().toWord(
 			cls=VERB,
-			forms=["indicative_present_simple3", "indicative_present_simple4"])
+			forms=["indicative_present_simple3", "indicative_present_simple4", "E-infinitive_sisaolento"])
+		
+		if word.isVerb() and word.form == "E-infinitive_sisaolento":
+			method = word.baseform + readVerbModifiers(tokens) + "_A"
+			
+			if case != "omanto":
+				tokens.i = place
+				syntaxError("object is not in the genitive case", tokens)
+			
+			params = {}
+			while not tokens.eof():
+				peek = tokens.peek()
+				if peek.token.lower() in [",", ".", "eikä", "ja"]:
+					break
+				if not peek.isWord() or not peek.toWord(cls=ADJ).isAdjective():
+					break
+				param, case = parseNominalPhrase(tokens)
+				if not isinstance(param, VariableExpr):
+					syntaxError("malformed parameter", tokens)
+				if case in params:
+					syntaxError("parameter repeated twice", tokens)
+				params[case] = param
+			for keyword in ["käyköön", "niin", ",", "että"]:
+				accept([keyword], tokens)
+				if keyword != ",":
+					tokens.setStyle("keyword")
+			body = parseList(parseSentence, tokens)
+			eatComma(tokens)
+			return MethodAssignmentStatement(subject, method, params, body)
 		
 		if not word.isVerb() or word.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
 			syntaxError("predicate is not in indicative simple present", tokens)
@@ -395,7 +423,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			token = tokens.peek()
 			if not token.isWord():
 				break
-			word = token.toWord(cls=NOUN+NUMERAL, forms=["omanto"])
+			word = token.toWord(cls=NOUN+NUMERAL, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"])
 			if must_be_in_genitive and word.form != "omanto":
 				break
 			if word.isOrdinal() and tokens.peek(2) and tokens.peek(2).toWord(cls=NOUN, forms=[word.form]).isNoun():

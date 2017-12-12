@@ -175,6 +175,32 @@ class MethodCallStatement(CallStatement):
 			ans += ";\n"
 		return ans
 
+class MethodAssignmentStatement:
+	def __init__(self, obj, method, params, body):
+		self.obj = obj
+		self.method = method
+		self.params = params
+		self.body = body
+	def __str__(self):
+		return (str(self.obj) + "." + self.method + " := ("
+			+ ", ".join([key + ": " + str(self.args[key]) for key in self.params]) + ") => { " + "; ".join(map(str, self.body)) + " }")
+	def compileName(self):
+		keys = sorted(self.params.keys())
+		return escapeIdentifier(self.method) + "_" + "".join([CASES_ABRV[case] for case in keys])
+	def compileParams(self):
+		keys = sorted(self.params.keys())
+		return "(" + ", ".join([self.params[key].compile() for key in keys]) + ")"
+	def compile(self, indent=0):
+		ans = " "*indent
+		ans += self.obj.compile()
+		ans += "." + self.compileName()
+		ans += " = "
+		ans += self.compileParams()
+		ans += " => {\n"
+		ans += "".join([s.compile(indent=indent+1) for s in self.body])
+		ans += " "*indent + "}"
+		return ans
+
 class VariableExpr:
 	def __init__(self, name, vtype="any"):
 		self.name = name

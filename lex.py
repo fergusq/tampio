@@ -51,6 +51,15 @@ def lexCode(code):
 				form = analysis["SIJAMUOTO"]
 			elif "MOOD" in analysis and "TENSE" in analysis:
 				form = analysis["MOOD"] + "_" + analysis["TENSE"]
+			elif "MOOD" in analysis and analysis["MOOD"] == "E-infinitive":
+				if re.fullmatch(r'.*ss[aä]', word.lower()):
+					form = "E-infinitive_sisaolento"
+				elif re.fullmatch(r'.*n', word.lower()):
+					form = "E-infinitive_keinonto"
+				else:
+					form = analysis["MOOD"]
+			elif "MOOD" in analysis:
+				form = analysis["MOOD"]
 			else:
 				form = ""
 			number = analysis["NUMBER"] if "NUMBER" in analysis else ""
@@ -114,7 +123,7 @@ class TokenList:
 			if i == place:
 				column = len(out)
 			if self.lines[i] == self.lines[place] and "\n" not in self.tokens[i].token:
-				out += self.tokens[i].token
+				out += self.tokens[i].token.replace("\t", " ")
 		out += "\n" + " "*column + "^" + "~"*(len(self.tokens[place].token)-1)
 		return out
 
