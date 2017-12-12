@@ -47,23 +47,31 @@ def lexCode(code):
 		for analysis in analysis_list:
 			bf = analysis["BASEFORM"]
 			cl = analysis["CLASS"]
+			number = analysis["NUMBER"] if "NUMBER" in analysis else ""
+			person = analysis["PERSON"] if "PERSON" in analysis else ""
 			if "SIJAMUOTO" in analysis:
 				form = analysis["SIJAMUOTO"]
 			elif "MOOD" in analysis and "TENSE" in analysis:
 				form = analysis["MOOD"] + "_" + analysis["TENSE"]
 			elif "MOOD" in analysis and analysis["MOOD"] == "E-infinitive":
-				if re.fullmatch(r'.*ss[aä]', word.lower()):
+				if re.fullmatch(r'.*taess[aä]', word.lower()):
 					form = "E-infinitive_sisaolento"
+					person = "4"
+				elif re.fullmatch(r'.*taen', word.lower()):
+					form = "E-infinitive_keinonto"
+					person = "4"
+				elif re.fullmatch(r'.*ss[aä]', word.lower()):
+					form = "E-infinitive_sisaolento"
+					person = "3"
 				elif re.fullmatch(r'.*n', word.lower()):
 					form = "E-infinitive_keinonto"
+					person = "3"
 				else:
 					form = analysis["MOOD"]
 			elif "MOOD" in analysis:
 				form = analysis["MOOD"]
 			else:
 				form = ""
-			number = analysis["NUMBER"] if "NUMBER" in analysis else ""
-			person = analysis["PERSON"] if "PERSON" in analysis else ""
 			alternatives += [Word(word, bf, form + person, number, cl)]
 		if len(alternatives) == 0:
 			alternatives = [Word(word, word, "", "", "")]
@@ -157,7 +165,7 @@ class Punctuation:
 	def isString(self):
 		return not not re.fullmatch(r'"[^"]*"', self.token)
 	def toWord(self, cls=[], forms=[], numbers=[]):
-		syntaxError("unexpected token, expected a word", tokens)
+		syntaxError("unexpected token, expected a word", self.tokens)
 	def __str__(self):
 		return self.token
 	def __repr__(self):

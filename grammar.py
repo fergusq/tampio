@@ -118,7 +118,7 @@ def parseSentence(tokens):
 	word = tokens.peek().toWord(
 		cls=ADJ*2+NUMERAL*2+NAME*2+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
-	if word.isAdjective() or word.isOrdinal() or word.isName() or word.isPronoun():
+	if word.isAdjective() or word.isOrdinal() or word.isName() or word.isPronoun() or word.isNoun():
 		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento", "omanto"])
 		
 		place = tokens.place()
@@ -128,12 +128,18 @@ def parseSentence(tokens):
 			cls=VERB,
 			forms=["indicative_present_simple3", "indicative_present_simple4", "E-infinitive_sisaolento"])
 		
-		if word.isVerb() and word.form == "E-infinitive_sisaolento":
-			method = word.baseform + readVerbModifiers(tokens) + "_A"
+		if word.isVerb() and word.form in ["E-infinitive_sisaolento3", "E-infinitive_sisaolento4"]:
+			method = word.baseform + readVerbModifiers(tokens)
+			if word.form[-1] == "3":
+				method += "_A"
+			else:
+				method += "_P"
 			
-			if case != "omanto":
+			if word.form[-1] == "3" and case != "omanto":
 				tokens.i = place
-				syntaxError("object is not in the genitive case", tokens)
+				syntaxError("subject is not in the genitive case", tokens)
+			
+			subject_case = case
 			
 			params = {}
 			while not tokens.eof():
@@ -154,7 +160,7 @@ def parseSentence(tokens):
 					tokens.setStyle("keyword")
 			body = parseList(parseSentence, tokens)
 			eatComma(tokens)
-			return MethodAssignmentStatement(subject, method, params, body)
+			return MethodAssignmentStatement(subject, subject_case, method, params, body)
 		
 		if not word.isVerb() or word.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
 			syntaxError("predicate is not in indicative simple present", tokens)
@@ -214,7 +220,7 @@ def readVerbModifiers(tokens):
 		token = tokens.peek()
 		if token.isWord():
 			word = token.toWord(cls=ADJ+NUMERAL+CONJ+PRONOUN)
-			if word.isNoun() and (word.baseform not in ["teksti", "merkkijono"] or not tokens.peek(2) or not tokens.peek(2).isString()) and word.form != "olento":
+			if word.isNoun() and (not tokens.peek(2) or not tokens.peek(2).isString()) and word.form != "olento":
 				tokens.next()
 				tokens.setStyle("function")
 				ans += "_" + token.token.lower()
@@ -345,7 +351,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		tokens.setStyle("literal")
 		case = word.form
 		expr = NumExpr(int(word.baseform))
-	elif word.isNoun() and word.baseform in ["teksti", "merkkijono"] and tokens.peek() and tokens.peek().isString():
+	elif word.isNoun() and tokens.peek() and tokens.peek().isString():
 		tokens.setStyle("keyword")
 		case = word.form
 		expr = StrExpr(tokens.next().token[1:-1])
@@ -356,9 +362,19 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		variable = word.baseform
 		expr = VariableExpr(variable)
 	elif word.isPronoun() and word.baseform == "se":
-		tokens.setStyle("variable")
-		case = word.form
-		expr = VariableExpr("this")
+		if tokens.peek(1) and tokens.peek(1).token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "että":
+			tokens.setStyle("keyword")
+			accept([","], tokens)
+			accept(["että"], tokens)
+			tokens.setStyle("keyword")
+			body = parseList(parseSentence, tokens)
+			eatComma(tokens)
+			case = word.form
+			expr = LambdaExpr(body)
+		else:
+			tokens.setStyle("variable")
+			case = word.form
+			expr = VariableExpr("this")
 	elif word.isAdjective() and word.baseform == "uusi":
 		tokens.setStyle("keyword")
 		checkEof(tokens)

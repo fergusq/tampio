@@ -78,6 +78,7 @@ class ClassDecl:
 			else:
 				ans += "undefined;\n"
 		ans += "};"
+		ans += "\n" + typeToJs(self.name) + ".prototype.assign = function(n, v) { this[n] = v; };"
 		for name, number in self.fields:
 			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + name + " = function() { return this." + name + "; };"
 		return ans
@@ -176,8 +177,9 @@ class MethodCallStatement(CallStatement):
 		return ans
 
 class MethodAssignmentStatement:
-	def __init__(self, obj, method, params, body):
+	def __init__(self, obj, obj_case, method, params, body):
 		self.obj = obj
+		self.obj_case = obj_case
 		self.method = method
 		self.params = params
 		self.body = body
@@ -186,19 +188,21 @@ class MethodAssignmentStatement:
 			+ ", ".join([key + ": " + str(self.args[key]) for key in self.params]) + ") => { " + "; ".join(map(str, self.body)) + " }")
 	def compileName(self):
 		keys = sorted(self.params.keys())
-		return escapeIdentifier(self.method) + "_" + "".join([CASES_ABRV[case] for case in keys])
+		return escapeIdentifier(self.method) + "_" + "".join([CASES_ABRV[case] for case in keys]) + "_" + CASES_ABRV[self.obj_case]
 	def compileParams(self):
 		keys = sorted(self.params.keys())
 		return "(" + ", ".join([self.params[key].compile() for key in keys]) + ")"
-	def compile(self, indent=0):
+	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
 		ans += self.obj.compile()
-		ans += "." + self.compileName()
-		ans += " = "
+		ans += ".assign(\"" + self.compileName()
+		ans += "\", "
 		ans += self.compileParams()
 		ans += " => {\n"
 		ans += "".join([s.compile(indent=indent+1) for s in self.body])
-		ans += " "*indent + "}"
+		ans += " "*indent + "});"
+		if semicolon:
+			ans += ";\n"
 		return ans
 
 class VariableExpr:
@@ -280,6 +284,14 @@ class ListExpr:
 		return "[" + ", ".join(map(str, self.values)) + "]"
 	def compile(self):
 		return "[" + ", ".join([value.compile() for value in self.values]) + "]"
+
+class LambdaExpr:
+	def __init__(self, body):
+		self.body = body
+	def __str__(self):
+		return "() => { " + "; ".join(map(str, body)) + " }"
+	def compile(self):
+		return "() => { " + "; ".join([s.compile(semicolon=False) for s in self.body]) + "; }"
 
 class ArithmeticExpr:
 	def __init__(self, operator, left, right):

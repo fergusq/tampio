@@ -46,13 +46,13 @@ def createHTML(code):
 	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body>"""
 	ans += """<div style="max-height:98vh;overflow:auto;float:left;width:50%;"><pre style="margin:0px;white-space:pre-wrap;">"""
 	ans += prettyPrint(tokens, "html")
-	ans += """</pre></div><div style="max-height:98vh;overflow:auto;float:right;width:calc(50% - 5px);padding-left:5px;"><script type="text/javascript">\n"""
+	ans += """</pre></div><div style="max-height:98vh;overflow:auto;float:right;width:calc(50% - 5px);padding-left:5px;"><div id="output"><script type="text/javascript">\n"""
 	ans += compiled
-	ans += """\ndocument.avautua_A__N();\n</script></div></body></html>"""
+	ans += """\ndocument.avautua_A__N();\n</script></div></div></body></html>"""
 	return ans
 
-TAMPIO_VERSION = "1.7"
-COMPILER_VERSION = "1.13.0"
+TAMPIO_VERSION = "1.8"
+COMPILER_VERSION = "1.14.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
