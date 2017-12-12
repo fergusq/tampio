@@ -186,7 +186,7 @@ In the body, the word `se` can be used to refer to the unnamed parameter.
 
 ## Methods
 
-A method is a procedure that can take multiple argumets, but must not return any value.
+A method is a procedure that can take multiple argumets.
 
     Kun [self parameter] [verb] [parameters], [statement list].
 
@@ -217,6 +217,12 @@ the object is in variable `villi vektori`:
 
     villi vektori painetaan nykyiselle sivulle
 
+If the method returns a value, it can be stored using the `tuloksena` keyword.
+If the verb is expressed in active voice, the keyword must have the `-an` possessive suffix.
+
+    [object] [verb/active] [arguments] tuloksenaan [variable]
+    [object] [verb/passive] [arguments] tuloksena [variable]
+
 A method call there may be a `missä` modifier, which is used to introduce temporary variables.
 They can be referenced in the call immediately before, and in all calls after the modifier.
 There must be a comma before `missä`.
@@ -236,6 +242,16 @@ However, it is may be clearer to use a `missä` clause to create a temporary var
 
     väliaikainen vektori painetaan nykyiselle sivulle,
     	missä väliaikainen vektori on uusi vektori, jonka komponentteja ovat yksi, kaksi ja kolme eikä muuta
+
+### Return statements
+
+A method can return a value using the return statement.
+
+    [expression/nominative] palautetaan
+
+For example, to return a zero:
+
+    nolla palautetaan
 
 ### If statements
 
@@ -277,6 +293,27 @@ Below is a table of available comparison operators.
 |`suurempi kuin`               |`>`                  |
 |`pienempi tai yhtä suuri kuin`|`<=`                 |
 |`suurempi tai yhtä suuri kuin`|`>=`                 |
+
+### Assignments
+
+There are three ways to create variables in Tampio: `missä` clauses, return value assignments and assignment statements.
+Return value assignments are covered in the method call chapter.
+Assignment statements consist of the name of the variable or field in the translative case and an expression.
+
+    [lval/translative] asetetaan [expression/nominative]
+
+For example:
+
+    kivan kaverin kuvaukseksi asetetaan teksti "Hän on kiva"
+
+There is also a special syntax to add a new item to a list, implemented as a method of the array class.
+It is similar to the assignment syntax, but the verb is `lisätään` instead of `asetetaan`.
+
+    [list/translative singular] lisätään [expression/nominative]
+
+For example:
+
+    kivan kaverin ystäväksi lisätään mukava kaveri
 
 ## Expressions
 
