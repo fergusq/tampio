@@ -1,0 +1,92 @@
+Olkoon nykyinen alue uusi muuttuja.
+
+Luvun seuraaja on se lisättynä yhteen.
+
+Kun toistetaan n kertaa tehokas toiminto,
+	jos n on suurempi kuin nolla, niin
+		tehokas toiminto suoritetaan
+	ja	toistetaan m kertaa tehokas toiminto, missä m on n vähennettynä yhdellä.
+
+Listalla on alkiot.
+Listan koko on sen alkioiden määrä.
+
+Olkoon loistava laskuri uusi luku.
+Olkoon koodaava merkkijono tyhjyys "".
+
+Kun lisätään koodiin mainio merkkijono,
+	koodaavaksi merkkijonoksi asetetaan koodaava merkkijono yhdistettynä mainioon merkkijonoon.
+
+Kun kasvatetaan laskuria,
+	loistavaksi laskuriksi asetetaan loistavan laskurin seuraaja.
+
+Kun muodostetaan ruudukko kivalle alueelle,
+	loistavaksi laskuriksi asetetaan nolla,
+	lisätään koodiin koodi "<table style='border-collapse:collapse;font-family:monospace;'>",
+	toistetaan kolme kertaa se, että
+		pienen pelikentän riviksi lisätään pieni rivi, missä pieni rivi on uusi rivi eikä muuta,
+		lisätään koodiin teksti "<tr>",
+		toistetaan kolme kertaa se, että
+			pienen rivin ruuduksi lisätään kiva ruutu, missä kiva ruutu on uusi ruutu eikä muuta,
+			lyhyen ruutulistan alkioksi lisätään kiva ruutu,
+			kasvatetaan laskuria,
+		ja	lisätään koodiin
+				teksti "<td id='cell"
+				yhdistettynä loistavaan laskuriin
+				ja yhdistettynä tekstiin "' style='padding:20px;border:1px solid black;'>-</td>",
+	ja	lisätään koodiin teksti "</tr>",
+	lisätään koodiin teksti "</table>"
+ja	kivalle alueelle kirjoitetaan koodaava merkkijono.
+
+Kun nykyisellä sivulla rekisteröidään tapahtumakäsittelijät,
+	loistavaksi laskuriksi asetetaan nolla
+ja	toistetaan kolme kertaa se, että
+		toistetaan kolme kertaa se, että
+			kasvatetaan laskuria,
+			nykyinen sivu etsii elementin nimellä "cell" yhdistettynä n:ään tuloksenaan etsitty ruutualue, missä n on loistava laskuri eikä muuta,
+		ja	etsittyä ruutualuetta painettaessa käyköön niin, että
+				vaihdetaan vuoroa,
+				etsitty ruutualue pyyhitään,
+				jos nykyisen pelaajan nimi on sana "risti", niin
+					etsitylle ruutualueelle kirjoitetaan merkki "X" eikä muuta,
+				jos nykyisen pelaajan nimi on sana "ruutu", niin
+					etsitylle ruutualueelle kirjoitetaan merkki "O" eikä muuta,
+				lyhyen ruutulistan n:nnen alkion omistajaksi asetetaan nykyinen pelaaja
+			ja	tarkistetaan voitto.
+
+Kun tarkistetaan voitto,
+	tarkistetaan voitto pienen pelikentän ensimmäisellä rivillä,
+	tarkistetaan voitto pienen pelikentän toisella rivillä,
+	tarkistetaan voitto pienen pelikentän kolmannella rivillä,
+	tarkistetaan voitto sarakkeista ensimmäisellä,
+	tarkistetaan voitto sarakkeista toisella,
+	tarkistetaan voitto sarakkeista kolmannella,
+	tarkistetaan voitto diagonaaleista ensimmäisellä
+ja	tarkistetaan voitto diagonaaleista toisella.
+
+Kun tarkistetaan voitto kivalla rivillä,
+	jos kivan rivin ensimmäisen ruudun omistaja on kivan rivin toisen ruudun omistaja
+	ja kivan rivin ensimmäisen ruudun omistaja on kivan rivin kolmannen ruudun omistaja,
+		rekisteröidään voitto.
+
+Matriisilla on rivit.
+Rivillä on ruudut.
+Ruudulla on omistaja.
+Pelaajalla on nimi.
+
+Olkoon pieni pelikenttä uusi matriisi.
+Olkoon lyhyt ruutulista uusi lista.
+
+Olkoon raivoisa risti uusi pelaaja, jonka nimi on sana "risti".
+Olkoon ryhdikäs ruutu uusi pelaaja, jonka nimi on sana "ruutu".
+Olkoon nykyinen pelaaja ryhdikäs ruutu.
+
+Kun vaihdetaan vuoroa,
+	nykyiseksi pelaajaksi asetetaan riippuen siitä, onko nykyisen pelaajan nimi sana "risti",
+		joko ryhdikäs ruutu
+		tai raivoisa risti.
+
+Kun nykyinen sivu avautuu,
+	nykyinen sivu etsii elementin nimellä "output" tuloksenaan oikeanpuoleinen alue,
+	nykyiseksi alueeksi asetetaan oikeanpuoleinen alue,
+	muodostetaan ruudukko oikeanpuoleiselle alueelle
+ja	nykyisellä sivulla rekisteröidään tapahtumakäsittelijät.
