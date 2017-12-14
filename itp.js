@@ -3,7 +3,7 @@ Array.prototype.lisätä_P_N_T = function(kiva_arvo) { this.push(kiva_arvo); };
 Array.prototype.f_määrä = function() { return this.length; };
 
 // Function
-Function.prototype.kutsua_P__P = function() { this(); }
+Function.prototype.suorittaa_P__N = function() { this(); }
 
 // Number/luku
 var power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};

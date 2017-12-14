@@ -41,6 +41,12 @@ def lexCode(code):
 					cont = True
 		if cont:
 			continue
+		for case in ORDINAL_CASE_REGEXES:
+			if re.fullmatch(ORDINAL_CASE_REGEXES[case], word):
+				output += [AltWords(word, [Word(word, word[:word.index(":")], case, number, "nimisana", ordinal_like=True)])]
+				cont = True
+		if cont:
+			continue
 		
 		analysis_list = voikko.analyze(word)
 		alternatives = []
@@ -202,16 +208,19 @@ VERB = ["teonsana", "kieltosana"]
 CONJ = ["sidesana"]
 
 class Word:
-	def __init__(self, word, baseform, form, number, word_class, possessive=""):
-		#print(word, baseform, form, number, word_class)
+	def __init__(self, word, baseform, form, number, word_class, possessive="", ordinal_like=False):
+		print(word, baseform, form, number, word_class)
 		self.word = word
 		self.baseform = baseform
 		self.form = form
 		self.number = number
 		self.word_class = word_class
 		self.possessive = possessive
+		self.ordinal_like = ordinal_like
+	def isVariable(self):
+		return len(self.baseform) == 1
 	def isNoun(self):
-		return self.word_class in ["nimisana"]
+		return self.word_class in ["nimisana"] or len(self.baseform) == 1
 	def isName(self):
 		return self.word_class in ["etunimi", "sukunimi"]
 	def isPronoun(self):
@@ -226,3 +235,5 @@ class Word:
 		return self.word_class in ["teonsana", "kieltosana"]
 	def isConjunction(self):
 		return self.word_class in ["sidesana"]
+	def isAdverb(self):
+		return self.word_class in ["seikkasana"]

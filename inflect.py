@@ -160,6 +160,21 @@ CASE_REGEXES = {
 	}
 }
 
+ORDINAL_CASE_REGEXES = {
+	"nimento": r"[^:]+:s",
+	"omanto": r"[^:]+:nnen",
+	"osanto": r"[^:]+:tt[aä]",
+	"tulento": r"[^:]+:nneksi",
+	"ulkotulento": r"[^:]+:nnelle",
+	"ulkoolento": r"[^:]+:nnell[aä]",
+	"ulkoeronto": r"[^:]+:nnelt[aä]",
+	"sisatulento": r"[^:]+:nteen",
+	"sisaolento": r"[^:]+:nness[aä]",
+	"sisaeronto": r"[^:]+:nnest[aä]",
+	"vajanto": r"[^:]+:nnett[aä]",
+	"kerrontosti": r"[^:]+:nnesti"
+}
+
 def inflect(word, case, plural):
 	case_latin = CASES_LATIN[case]
 	if plural:

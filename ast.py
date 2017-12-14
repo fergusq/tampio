@@ -17,6 +17,12 @@
 from inflect import CASES_ABRV
 from fatal_error import fatalError
 
+def formAbrv(form):
+	if form in CASES_ABRV:
+		return CASES_ABRV[form]
+	else:
+		return form[0].upper() + form[1:].lower()
+
 def typeToJs(typename):
 	if typename == "luku":
 		return "Number"
@@ -139,7 +145,7 @@ class CallStatement:
 		self.output_var = output_var
 	def compileName(self):
 		keys = sorted(self.args.keys())
-		return escapeIdentifier(self.name) + "_" + "".join([CASES_ABRV[case] for case in keys])
+		return escapeIdentifier(self.name) + "_" + "".join([formAbrv(form) for form in keys])
 	def compileArgs(self):
 		keys = sorted(self.args.keys())
 		return "(" + ", ".join([self.args[key].compile() for key in keys]) + ")"
@@ -171,7 +177,7 @@ class MethodCallStatement(CallStatement):
 	def __str__(self):
 		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 	def compileName(self):
-		return super(MethodCallStatement, self).compileName() + "_" + CASES_ABRV[self.obj_case]
+		return super(MethodCallStatement, self).compileName() + "_" + formAbrv(self.obj_case)
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
 		if ((isinstance(self.obj, VariableExpr) or isinstance(self.obj, SubscriptExpr) or isinstance(self.obj, FieldExpr))
@@ -203,7 +209,7 @@ class MethodAssignmentStatement:
 			+ ", ".join([key + ": " + str(self.args[key]) for key in self.params]) + ") => { " + "; ".join(map(str, self.body)) + " }")
 	def compileName(self):
 		keys = sorted(self.params.keys())
-		return escapeIdentifier(self.method) + "_" + "".join([CASES_ABRV[case] for case in keys]) + "_" + CASES_ABRV[self.obj_case]
+		return escapeIdentifier(self.method) + "_" + "".join([formAbrv(form) for form in keys]) + "_" + formAbrv(self.obj_case)
 	def compileParams(self):
 		keys = sorted(self.params.keys())
 		return "(" + ", ".join([self.params[key].compile() for key in keys]) + ")"
