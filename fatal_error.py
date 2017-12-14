@@ -23,8 +23,8 @@ def fatalError(msg):
 class StopEvaluation(Exception):
 	pass
 
-def syntaxError(msg, tokens):
-	raise(TampioSyntaxError(msg, tokens, tokens.i))
+def syntaxError(msg, tokens, place=None):
+	raise(TampioSyntaxError(msg, tokens, place if place else tokens.place()))
 
 class TampioSyntaxError(Exception):
 	def __init__(self, msg, tokens, i):
@@ -34,4 +34,4 @@ class TampioSyntaxError(Exception):
 	def printMe(self, stream):
 		stream.write("Syntax error: " + self.msg + "\n" + self.tokens.fancyContext(self.place) + "\n")
 	def __str__(self):
-		stream.write("Syntax error: " + self.msg + " (in \"" + self.tokens.context(self.place) + "\")")
+		return "Syntax error: " + self.msg + " (in \"" + self.tokens.context(self.place) + "\")"

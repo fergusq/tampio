@@ -52,7 +52,7 @@ def createHTML(code):
 	return ans
 
 TAMPIO_VERSION = "1.10"
-COMPILER_VERSION = "1.16.0"
+COMPILER_VERSION = "1.16.1"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():

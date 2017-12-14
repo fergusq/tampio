@@ -34,6 +34,7 @@ HTMLElement.prototype.assign = function(n, v) {
  this[n] = v;
 };
 HTMLElement.prototype.kirjoittaa_P_N_Ut = function(text) { this.innerHTML += text; };
+HTMLElement.prototype.kirjoittaa_P_N_St = function(text) { this.innerHTML += text; };
 HTMLElement.prototype.pyyhkiä_P__N = function() { this.innerHTML = ""; };
 
 // Date/aika

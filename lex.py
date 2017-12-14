@@ -99,7 +99,7 @@ class TokenList:
 			line += token.token.count("\n")
 			self.lines.append(line)
 	def setPlace(self, i):
-		self.i = 0
+		self.i = i
 	def place(self):
 		return self.i
 	def peek(self, n=1):
@@ -209,7 +209,7 @@ CONJ = ["sidesana"]
 
 class Word:
 	def __init__(self, word, baseform, form, number, word_class, possessive="", ordinal_like=False):
-		print(word, baseform, form, number, word_class)
+		#print(word, baseform, form, number, word_class)
 		self.word = word
 		self.baseform = baseform
 		self.form = form

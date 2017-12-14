@@ -179,8 +179,7 @@ def parseSentence(tokens):
 				method += "_P"
 			
 			if word.form[-1] == "3" and case != "omanto":
-				tokens.i = place
-				syntaxError("subject is not in the genitive case", tokens)
+				syntaxError("subject is not in the genitive case", tokens, place)
 			
 			subject_case = case
 			
@@ -213,8 +212,7 @@ def parseSentence(tokens):
 		predicate = word.baseform + readVerbModifiers(tokens) + ("_P" if passive else "_A")
 		
 		if case != "nimento" and not passive:
-			tokens.setPlace(place)
-			syntaxError("subject must be in nominative case", tokens)
+			syntaxError("subject must be in nominative case", tokens, place)
 		
 		subjectless = False
 		subject_case = case
@@ -229,8 +227,7 @@ def parseSentence(tokens):
 		elif word.form == "indicative_present_simple4":
 			predicate = word.baseform + readVerbModifiers(tokens)
 		else:
-			tokens.setPlace(place)
-			syntaxError("predicate ("+word.word+") is not in indicative or imperative simple present", tokens)
+			syntaxError("predicate ("+word.word+") is not in indicative or imperative simple present", tokens, place)
 	else:
 		syntaxError("malformed sentence", tokens)
 	
@@ -241,6 +238,8 @@ def parseSentence(tokens):
 		if case in args:
 			syntaxError(formToEnglish(case, short=True) + " argument repeated twice", tokens)
 		args[case] = arg
+		if isinstance(arg, LambdaExpr): # että-lohkot ovat lauseissa aina viimeisenä
+			break
 	
 	if (not tokens.eof() and (
 			(tokens.peek().token.lower() == "tuloksenaan" and not passive)
@@ -275,8 +274,14 @@ def readVerbModifiers(tokens):
 		token = tokens.peek()
 		if token.isWord():
 			word = token.toWord(cls=ADJ+NUMERAL+CONJ+PRONOUN)
-			if ((word.isNoun() and (not tokens.peek(2) or not tokens.peek(2).isString()) and word.form != "olento" and len(word.baseform) > 1)
+			if ((word.isNoun()
+				and word.baseform not in CARDINALS
+				and word.baseform not in ORDINALS
+				and (not tokens.peek(2) or not tokens.peek(2).isString())
+				and word.form != "olento"
+				and len(word.baseform) > 1)
 				or word.isAdverb()):
+				
 				tokens.next()
 				tokens.setStyle("function")
 				ans += "_" + token.token.lower()
@@ -289,6 +294,7 @@ def readVerbModifiers(tokens):
 ARI_OPERATORS = {
 	"lisättynä": ("sisatulento", "+"),
 	"ynnättynä": ("sisatulento", "+"),
+	"yhdistettynä": ("sisatulento", "+"),
 	"vähennettynä": ("ulkoolento", "-"),
 	"kerrottuna": ("ulkoolento", "*"),
 	"jaettuna": ("ulkoolento", "/")
@@ -459,9 +465,12 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		tokens.setStyle("variable")
 		if tokens.eof():
 			syntaxError("unexpected eof, a variable must have at least two words", tokens)
+		place = tokens.place()
 		word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
-		if not word.isAdjective() or not word2.isNoun():
-			syntaxError("a variable must begin with an adjective: "+word.baseform+" "+word2.baseform, tokens)
+		if not word.isAdjective():
+			syntaxError("a variable must begin with an adjective: "+word.baseform+" "+word2.baseform, tokens, place)
+		if not word2.isNoun():
+			syntaxError("a variable must end with a noun: "+word.baseform+" "+word2.baseform, tokens)
 		if word.form != word2.form:
 			syntaxError("the adjective and the noun of a variable must be in the same case", tokens)
 		
@@ -511,10 +520,15 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			word = token.toWord(cls=NOUN+NUMERAL, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"])
 			if must_be_in_genitive and word.form != "omanto":
 				break
-			if word.isOrdinal() and tokens.peek(2) and tokens.peek(2).toWord(cls=NOUN, forms=[word.form]).isNoun():
+			if ((word.isOrdinal() or (word.isVariable() and word.ordinal_like))
+				and tokens.peek(2) and tokens.peek(2).toWord(cls=NOUN, forms=[word.form]).isNoun()):
 				tokens.next()
-				tokens.setStyle("literal")
-				index = NumExpr(ORDINALS.index(word.baseform)+1)
+				if word.isOrdinal():
+					tokens.setStyle("literal")
+					index = NumExpr(ORDINALS.index(word.baseform)+1)
+				else:
+					tokens.setStyle("variable")
+					index = VariableExpr(word.baseform)
 				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
 				if not word2.isNoun() or word2.form != word.form:
 					syntaxError("expected a noun " + formToEnglish(word.form, article=False), tokens)
@@ -585,8 +599,13 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		return expr, case
 
 def parseAssignment(tokens):
-	word, word2 = parseVariable(tokens)
-	var = word.baseform + "_" + word2.baseform
+	checkEof(tokens)
+	if tokens.peek().toWord().isVariable():
+		var = tokens.next().toWord().baseform
+		tokens.setStyle("variable")
+	else:
+		word, word2 = parseVariable(tokens)
+		var = word.baseform + "_" + word2.baseform
 	accept(["on", "ovat"], tokens)
 	tokens.setStyle("keyword")
 	value, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
@@ -642,5 +661,5 @@ def parseList(parseChild, tokens, custom_endings=[]):
 	elif token.token.lower() == "ja":
 		ans += [parseChild(tokens)]
 	elif token.token.lower() not in custom_endings:
-		syntaxError("unexpected token, expected " + ", ".join(custom_endings+["ja"]) + " or \"eikä\"", tokens)
+		syntaxError("unexpected token, expected " + ", ".join(["\""+t+"\"" for t in custom_endings+["ja"]]) + " or \"eikä\"", tokens)
 	return ans
