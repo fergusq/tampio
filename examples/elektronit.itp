@@ -1,0 +1,62 @@
+Listalla on alkiot.
+Olkoon lyhyt orbitaalilista uusi lista, jonka alkioita ovat
+	orbitaali "1s",
+	orbitaali "2s",
+	orbitaali "2p",
+	orbitaali "3s",
+	orbitaali "3p",
+	orbitaali "3d",
+	orbitaali "4s",
+	orbitaali "4p",
+	orbitaali "4d",
+	orbitaali "5s",
+	orbitaali "5p",
+	orbitaali "4f",
+	orbitaali "5d",
+	orbitaali "6s",
+	orbitaali "6p",
+	orbitaali "5f",
+	orbitaali "6d",
+	orbitaali "7s" ja
+	orbitaali "7p".
+Olkoon lyhyt maksimilista uusi lista, jonka alkioita ovat
+	2,
+	2,
+	6,
+	2,
+	6,
+	10,
+	2,
+	6,
+	10,
+	2,
+	6,
+	14,
+	10,
+	2,
+	6,
+	14,
+	10,
+	2 ja
+	6.
+
+Kun jaetaan orbitaaleille pienehkö elektronimäärä nykyisellä sivulla,
+	nykyinen sivu näyttää nykyisen orbitaalin, missä
+		nykyinen orbitaali on lyhyen orbitaalilistan ensimmäinen alkio ja
+		nykyinen maksimi on lyhyen maksimilistan ensimmäinen alkio,
+	jos pienehkö elektronimäärä on suurempi kuin nykyinen maksimi,
+	niin
+		nykyinen sivu näyttää nykyisen maksimin,
+		nykyinen sivu näyttää välin " ",
+		lyhyen orbitaalilistan alkioiksi asetetaan lyhyen orbitaalilistan alkiot toisesta alkaen,
+		lyhyen maksimilistan alkioiksi asetetaan lyhyen maksimilistan alkiot toisesta alkaen
+	ja	jaetaan orbitaaleille pienehkö elektronimäärä vähennettynä nykyisellä maksimilla nykyisellä sivulla,
+	ja, jos pienehkö elektronimäärä on pienempi tai yhtä suuri kuin nykyinen maksimi,
+	niin
+		nykyinen sivu näyttää pienehkön elektronimäärän.
+
+Olkoon mukava muuttuja uusi muuttuja.
+
+Kun nykyinen sivu avautuu,
+	mukavaan muuttujaan luetaan luku
+ja	jaetaan orbitaaleille mukavan muuttujan arvo nykyisellä sivulla.
