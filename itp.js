@@ -2,6 +2,9 @@
 Array.prototype.lisätä_P_N_T = function(kiva_arvo) { this.push(kiva_arvo); };
 Array.prototype.f_määrä = function() { return this.length; };
 
+// Function
+Function.prototype.kutsua_P__P = function() { this(); }
+
 // Number/luku
 var power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};
 Number.prototype.f_potenssi = function() { return new Proxy(this, power_handler); };
@@ -12,6 +15,7 @@ Number.prototype.f_merkkijono_E = Number.prototype.toString;
 // String/merkkijono
 String.prototype.f_pituus = function() { return this.length; };
 String.prototype.näyttää_käyttäjälle_P__N = function() { alert(this); };
+String.prototype.jakaa_P_SeT_N = function(sep, list) { for (var s in this.split(sep)) list.push(s); };
 
 // HTMLDocument/sivu
 HTMLDocument.prototype.näyttää_A_G_N = HTMLDocument.prototype.write;
