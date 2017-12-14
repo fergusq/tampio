@@ -1,0 +1,15 @@
+Henkilöllä on nimi ja ikä.
+Työntekijä on henkilö, jolla on työnantaja.
+
+Olkoon urhea yrittäjä uusi henkilö, jonka nimi on teksti "Tiina" ja ikä on 42.
+Olkoon ahkera ahertaja uusi työntekijä, jonka nimi on teksti "Jaakko", ikä on 26 ja työnantaja on urhea yrittäjä.
+
+Kun nykyinen sivu avautuu,
+	se näyttää urhean yrittäjän nimen,
+	se näyttää pilkun ", ",
+	se näyttää urhean yrittäjän iän,
+	se näyttää pilkun ", työllistää henkilön ",
+	se näyttää ahkeran ahertajan nimen,
+	se näyttää pilkun ", ",
+	se näyttää ahkeran ahertajan iän
+ja	se näyttää pisteen ".".

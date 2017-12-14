@@ -128,6 +128,7 @@ class TokenList:
 		a = max(0, place-10)
 		b = min(len(self.tokens), place+10)
 		out = "Line " + str(self.lines[place]) + ": "
+		column = 0
 		for i in range(a, b):
 			if i == place:
 				column = len(out)

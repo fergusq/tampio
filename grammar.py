@@ -49,7 +49,24 @@ def parseDeclaration(tokens):
 			fields = parseList(parseFieldName, tokens)
 			eatPeriod(tokens)
 			return ClassDecl(word.baseform, fields)
-		elif (word.isAdjective() or word.isNoun()) and word.form in ["nimento", "omanto"]:
+		elif word.isNoun() and word.form == "nimento":
+			tokens.next()
+			tokens.setStyle("type")
+			accept(["on"], tokens)
+			tokens.setStyle("keyword")
+			checkEof(tokens)
+			super_type = tokens.next().toWord(cls=NOUN,forms=["nimento"])
+			if not super_type.isNoun() or super_type.form != "nimento":
+				syntaxError("super type must be a noun in the nominative case", tokens)
+			accept([","], tokens)
+			accept(["jolla"], tokens)
+			tokens.setStyle("keyword")
+			accept(["on"], tokens)
+			tokens.setStyle("keyword")
+			fields = parseList(parseFieldName, tokens)
+			eatPeriod(tokens)
+			return ClassDecl(word.baseform, fields, super_type=super_type.baseform)
+		elif (word.isAdjective() or word.isNoun()) and word.form == "omanto":
 			if word.isAdjective():
 				tokens.next()
 				tokens.setStyle("variable")
@@ -293,7 +310,6 @@ def parseCondition(tokens, prefix=False):
 		if tokens.peek().token.lower() == "ei":
 			tokens.next()
 			tokens.setStyle("keyword")
-			checkEof(tokens)
 			accept(["ole"], tokens)
 			tokens.setStyle("keyword")
 			negation = True
@@ -302,7 +318,6 @@ def parseCondition(tokens, prefix=False):
 			tokens.setStyle("keyword")
 			negation = False
 	elif negation:
-		checkEof(tokens)
 		accept(["ole"], tokens)
 		tokens.setStyle("keyword")
 	operator = parseOperator(tokens)
@@ -524,7 +539,6 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 def parseAssignment(tokens):
 	word, word2 = parseVariable(tokens)
 	var = word.baseform + "_" + word2.baseform
-	checkEof(tokens)
 	accept(["on", "ovat"], tokens)
 	tokens.setStyle("keyword")
 	value, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
@@ -575,7 +589,6 @@ def parseList(parseChild, tokens, custom_endings=[]):
 	token = tokens.next()
 	tokens.setStyle("keyword")
 	if token.token.lower() == "eikä":
-		checkEof(tokens)
 		accept(["muuta"], tokens)
 		tokens.setStyle("keyword")
 	elif token.token.lower() == "ja":

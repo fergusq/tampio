@@ -51,7 +51,7 @@ STYLES = {
 }
 
 def make_tokens(code):
-	tl, _ = compileCode(code)
+	tl, _, _ = compileCode(code)
 	tokens = []
 	line = []
 	for token, style in zip(tl.tokens, tl.styles):
@@ -79,8 +79,7 @@ def make_texts(tokens):
 		texts.append((char, style, image))
 	return texts
 
-with open("examples/vektori.itp") as f:
-	code = f.read()
+code = ""
 
 tokens = make_tokens(code)
 image_lines = [make_texts(l) for l in tokens]
@@ -156,10 +155,13 @@ while not done:
 			tokens.insert(cursor_y+1, new_line)
 			cursor_y += 1
 			cursor_x = 0
-		elif key in list(range(ord("a"), ord("z")+1)) + [ord(c) for c in list("åäö.,- \t")]:
+		elif key in list(range(ord("a"), ord("z")+1)) + [ord(c) for c in list("åäö.,- \t1234567890+")]:
 			char = chr(key)
 			if pygame.K_LSHIFT in keys_down or pygame.K_RSHIFT in keys_down:
-				char = char.upper()
+				if char in "1234567890+.,-":
+					char = "!\"#¤%&/()=?:;_"["1234567890+.,-".index(char)]
+				else:
+					char = char.upper()
 			line.insert(cursor_x, (char, ""))
 			cursor_x += 1
 		image_lines = [make_texts(l) for l in tokens]

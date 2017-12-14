@@ -64,20 +64,26 @@ class ProcedureDecl:
 			fatalError("TODO")
 
 class ClassDecl:
-	def __init__(self, name, fields):
+	def __init__(self, name, fields, super_type=None):
 		self.name = name
 		self.fields = fields
+		self.super = super_type
 	def __str__(self):
 		return self.name + " := class { " + ", ".join(self.fields) + "};"
 	def compile(self):
-		ans = "function " + self.name + "(vals) {\n"
+		ans = "function " + escapeIdentifier(self.name) + "(vals) {\n"
+		if self.super:
+			ans += " " + escapeIdentifier(self.super) + ".call(this, vals);\n"
 		for name, number in self.fields:
-			ans += " this." + name + " = (\"" + name + "\" in vals) ? vals[\"" + name + "\"] : "
+			ans += " this." + escapeIdentifier(name) + " = (\"" + name + "\" in vals) ? vals[\"" + name + "\"] : "
 			if number == "plural":
 				ans += "[];\n"
 			else:
 				ans += "undefined;\n"
 		ans += "};"
+		if self.super:
+			ans += "\n" + escapeIdentifier(self.name) + ".prototype = Object.create(" + escapeIdentifier(self.super) + ".prototype);"
+			ans += "\n" + escapeIdentifier(self.name) + ".prototype.constructor = " + escapeIdentifier(self.name) + ";"
 		ans += "\n" + typeToJs(self.name) + ".prototype.assign = function(n, v) { this[n] = v; };"
 		for name, number in self.fields:
 			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + name + " = function() { return this." + name + "; };"

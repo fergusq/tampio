@@ -177,7 +177,7 @@ Here's another function that return the "tail" of a vector:
     Lyhyen vektorin häntä on uusi vektori, jonka komponentit ovat lyhyen vektorin komponentit toisesta alkaen.
 
 Again, its parameter is `lyhyt vektori`.
-The function returns a new vector (using the `uusi` keyword) thats components are formed using the slice syntax.
+The function returns a new vector (using the `uusi` keyword), and its components are formed using the slice syntax.
 
 It is possible to not name the parameter, in which case only the class name appears in the signature.
 In the body, the word `se` can be used to refer to the unnamed parameter.
@@ -590,7 +590,7 @@ Pseudodeclaration:
 |määrä                           |number (of items)                      |komponenttien **määrä**<br/>_the **number** of components_
 |olkoon                          |let .. be                              |**Olkoon** pieni luku kaksi.<br/>_**Let** the small number **be** two._
 |on                              |is, has                                |pieni luku **on** pienempi kuin kaksi<br/>_the small number **is** less than two_<br/>Vektorilla **on** komponentit.<br/>_A vector **has** components._
-|ovat                            |are                                    |uusi vektori, jonka komponentit **ovat** yksi, kaksi ja kolme.<br/>_A new vector thats components **are** one, two and three._
+|ovat                            |are                                    |uusi vektori, jonka komponentit **ovat** yksi, kaksi ja kolme.<br/>_A new vector, and its components **are** one, two and three._
 |päättyen                        |ending to                              |neljänteen **päättyen**<br/>_**ending to** the fourth_
 |riippuen siitä .. joko .. tai ..|depending on whether .. either .. or ..|Olkoon pieni luku **riippuen siitä**, onko kiva luku nolla, **joko** yksi **tai** kaksi.<br/>_Let the small number be, **depending on whether** the nice number is zero, **either** one **or** two._
 |se                              |it                                     |**sen** nimi<br/>_**its** name_
