@@ -1,5 +1,4 @@
-Olkoon nykyinen alue uusi muuttuja.
-Olkoon viestivä alue uusi muuttuja.
+# Apufunktiot
 
 Luvun seuraaja on se lisättynä yhteen.
 
@@ -8,10 +7,14 @@ Kun toistetaan n kertaa tehokas toiminto,
 		tehokas toiminto suoritetaan
 	ja	toistetaan m kertaa tehokas toiminto, missä m on n vähennettynä yhdellä.
 
+# Lista
+
 Listalla on alkiot.
 Listan koko on sen alkioiden määrä.
 
 Olkoon tyhjä lista uusi lista.
+
+# Matriisi ja vektori
 
 Matriisilla on rivit.
 Vektorilla on ruudut.
@@ -68,6 +71,10 @@ Vektorin muutosmäärä on
 		joko nollaan
 		tai yhteen.
 
+# HTML:n muodostus
+
+Olkoon viestivä alue uusi muuttuja.
+
 Olkoon loistava laskuri uusi luku.
 Olkoon koodaava merkkijono tyhjyys "".
 
@@ -77,39 +84,41 @@ Kun lisätään koodiin mainio merkkijono,
 Kun kasvatetaan laskuria,
 	loistavaksi laskuriksi asetetaan loistavan laskurin seuraaja.
 
-Kun muodostetaan ruudukko kivalle alueelle,
+Kun muodostetaan ruudukko kivalle alueelle annetussa koossa,
 	loistavaksi laskuriksi asetetaan nolla,
+	lisätään koodiin teksti "<h1>Risti ja ruutu</h1>",
+	lisätään koodiin teksti "<p>Kumpikin pelaaja painaa vuorotelleen valitsemaansa ruutua. Risti aloittaa.</p>",
 	lisätään koodiin teksti "<div id='viesti'></div>",
-	lisätään koodiin teksti "<table style='border-collapse:collapse;font-family:monospace;'>",
-	toistetaan kolme kertaa se, että
+	lisätään koodiin teksti "<table style='border-collapse:collapse;font-family:sans-serif;'>",
+	toistetaan annettu koko kertaa se, että
 		pienen pelikentän riviksi lisätään pieni rivi, missä pieni rivi on uusi vektori eikä muuta,
 		lisätään koodiin teksti "<tr>",
-		toistetaan kolme kertaa se, että
+		toistetaan annettu koko kertaa se, että
 			pienen rivin ruuduksi lisätään kiva ruutu, missä kiva ruutu on uusi ruutu, jonka omistaja on tyhjä pelaaja eikä muuta, eikä muuta,
 			lyhyen ruutulistan alkioksi lisätään kiva ruutu,
 			kasvatetaan laskuria,
 		ja	lisätään koodiin
 				teksti "<td id='cell"
 				yhdistettynä loistavaan laskuriin
-				ja yhdistettynä tekstiin "' style='padding:20px;border:1px solid black;'>-</td>",
+				ja yhdistettynä tekstiin "' style='text-align:center;width:50px;height:50px;border:1px solid black;'>-</td>",
 	ja	lisätään koodiin teksti "</tr>",
-	lisätään koodiin teksti "</table>"
+	lisätään koodiin teksti "</table>",
+	kiva alue pyyhitään
 ja	kivalle alueelle kirjoitetaan koodaava merkkijono.
+
+# Pelilogiikka
 
 Kun nykyisellä sivulla rekisteröidään tapahtumakäsittelijät,
 	nykyinen sivu etsii elementin nimellä "viesti" tuloksenaan kiva alue,
 	viestiväksi alueeksi asetetaan kiva alue,
 	loistavaksi laskuriksi asetetaan nolla
-ja	toistetaan kolme kertaa se, että
-		toistetaan kolme kertaa se, että
-			kasvatetaan laskuria,
-			nykyinen sivu etsii elementin nimellä "cell" yhdistettynä n:ään tuloksenaan etsitty ruutualue, missä n on loistava laskuri eikä muuta,
-		ja	etsittyä ruutualuetta painettaessa käyköön niin, että
+ja	toistetaan pienen pelikentän koko kertaa se, että
+		kasvatetaan laskuria,
+		nykyinen sivu etsii elementin nimellä "cell" yhdistettynä n:ään tuloksenaan etsitty ruutualue, missä n on loistava laskuri eikä muuta,
+	ja	etsittyä ruutualuetta painettaessa käyköön niin, että,
+			jos nykyinen pelaaja ei ole tyhjä pelaaja, niin
 				etsitty ruutualue pyyhitään,
-				jos nykyinen pelaaja on raivoisa risti, niin
-					etsitylle ruutualueelle kirjoitetaan merkki "X" eikä muuta,
-				jos nykyinen pelaaja on ryhdikäs ruutu, niin
-					etsitylle ruutualueelle kirjoitetaan merkki "O" eikä muuta,
+				etsitylle ruutualueelle kirjoitetaan nykyisen pelaajan tunnus,
 				lyhyen ruutulistan n:nnen alkion omistajaksi asetetaan nykyinen pelaaja,
 				tarkistetaan voitto
 			ja	vaihdetaan vuoroa.
@@ -125,7 +134,7 @@ Kun tarkistetaan voitto,
 ja	tarkistetaan voitto pienen pelikentän laskudiagonaalilla.
 
 Kun tarkistetaan voitto kivalla rivillä,
-	jos kivan rivin ensimmäisen ruudun omistaja ei ole tyhjä pelaaja,
+	jos kivan rivin ensimmäisen ruudun omistaja ei ole tyhjä pelaaja
 	ja kivan rivin muutosmäärä on nolla,
 		rekisteröidään voitto.
 
@@ -134,15 +143,17 @@ Kun rekisteröidään voitto,
 	viestivälle alueelle kirjoitetaan nykyisen pelaajan nimi yhdistettynä tekstiin " voitti!"
 ja	nykyiseksi pelaajaksi asetetaan tyhjä pelaaja.
 
+# Ruudut ja pelaajaoliot
+
 Ruudulla on omistaja.
-Pelaajalla on nimi.
+Pelaajalla on nimi ja tunnus.
 
 Olkoon pieni pelikenttä uusi matriisi.
 Olkoon lyhyt ruutulista uusi lista.
 
-Olkoon tyhjä pelaaja uusi pelaaja.
-Olkoon raivoisa risti uusi pelaaja, jonka nimi on sana "risti".
-Olkoon ryhdikäs ruutu uusi pelaaja, jonka nimi on sana "ruutu".
+Olkoon tyhjä pelaaja uusi pelaaja, jonka tunnus on merkki "-".
+Olkoon raivoisa risti uusi pelaaja, jonka nimi on sana "risti" ja tunnus on merkki "X".
+Olkoon ryhdikäs ruutu uusi pelaaja, jonka nimi on sana "ruutu" ja tunnus on merkki "O".
 Olkoon nykyinen pelaaja ryhdikäs ruutu.
 
 Kun vaihdetaan vuoroa,
@@ -151,11 +162,18 @@ Kun vaihdetaan vuoroa,
 			joko ryhdikäs ruutu
 			tai raivoisa risti,
 		viestivä alue pyyhitään
-	ja	viestivälle alueelle kirjoitetaan nykyisen pelaajan nimi.
+	ja	viestivälle alueelle kirjoitetaan teksti "<em>Vuorossa:</em> " yhdistettynä nykyisen pelaajan nimeen.
+
+# Päämetodi
+
+Olkoon mukava muuttuja uusi muuttuja.
 
 Kun nykyinen sivu avautuu,
+	alustetaan pelilauta nykyisellä sivulla.
+
+Kun alustetaan pelilauta nykyisellä sivulla,
+	mukavaan muuttujaan luetaan luku kysymyksellä "Pelilaudan sivun pituus ruutuina?",
 	nykyinen sivu etsii elementin nimellä "output" tuloksenaan oikeanpuoleinen alue,
-	nykyiseksi alueeksi asetetaan oikeanpuoleinen alue,
-	muodostetaan ruudukko oikeanpuoleiselle alueelle,
+	muodostetaan ruudukko oikeanpuoleiselle alueelle annetussa koossa, missä annettu koko on mukavan muuttujan arvo eikä muuta,
 	nykyisellä sivulla rekisteröidään tapahtumakäsittelijät
 ja	vaihdetaan vuoroa.
