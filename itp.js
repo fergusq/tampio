@@ -1,3 +1,6 @@
+// Object
+Object.prototype.prepend = function(x) { return [this].concat(x); };
+
 // Array
 Array.prototype.lisätä_P_N_T = function(kiva_arvo) { this.push(kiva_arvo); };
 Array.prototype.f_määrä = function() { return this.length; };

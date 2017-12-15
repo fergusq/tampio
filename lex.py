@@ -53,6 +53,8 @@ def lexCode(code):
 		for analysis in analysis_list:
 			bf = analysis["BASEFORM"]
 			cl = analysis["CLASS"]
+			if bf in ORDINALS+CARDINALS:
+				cl = "lukusana"
 			number = analysis["NUMBER"] if "NUMBER" in analysis else ""
 			person = analysis["PERSON"] if "PERSON" in analysis else ""
 			possessive = analysis["POSSESSIVE"] if "POSSESSIVE" in analysis else ""
@@ -102,6 +104,17 @@ class TokenList:
 		self.i = i
 	def place(self):
 		return self.i
+	def current(self):
+		return self.tokens[self.i]
+	def prev(self, n=1):
+		j = self.i<1
+		while j >= 0:
+			if self.tokens[j].isWord() or not self.tokens[j].isSpace():
+				n -= 1
+				if n == 0:
+					return self.tokens[j]
+			j -= 1
+		return None
 	def peek(self, n=1):
 		j = self.i+1
 		while j < len(self.tokens):
@@ -177,7 +190,7 @@ class Punctuation:
 	def __str__(self):
 		return self.token
 	def __repr__(self):
-		return "Punctuation{" + self.token + "}"
+		return "<Punctuation " + self.token + ">"
 
 class AltWords:
 	def __init__(self, token, alternatives):
@@ -197,8 +210,8 @@ class AltWords:
 	def __str__(self):
 		return self.token
 	def __repr__(self):
-		return "AltWord{" + self.token + "}"
-				
+		return "<AltWord " + self.token + ">"
+
 ADJ = ["laatusana", "nimisana_laatusana"]
 NOUN = ["nimisana"]
 NAME = ["etunimi", "sukunimi"]
@@ -217,6 +230,10 @@ class Word:
 		self.word_class = word_class
 		self.possessive = possessive
 		self.ordinal_like = ordinal_like
+	def __str__(self):
+		return self.baseform + "(" + self.word_class + ":" + self.form + ":" + self.number + ")"
+	def __repr__(self):
+		return "<Word " + str(self) + ">"
 	def isVariable(self):
 		return len(self.baseform) == 1
 	def isNoun(self):

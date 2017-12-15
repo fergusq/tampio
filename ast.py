@@ -96,17 +96,21 @@ class ClassDecl:
 		return ans
 
 class FunctionDecl:
-	def __init__(self, vtype, field, param, body):
+	def __init__(self, vtype, field, param, body, wheres):
 		self.type = vtype
 		self.field = field
 		self.param = param
 		self.body = body
+		self.wheres = wheres
 	def __str__(self):
 		return self.type + "." + self.field + " := " + self.param + " => " + str(self.body)
+	def compileWheres(self):
+		return "".join([" var "+escapeIdentifier(where[0])+" = "+where[1].compile()+";\n" for where in self.wheres])
 	def compile(self):
 		ans = typeToJs(self.type) + ".prototype.f_" + self.field + " = function() {\n"
 		if self.param != "":
 			ans += " var " + escapeIdentifier(self.param) + " = this;\n"
+		ans += self.compileWheres()
 		ans += " return " + self.body.compile() + ";\n};"
 		return ans
 
@@ -320,9 +324,12 @@ class ArithmeticExpr:
 		self.left = left
 		self.right = right
 	def __str__(self):
-		return "(" + str(self.left) + self.operator + str(self.right) + ")"
+		return "(" + str(self.left) + " " + self.operator + " " + str(self.right) + ")"
 	def compile(self):
-		return "(" + self.left.compile() + self.operator + self.right.compile() + ")"
+		if self.operator[0] == ".":
+			return self.left.compile() + self.operator + "(" + self.right.compile() + ")"
+		else:
+			return "(" + self.left.compile() + self.operator + self.right.compile() + ")"
 
 class TernaryExpr:
 	def __init__(self, conditions, then, otherwise):

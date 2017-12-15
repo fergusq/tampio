@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
+import sys
 from itertools import chain
 from fatal_error import syntaxError
 from inflect import *
@@ -103,8 +103,8 @@ def parseDeclaration(tokens):
 				tokens.next()
 				tokens.setStyle("type")
 				varname = ""
-			field, _ = parseFieldName(tokens, word.form)
-			if typeword.number == "plural":
+			field, field_number = parseFieldName(tokens, word.form)
+			if field_number == "plural":
 				accept(["ovat"], tokens)
 			else:
 				accept(["on"], tokens)
@@ -112,8 +112,9 @@ def parseDeclaration(tokens):
 			body, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 			if case != "nimento":
 				syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
+			wheres = parseWheres(tokens)
 			eatPeriod(tokens)
-			return FunctionDecl(typeword.baseform, field, varname, body)
+			return FunctionDecl(typeword.baseform, field, varname, body, wheres)
 	tokens.next()
 	syntaxError("unexpected token \"" + token.token + "\"", tokens)
 
@@ -145,6 +146,25 @@ def parseFieldName(tokens, form="omanto"):
 		field += "_E"
 	return field, word.number
 
+def parseWheres(tokens):
+	token = tokens.peek()
+	if token and token.token.lower() == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "missä":
+		tokens.next()
+		tokens.next()
+		tokens.setStyle("keyword")
+		wheres = parseList(parseAssignment, tokens)
+		eatComma(tokens)
+	elif token and token.token.lower() == "missä":
+		if tokens.current().token != ",":
+			syntaxError("there must be a comma before \"missä\"", tokens)
+		tokens.next()
+		tokens.setStyle("keyword")
+		wheres = parseList(parseAssignment, tokens)
+		eatComma(tokens)
+	else:
+		wheres = []
+	return wheres
+
 def parseSentence(tokens):
 	args = {}
 	checkEof(tokens)
@@ -152,6 +172,8 @@ def parseSentence(tokens):
 	if token.token.lower() == "jos" or (token.token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "jos"):
 		if token.token == ",":
 			tokens.next()
+		elif tokens.current().token != ",":
+			syntaxError("there must be a comma before \"jos\"", tokens)
 		tokens.next()
 		tokens.setStyle("keyword")
 		conditions = parseList(parseCondition, tokens, ["niin"])
@@ -254,14 +276,7 @@ def parseSentence(tokens):
 	
 	eatComma(tokens)
 	
-	token = tokens.peek()
-	if token and token.token.lower() == "missä":
-		tokens.next()
-		tokens.setStyle("keyword")
-		wheres = parseList(parseAssignment, tokens)
-		eatComma(tokens)
-	else:
-		wheres = []
+	wheres = parseWheres(tokens)
 	
 	if subjectless:
 		return ProcedureCallStatement(predicate, args, wheres, output_var)
@@ -294,17 +309,18 @@ def readVerbModifiers(tokens):
 ARI_OPERATORS = {
 	"lisättynä": ("sisatulento", "+"),
 	"ynnättynä": ("sisatulento", "+"),
-	"yhdistettynä": ("sisatulento", "+"),
+	"yhdistettynä": ("sisatulento", ".concat"),
+	"liitettynä": ("sisatulento", ".prepend"),
 	"vähennettynä": ("ulkoolento", "-"),
 	"kerrottuna": ("ulkoolento", "*"),
 	"jaettuna": ("ulkoolento", "/")
 }
 
 CMP_OPERATORS = {
-	"yhtä suuri kuin": "==",
-	"yhtäsuuri kuin": "==",
-	"yhtä kuin": "==",
-	"erisuuri kuin": "!=",
+	"yhtä suuri kuin": "===",
+	"yhtäsuuri kuin": "===",
+	"yhtä kuin": "===",
+	"erisuuri kuin": "!==",
 	"pienempi kuin": "<",
 	"pienempi tai yhtä suuri kuin": "<=",
 	"pienempi tai yhtäsuuri kuin": "<=",
