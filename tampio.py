@@ -44,15 +44,15 @@ def createHTML(code):
 	ans = """<!DOCTYPE html><html><head><meta charset="utf-8" /><title>Imperatiivinen Tampio</title>"""
 	ans += """<script type="text/javascript" src="itp.js" charset="utf-8"></script>"""
 	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body>"""
-	ans += """<div style="max-height:98vh;overflow:auto;float:left;width:50%;"><pre style="margin:0px;white-space:pre-wrap;">"""
+	ans += """<div style="max-height:98vh;overflow:auto;float:left;width:50%;">"""
 	ans += prettyPrint(tokens, "html")
-	ans += """</pre></div><div style="max-height:98vh;overflow:auto;float:right;width:calc(50% - 5px);padding-left:5px;"><div id="output"><script type="text/javascript">\n"""
+	ans += """</div><div style="max-height:98vh;overflow:auto;float:right;width:calc(50% - 5px);padding-left:5px;"><div id="output"><script type="text/javascript">\n"""
 	ans += compiled
 	ans += """\ndocument.avautua_A__N();\n</script></div></div></body></html>"""
 	return ans
 
 TAMPIO_VERSION = "1.11"
-COMPILER_VERSION = "1.17.0"
+COMPILER_VERSION = "1.18.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():

@@ -53,8 +53,9 @@ def parseDeclaration(tokens):
 		tokens.next()
 		tokens.setStyle("keyword")
 		signature = parseSentence(tokens)
-		body = parseList(parseSentence, tokens)
+		body = parseList(parseSentence, tokens, do_format=True)
 		eatPeriod(tokens)
+		tokens.addNewline()
 		return ProcedureDecl(signature, body)
 	elif token.token.lower() == "olkoon":
 		tokens.next()
@@ -64,6 +65,7 @@ def parseDeclaration(tokens):
 		if case != "nimento":
 			syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
 		eatPeriod(tokens)
+		tokens.addNewline()
 		return VariableDecl(word1.baseform + "_" + word2.baseform, value)
 	else:
 		word = token.toWord(cls=NOUN+ADJ,forms=["ulkoolento", "omanto"])
@@ -74,6 +76,7 @@ def parseDeclaration(tokens):
 			tokens.setStyle("keyword")
 			fields = parseList(parseFieldName, tokens)
 			eatPeriod(tokens)
+			tokens.addNewline()
 			return ClassDecl(word.baseform, fields)
 		elif word.isNoun() and word.form == "nimento":
 			tokens.next()
@@ -91,6 +94,7 @@ def parseDeclaration(tokens):
 			tokens.setStyle("keyword")
 			fields = parseList(parseFieldName, tokens)
 			eatPeriod(tokens)
+			tokens.addNewline()
 			return ClassDecl(word.baseform, fields, super_type=super_type.baseform)
 		elif (word.isAdjective() or word.isNoun()) and word.form == "omanto":
 			if word.isAdjective():
@@ -114,6 +118,7 @@ def parseDeclaration(tokens):
 				syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
 			wheres = parseWheres(tokens)
 			eatPeriod(tokens)
+			tokens.addNewline()
 			return FunctionDecl(typeword.baseform, field, varname, body, wheres)
 	tokens.next()
 	syntaxError("unexpected token \"" + token.token + "\"", tokens)
@@ -177,7 +182,7 @@ def parseSentence(tokens):
 		tokens.next()
 		tokens.setStyle("keyword")
 		conditions = parseList(parseCondition, tokens, ["niin"])
-		block = parseList(parseSentence, tokens)
+		block = parseList(parseSentence, tokens, do_format=True)
 		eatComma(tokens)
 		return IfStatement(conditions, block)
 	word = tokens.peek().toWord(
@@ -222,7 +227,7 @@ def parseSentence(tokens):
 				accept([keyword], tokens)
 				if keyword != ",":
 					tokens.setStyle("keyword")
-			body = parseList(parseSentence, tokens)
+			body = parseList(parseSentence, tokens, do_format=True)
 			eatComma(tokens)
 			return MethodAssignmentStatement(subject, subject_case, method, params, body)
 		
@@ -400,10 +405,13 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		tokens.setStyle("keyword")
 		accept([","], tokens)
 		conds = parseList(lambda t: parseCondition(t, prefix=True), tokens, ["joko"])
+		tokens.increaseIndentLevel()
 		alt1, case1 = parseNominalPhrase(tokens)
 		accept(["tai"], tokens)
+		tokens.addNewline()
 		tokens.setStyle("keyword")
 		alt2, case2 = parseNominalPhrase(tokens)
+		tokens.decreaseIndentLevel()
 		if case1 != case2:
 			syntaxError("both operands of \"tai\" must be in the same case", tokens)
 		return TernaryExpr(conds, alt1, alt2), case1
@@ -447,7 +455,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			accept([","], tokens)
 			accept(["että"], tokens)
 			tokens.setStyle("keyword")
-			body = parseList(parseSentence, tokens)
+			body = parseList(parseSentence, tokens, do_format=True)
 			eatComma(tokens)
 			case = word.form
 			expr = LambdaExpr(body)
@@ -656,10 +664,14 @@ def parseCtorArg(tokens):
 				syntaxError("contructor argument value is not in nominative case", tokens)
 		return CtorArgExpr(word.baseform, ListExpr(values))
 
-def parseList(parseChild, tokens, custom_endings=[]):
+def parseList(parseChild, tokens, custom_endings=[], do_format=False):
+	if do_format:
+		tokens.increaseIndentLevel()
 	ans = []
 	force = False
 	while force or (not tokens.eof() and not tokens.peek().token.lower() in [".", "ja", "eikä"] + custom_endings):
+		if do_format and len(ans) > 0:
+			tokens.addNewline()
 		ans += [parseChild(tokens)]
 		if not tokens.eof() and tokens.peek().token == ",":
 			tokens.next()
@@ -668,7 +680,11 @@ def parseList(parseChild, tokens, custom_endings=[]):
 			force = False
 	checkEof(tokens)
 	if len(ans) == 1 and tokens.peek().token == ".":
+		if do_format:
+			tokens.decreaseIndentLevel()
 		return ans
+	if do_format:
+		tokens.addNewline()
 	token = tokens.next()
 	tokens.setStyle("keyword")
 	if token.token.lower() == "eikä":
@@ -678,4 +694,6 @@ def parseList(parseChild, tokens, custom_endings=[]):
 		ans += [parseChild(tokens)]
 	elif token.token.lower() not in custom_endings:
 		syntaxError("unexpected token, expected " + ", ".join(["\""+t+"\"" for t in custom_endings+["ja"]]) + " or \"eikä\"", tokens)
+	if do_format:
+		tokens.decreaseIndentLevel()
 	return ans

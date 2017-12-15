@@ -26,10 +26,10 @@ voikko = Voikko(LANGUAGE)
 
 def lexCode(code):
 	output = []
-	for word in re.split(r'(\s|\.|,|"[^"]*")', code):
+	for word in re.split(r'(\s|\.|,|"[^"]*"|#[^\n]*\n)', code):
 		if word == "":
 			continue
-		if re.fullmatch(r'\s|\.|,|"[^"]*"', word):
+		if re.fullmatch(r'\s|\.|,|"[^"]*"|#[^\n]*\n', word):
 			output += [Punctuation(word)]
 			continue
 		
@@ -91,6 +91,8 @@ class TokenList:
 	def __init__(self, tokens):
 		self.tokens = tokens
 		self.styles = [""]*len(tokens)
+		self.newlines = [False]*len(tokens)
+		self.indent_levels = [0]*len(tokens)
 		self.i = -1
 		
 		# rivinumero jokaiselle tokenille
@@ -100,6 +102,8 @@ class TokenList:
 			token.tokens = self
 			line += token.token.count("\n")
 			self.lines.append(line)
+		
+		self.indent_level = 0
 	def setPlace(self, i):
 		self.i = i
 	def place(self):
@@ -127,6 +131,7 @@ class TokenList:
 	def next(self):
 		while self.i < len(self.tokens):
 			self.i += 1
+			self.indent_levels[self.i] = self.indent_level
 			if self.tokens[self.i].isWord() or not self.tokens[self.i].isSpace():
 				return self.tokens[self.i]
 		return None
@@ -134,6 +139,12 @@ class TokenList:
 		return not self.peek()
 	def setStyle(self, style):
 		self.styles[self.i] = style
+	def increaseIndentLevel(self):
+		self.indent_level += 1
+	def decreaseIndentLevel(self):
+		self.indent_level -= 1
+	def addNewline(self):
+		self.newlines[self.i] = True
 	def context(self, place):
 		a = max(0, place-10)
 		b = min(len(self.tokens), place+10)
@@ -182,7 +193,9 @@ class Punctuation:
 	def isWord(self):
 		return False
 	def isSpace(self):
-		return not not re.fullmatch("\\s*", self.token)
+		return not not re.fullmatch("(?:#[^\n]*\n|\\s*)", self.token)
+	def isComment(self):
+		return not not re.fullmatch("#[^\n]*\n", self.token)
 	def isString(self):
 		return not not re.fullmatch(r'"[^"]*"', self.token)
 	def toWord(self, cls=[], forms=[], numbers=[]):
@@ -200,6 +213,8 @@ class AltWords:
 	def isWord(self):
 		return True
 	def isSpace(self):
+		return False
+	def isComment(self):
 		return False
 	def isString(self):
 		return False

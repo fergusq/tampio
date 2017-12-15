@@ -23,3 +23,22 @@ span.function {
 span.literal {
 	color: #622;
 }
+
+span.comment {
+	color: #aaa;
+}
+
+ul.syntax-root > li > span.comment {
+	color: black;
+	font-size: 1.5em;
+	border-bottom: 1px solid black;
+}
+
+ul.syntax-root > li {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+ul.syntax-root {
+	list-style: none;
+}
