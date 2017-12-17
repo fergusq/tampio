@@ -21,22 +21,6 @@ LISENSSEISSÄ? SE ON VAIKEAMPI LUKEA NIIN... JOKA TAPAUKSESSA OHJELMA ON PURKKAA
 EIKÄ LUULTAVASTI TOIMI. KÄYTÄ OMALLA VASTUULLA.
 )
 
-# Apufunktiot
-
-Luvun seuraaja on se lisättynä yhteen.
-
-Kun toistetaan n kertaa tehokas toiminto,
-	jos n on suurempi kuin nolla, niin
-		tehokas toiminto suoritetaan
-	ja	toistetaan m kertaa tehokas toiminto, missä m on n vähennettynä yhdellä.
-
-# Lista
-
-Listalla on alkiot.
-Listan koko on sen alkioiden määrä.
-
-Olkoon tyhjä lista uusi lista.
-
 # Matriisi ja vektori
 
 Matriisilla on rivit.

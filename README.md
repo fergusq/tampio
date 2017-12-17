@@ -533,6 +533,15 @@ The operators are as in if statements, see the table in the If statements chapte
 
 The array class does not have a name in Tampio, and is the JavaScript class `Array`.
 
+All plural fields have this type.
+The difference between this type and the `lista` class is both syntactic and semantic.
+Arrays are seen as multiple values, whereas lists are single values that contain values.
+Therefore, it is not meaningful to talk about "a single array" or "many arrays",
+as the array type is not countable.
+Indeed, it is not possible to create an array of arrays in Tampio,
+because array is not a single value and it cannot be contained otherwise than as a field or a variable.
+Lists of lists are possible.
+
 Pseudodeclaration:
 
     "Arrayn" määrä on ...
@@ -595,6 +604,22 @@ Pseudodeclaration:
 |:-----------|:------:|:----------|
 |`suoritetaan`|Method |Executes this function with zero arguments (`this()`).
 
+### `lista` class
+
+Declaration:
+
+    Listalla on alkiot.
+    Listan koko on sen alkioiden määrä.
+    Listan häntä on uusi lista, jonka alkiot ovat sen alkiot toisesta alkaen.
+    Kun lyhyt lista etsii indeksin ihanalle alkiolle, ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`alkiot`    |Field   |The items in this list.
+|`koko`      |Function|The number of items in this list (`this.alkio.length`).
+|`häntä`     |Function|The tail of this list (`this.alkio.slice(1)`).
+|`etsii indeksin`|Method|Returns the index of the given element (`this.alkio.indexOf(item)`).
+
 ### `luku` class
 
 `luku` is an alias to the JavaScript class `Number`.
@@ -610,6 +635,9 @@ Pseudodeclaration:
 |:-----------|:------:|:----------|
 |`neliöjuuri`|Function|The square root of this number (`sqrt(this)`).
 |`vastaluku` |Function|The opposite of this number (`-this`).
+|`käänteisluku`|Function|The inverse of this number (`1/this`).
+|`edeltäjä`  |Function|The predecessor of this number (`this-1`).
+|`seuraaja`  |Function|The successor of this number (`this+1`).
 |`potenssit` |Function|An infinite array of the powers of this number.
 |`merkkijonona`|Function|Converts this number to string (`this.toString()`).
 
