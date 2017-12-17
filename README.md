@@ -4,6 +4,9 @@ The Tampio Programming Language
 Tampio is an object-oriented programming language that looks like a natural language – Finnish.
 It is named after a famous Finnish programmer.
 
+To see this language in action, see the [Tic-Tac-Toe example](http://iikka.kapsi.fi/tampio/ristiruutu.html).
+(For technical reasons, it's named "ristiruutu" instead of "ristinolla", which is the proper Finnish translation.)
+
 This branch currently contains a new iteration of the language that is not functional. The functional language is in the [`functional`](https://github.com/fergusq/tampio/tree/functional) branch.
 
 ## Dependencies
@@ -188,12 +191,17 @@ In the body, the word `se` can be used to refer to the unnamed parameter.
 
 A method is a procedure that can take multiple arguments.
 
-    Kun [self parameter] [verb] [parameters], [statement list].
+    Kun [self parameter] [method name] [parameters], [statement list].
 
-Each parameter must be in a different case.
+The method name consists of a verb and optionally some noun modifiers.
+
+Each parameter must be in a different case or have a postposition.
 The case of the self parameter is restricted by the verb form chosen.
 If the verb is expressed in active voice, the self parameter must be in the nominative case.
 The passive voice does not restrict cases.
+
+The order of parameters does not have any significance (other than that the self parameter must come before the verb).
+The parameters are identified by their case or postposition.
 
 The following method iterates the components of a vector and prints them:
 
@@ -201,6 +209,39 @@ The following method iterates the components of a vector and prints them:
     	jos lyhyen vektorin dimensio ei ole nolla,
     		nykyinen sivu näyttää lyhyen vektorin ensimmäisen komponentin
     		ja lyhyen vektorin häntä painetaan nykyiselle sivulle.
+
+### Postpositions
+
+Postpositions are used to identify the parameters when they are not identified by cases.
+The parameter must usually be in the genitive case and the postposition must immediately follow it.
+These rules are the same in both method definitions and method calls.
+
+    [parameter/required case] [postposition]
+
+|Postposition|Required case|
+|:-----------|:------------|
+|`alla`      |genitive     |
+|`alta`      |genitive     |
+|`alle`      |genitive     |
+|`edessä`    |genitive     |
+|`edestä`    |genitive     |
+|`eteen`     |genitive     |
+|`kertaa`    |nominative   |
+|`mukaisesti`|genitive     |
+|`takana`    |genitive     |
+|`takaa`     |genitive     |
+|`taakse`    |genitive     |
+
+For example:
+
+    toteuteutetaan työ annettujen ohjeiden mukaisesti
+    lisätään loistava luku lyhyen listan eteen
+    luetaan arvo oivan osoittimen alta mukavaan muuttujaan
+
+    Kun toistetaan n kertaa tehokas toiminto,
+        jos n on suurempi kuin nolla, niin
+            tehokas toiminto suoritetaan
+        ja  toistetaan m kertaa tehokas toiminto, missä m on n vähennettynä yhdellä.
 
 ## Statements
 
@@ -227,7 +268,7 @@ A method call there may be a `missä` modifier, which is used to introduce tempo
 They can be referenced in the call immediately before, and in all calls after the modifier.
 There must be a comma before `missä`.
 
-    , missä [assignment list]
+    , missä [assignment list],
 
 Each assignment has a variable name and a value:
 
@@ -242,6 +283,11 @@ However, it is may be clearer to use a `missä` clause to create a temporary var
 
     väliaikainen vektori painetaan nykyiselle sivulle,
     	missä väliaikainen vektori on uusi vektori, jonka komponentteja ovat yksi, kaksi ja kolme eikä muuta
+
+`missä` clauses are also used to create single-letter variables, which can be used in array subscripts and mathematical expressions.
+
+    nykyinen sivu näyttää villin vektorin n:nnen komponentin,
+        missä n on villin vektorin dimensio vähennettynä kahdella,
 
 ### Return statements
 
@@ -411,7 +457,7 @@ Examples:
 
 If the array is in a field inside an object or a return value of a function, the following syntax is used.
 
-    [object/genitive] [ordinal] [field name/function name]
+    [object/genitive] [ordinal] [field name or function name]
 
 If the array is instead a variable, the following is used.
 
@@ -421,9 +467,10 @@ For example:
 
     villin vektorin neljäs komponentti  # villi_vektori.komponentti[4]
     nätin luvun toinen potenssi         # nätti_luku.potenssi[2] = nätti_luku^2
-    viides luku                         # luku[5]
+    n:s luku                            # luku[n]
 
-The available ordinals are listed below.
+The available ordinal literals are listed below.
+It is also possible to use single-letter variables.
 
 |Ordinal      |Corresponding index|
 |:------------|:------------------|
@@ -437,9 +484,6 @@ The available ordinals are listed below.
 |`kahdeksas`  |8                  |
 |`yhdeksäs`   |9                  |
 |`kymmenes`   |10                 |
-
-The ordinal is a literal.
-There is currently no way to retrieve the index from a variable.
 
 ### Array slice
 
@@ -523,6 +567,18 @@ Pseudodeclaration:
 |`pyyhitään` |Method  |Clears the innerHTML field (`this.innerHTML = ""`).
 |`painettaessa`|Method field|This method is called when a `click` event is fired.
 
+### Function class
+
+The function class does not have a name in Tampio, and is the JavaScript class `Function`.
+
+Pseudodeclaration:
+
+    Kun kiva "funktio" suoritetaan, ...
+
+|Member name |Type    |Description|
+|:-----------|:------:|:----------|
+|`suoritetaan`|Method |Executes this function with zero arguments (`this()`).
+
 ### `luku` class
 
 `luku` is an alias to the JavaScript class `Number`.
@@ -532,12 +588,14 @@ Pseudodeclaration:
     Luvun neliöjuuri on ...
     Luvun vastaluku on ...
     Luvun potenssit ovat ...
+    Luku merkkijonona on ...
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
 |`neliöjuuri`|Function|The square root of this number (`sqrt(this)`).
 |`vastaluku` |Function|The opposite of this number (`-this`).
 |`potenssit` |Function|An infinite array of the powers of this number.
+|`merkkijonona`|Function|Converts this number to string (`this.toString()`).
 
 ### `merkkijono` class
 
@@ -546,10 +604,13 @@ Pseudodeclaration:
 Pseudodeclaration:
 
     Merkkijonon pituus on ...
+    Kun mukava merkkijono jaetaan annetusta erottimesta kivoiksi arvoiksi, ...
+    Kun mukava merkkijono näytetään käyttäjälle, ...
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
 |`pituus`    |Function|The length of this string (`this.length`).
+|`jaetaan`   |Method  |Splits this string and stores it to the given array. (`for (var s of this.split(sep)) list.push(s)`).
 |`näytetään käyttäjälle`|Method|Displays this string to the user (`alert(this)`).
 
 ### `muuttuja` class
