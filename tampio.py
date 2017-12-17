@@ -51,8 +51,8 @@ def createHTML(code):
 	ans += """\ndocument.avautua_A__N();\n</script></div></div></body></html>"""
 	return ans
 
-TAMPIO_VERSION = "1.11"
-COMPILER_VERSION = "1.18.0"
+TAMPIO_VERSION = "1.12"
+COMPILER_VERSION = "1.19.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():

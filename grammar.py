@@ -15,6 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 import sys
 from itertools import chain
+from collections import namedtuple
+
 from fatal_error import syntaxError
 from inflect import *
 
@@ -170,6 +172,28 @@ def parseWheres(tokens):
 		wheres = []
 	return wheres
 
+# pino jokainen-lausekkeiden tallentamista varten (siis for-silmukoiden, vrt. rödan _)
+FOR_STACK = []
+
+ForVar = namedtuple("ForVar", ["name", "expr"])
+
+def pushFor():
+	FOR_STACK.append([])
+
+def addForVar(i_name, expr):
+	if len(FOR_STACK) == 0:
+		syntaxError("\"jokainen\" can't be used in this context")
+	name = i_name
+	i = 1
+	while [fv.name for fv in FOR_STACK[-1]].count(name) > 0:
+		name = i_name + str(i)
+		i += 1
+	FOR_STACK[-1].append(ForVar(name, expr))
+	return name
+
+def popFor():
+	return FOR_STACK.pop()
+
 def parseSentence(tokens):
 	args = {}
 	checkEof(tokens)
@@ -185,6 +209,8 @@ def parseSentence(tokens):
 		block = parseList(parseSentence, tokens, do_format=True)
 		eatComma(tokens)
 		return IfStatement(conditions, block)
+	
+	pushFor()
 	word = tokens.peek().toWord(
 		cls=ADJ*2+NUMERAL*2+NAME*2+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
@@ -199,6 +225,7 @@ def parseSentence(tokens):
 			forms=["indicative_present_simple3", "indicative_present_simple4", "E-infinitive_sisaolento"])
 		
 		if word.isVerb() and word.form in ["E-infinitive_sisaolento3", "E-infinitive_sisaolento4"]:
+			tokens.setStyle("function")
 			method = word.baseform + readVerbModifiers(tokens)
 			if word.form[-1] == "3":
 				method += "_A"
@@ -229,7 +256,12 @@ def parseSentence(tokens):
 					tokens.setStyle("keyword")
 			body = parseList(parseSentence, tokens, do_format=True)
 			eatComma(tokens)
-			return MethodAssignmentStatement(subject, subject_case, method, params, body)
+			stmt = MethodAssignmentStatement(subject, subject_case, method, params, body)
+			
+			for_vars = popFor()
+			for for_var in for_vars:
+				stmt = ForStatement(for_var.name, for_var.expr, stmt)
+			return stmt
 		
 		if not word.isVerb() or word.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
 			syntaxError("predicate is not in indicative simple present", tokens)
@@ -284,9 +316,14 @@ def parseSentence(tokens):
 	wheres = parseWheres(tokens)
 	
 	if subjectless:
-		return ProcedureCallStatement(predicate, args, wheres, output_var)
+		stmt = ProcedureCallStatement(predicate, args, wheres, output_var)
 	else:
-		return MethodCallStatement(subject, subject_case, predicate, args, wheres, output_var)
+		stmt = MethodCallStatement(subject, subject_case, predicate, args, wheres, output_var)
+	
+	for_vars = popFor()
+	for for_var in for_vars:
+		stmt = ForStatement(for_var.name, for_var.expr, stmt)
+	return stmt
 
 def readVerbModifiers(tokens):
 	ans = ""
@@ -423,6 +460,14 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	elif word.isNoun() and word.possessive == "" and word.form == "olento" and word.word != "tuloksena":
 		tokens.setStyle("field")
 		expr, case = parseNominalPhrase(tokens)
+	elif word.baseform == "jokainen":
+		tokens.setStyle("keyword")
+		case = word.form
+		expr, case2 = parseNominalPhrase(tokens, case == "omanto")
+		if case != case2:
+			syntaxError("an ordinal and its nominal phrase must be in the same case", tokens)
+		name = addForVar("jokainen", expr)
+		expr = VariableExpr(name)
 	elif word.isOrdinal():
 		tokens.setStyle("literal")
 		case = word.form
@@ -544,8 +589,21 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			word = token.toWord(cls=NOUN+NUMERAL, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"])
 			if must_be_in_genitive and word.form != "omanto":
 				break
-			if ((word.isOrdinal() or (word.isVariable() and word.ordinal_like))
-				and tokens.peek(2) and tokens.peek(2).toWord(cls=NOUN, forms=[word.form]).isNoun()):
+			peek2 = tokens.peek(2)
+			if word.baseform == "jokainen" and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun():
+				tokens.next()
+				tokens.setStyle("keyword")
+				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
+				if not word2.isNoun() or word2.form != word.form:
+					syntaxError("expected a noun " + formToEnglish(word.form, article=False), tokens)
+				tokens.setStyle("field")
+				case = word.form
+				field = word2.baseform
+				field_expr = FieldExpr(expr, field)
+				var = addForVar(word.baseform + "_" + word2.baseform, field_expr)
+				expr = VariableExpr(var)
+			elif ((word.isOrdinal() or (word.isVariable() and word.ordinal_like))
+				and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun()):
 				tokens.next()
 				if word.isOrdinal():
 					tokens.setStyle("literal")

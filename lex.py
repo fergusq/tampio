@@ -250,9 +250,9 @@ class Word:
 	def __repr__(self):
 		return "<Word " + str(self) + ">"
 	def isVariable(self):
-		return len(self.baseform) == 1
+		return len(self.baseform) == 1 and self.baseform not in [str(i) for i in range(0,10)]
 	def isNoun(self):
-		return self.word_class in ["nimisana"] or len(self.baseform) == 1
+		return self.word_class in ["nimisana"] or self.isVariable()
 	def isName(self):
 		return self.word_class in ["etunimi", "sukunimi"]
 	def isPronoun(self):

@@ -114,6 +114,20 @@ class FunctionDecl:
 		ans += " return " + self.body.compile() + ";\n};"
 		return ans
 
+class ForStatement:
+	def __init__(self, var, expr, stmt):
+		self.var = var
+		self.expr = expr
+		self.stmt = stmt
+	def __str__(self):
+		return "for (" + self.var + " in " + str(self.expr) + ") " + str(self.stmt)
+	def compile(self, indent=0):
+		return (" "*indent
+			+ "for (const " + escapeIdentifier(self.var)
+			+ " of " + self.expr.compile()
+			+ ") {\n" + self.stmt.compile(indent=indent+1)
+			+ " "*indent + "}\n")
+
 class IfStatement:
 	def __init__(self, conditions, block):
 		self.conditions = conditions

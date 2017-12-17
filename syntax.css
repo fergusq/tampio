@@ -28,6 +28,10 @@ span.comment {
 	color: #aaa;
 }
 
+ul:not(.syntax-root) {
+	list-style: disc;
+}
+
 ul.syntax-root > li > span.comment {
 	color: black;
 	font-size: 1.5em;

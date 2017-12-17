@@ -89,14 +89,14 @@ Kun muodostetaan ruudukko kivalle alueelle annetussa koossa,
 	lisätään koodiin teksti "<h1>Risti ja ruutu</h1>",
 	lisätään koodiin teksti "<p>Kumpikin pelaaja painaa vuorotelleen valitsemaansa ruutua. Risti aloittaa.</p>",
 	lisätään koodiin teksti "<div id='viesti'></div>",
-	lisätään koodiin teksti "<table style='border-collapse:collapse;font-family:sans-serif;'>",
+	lisätään koodiin teksti "<table style='border-collapse:collapse;font-family:sans-serif;cursor:crosshair;'>",
 	toistetaan annettu koko kertaa se, että
 		pienen pelikentän riviksi lisätään pieni rivi, missä pieni rivi on uusi vektori eikä muuta,
 		lisätään koodiin teksti "<tr>",
 		toistetaan annettu koko kertaa se, että
 			pienen rivin ruuduksi lisätään kiva ruutu, missä kiva ruutu on uusi ruutu, jonka omistaja on tyhjä pelaaja eikä muuta, eikä muuta,
 			lyhyen ruutulistan alkioksi lisätään kiva ruutu,
-			kasvatetaan laskuria,
+			kasvatetaan laskuria
 		ja	lisätään koodiin
 				teksti "<td id='cell"
 				yhdistettynä loistavaan laskuriin
@@ -124,12 +124,8 @@ ja	toistetaan pienen pelikentän koko kertaa se, että
 			ja	vaihdetaan vuoroa.
 
 Kun tarkistetaan voitto,
-	tarkistetaan voitto pienen pelikentän ensimmäisellä rivillä,
-	tarkistetaan voitto pienen pelikentän toisella rivillä,
-	tarkistetaan voitto pienen pelikentän kolmannella rivillä,
-	tarkistetaan voitto pienen pelikentän ensimmäisellä sarakkeella,
-	tarkistetaan voitto pienen pelikentän toisella sarakkeella,
-	tarkistetaan voitto pienen pelikentän kolmannella sarakkeella,
+	tarkistetaan voitto pienen pelikentän jokaisella rivillä,
+	tarkistetaan voitto pienen pelikentän jokaisella sarakkeella,
 	tarkistetaan voitto pienen pelikentän kasvudiagonaalilla
 ja	tarkistetaan voitto pienen pelikentän laskudiagonaalilla.
 
