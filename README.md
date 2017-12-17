@@ -299,6 +299,16 @@ For example, to return a zero:
 
     nolla palautetaan
 
+### For each statements
+
+There are no for loops (or any kind of loops) in Tampio.
+However, there is a statement roughly equivalent to the `forEach` method in JavaScript.
+
+If any subexpression of a statement contains the word `jokainen` in place of an ordinal in an array subscript,
+the statement is evaluated once for each element in the array.
+
+    nykyinen sivu näyttää jokaisen lyhyen vektorin komponentin
+
 ### If statements
 
 If statements are used to execute other statements conditionally.
@@ -356,10 +366,12 @@ There is also a special syntax to add a new item to a list, implemented as a met
 It is similar to the assignment syntax, but the verb is `lisätään` instead of `asetetaan`.
 
     [list/translative singular] lisätään [expression/nominative]
+    [list/translative plural] lisätään [jokainen expression/nominative]
 
 For example:
 
     kivan kaverin ystäväksi lisätään mukava kaveri
+    kivan kaverin ystäviksi lisätään jokainen mukavan kaverin ystävä
 
 ### Method assignments
 
@@ -376,7 +388,7 @@ For example:
 
 ## Expressions
 
-### Literal number
+### Literal numbers
 
 Literal numbers can appear in the code both written with digits or as words.
 
@@ -457,11 +469,13 @@ Examples:
 
 If the array is in a field inside an object or a return value of a function, the following syntax is used.
 
-    [object/genitive] [ordinal] [field name or function name]
+    [object/genitive] [ordinal] [field name or function name/singular]
 
 If the array is instead a variable, the following is used.
 
     [ordinal] [array object]
+
+The name of the array (which usually is plural), must be singular in this expression.
 
 For example:
 
@@ -484,6 +498,8 @@ It is also possible to use single-letter variables.
 |`kahdeksas`  |8                  |
 |`yhdeksäs`   |9                  |
 |`kymmenes`   |10                 |
+
+If the ordinal is `jokainen`, the current statement is a for statement (see the Statements chapter).
 
 ### Array slice
 
