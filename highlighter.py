@@ -113,7 +113,17 @@ def highlightHtml(tl, pre=False):
 		list_end="</ul>",
 		item_begin="<li>",
 		item_end="</li>",
-		markup=lambda s,t: "<span class=\"" + s + "\">" + html.escape(t) + "</span>" if s != "" else html.escape(t))
+		markup=htmlMarkup)
+
+def htmlMarkup(style, token):
+	if style == "":
+		return html.escape(token)
+	style_span = "<span class=\"" + style + "\">"
+	if style == "block-comment-global":
+		paragraphs = token.split("\n\n")
+		return "\n".join(["<p>" + style_span + html.escape(paragraph) + "</span></p>" for paragraph in paragraphs])
+	else:
+		return style_span + html.escape(token) + "</span>"
 
 def highlightLatex(tl, use_lists=False):
 	return highlight(tl, use_lists,

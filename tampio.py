@@ -61,7 +61,7 @@ def createLatex(code):
 	return ans
 
 TAMPIO_VERSION = "1.13"
-COMPILER_VERSION = "1.20.0"
+COMPILER_VERSION = "1.20.1"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
@@ -91,7 +91,7 @@ def main():
 			code = f.read()
 			if args.html_page:
 				print(createHTML(code))
-			if args.latex_document:
+			elif args.latex_document:
 				print(createLatex(code))
 			else:
 				tokens, compiled, n = compileCode(code)
