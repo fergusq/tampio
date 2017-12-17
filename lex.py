@@ -26,10 +26,10 @@ voikko = Voikko(LANGUAGE)
 
 def lexCode(code):
 	output = []
-	for word in re.split(r'(\s|\.|,|"[^"]*"|#[^\n]*\n)', code):
+	for word in re.split(r'(\s|\.|,|"[^"]*"|#[^\n]*\n|\([^()]*\))', code):
 		if word == "":
 			continue
-		if re.fullmatch(r'\s|\.|,|"[^"]*"|#[^\n]*\n', word):
+		if re.fullmatch(r'\s|\.|,|"[^"]*"|#[^\n]*\n|\([^()]*\)', word):
 			output += [Punctuation(word)]
 			continue
 		
@@ -193,9 +193,9 @@ class Punctuation:
 	def isWord(self):
 		return False
 	def isSpace(self):
-		return not not re.fullmatch("(?:#[^\n]*\n|\\s*)", self.token)
+		return self.isComment() or not not re.fullmatch("\s*", self.token)
 	def isComment(self):
-		return not not re.fullmatch("#[^\n]*\n", self.token)
+		return not not re.fullmatch("#[^\n]*\n|\([^()]*\)", self.token)
 	def isString(self):
 		return not not re.fullmatch(r'"[^"]*"', self.token)
 	def toWord(self, cls=[], forms=[], numbers=[]):

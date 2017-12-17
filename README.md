@@ -307,7 +307,7 @@ However, there is a statement roughly equivalent to the `forEach` method in Java
 If any subexpression of a statement contains the word `jokainen` in place of an ordinal in an array subscript,
 the statement is evaluated once for each element in the array.
 
-    nykyinen sivu näyttää jokaisen lyhyen vektorin komponentin
+    nykyinen sivu näyttää lyhyen vektorin jokaisen komponentin
 
 ### If statements
 

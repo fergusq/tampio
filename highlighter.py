@@ -19,12 +19,18 @@ import html
 def prettyPrint(tokens, lang):
 	return HIGHLIGHTERS[lang](tokens)
 
-def highlightHtml(tl, pre=False):
+def highlight(tl, pre,
+	pre_begin, pre_end,
+	document_begin, document_end,
+	document_item_begin, document_item_end,
+	list_begin, list_end,
+	item_begin, item_end,
+	markup):
 	out = ""
 	if pre:
-		out += "<pre>"
+		out += pre_begin
 	else:
-		out += "<ul class=\"syntax-root\"><li>"
+		out += document_begin + document_item_begin
 	prev_inle = 0
 	next_is_newline = False
 	skip = 0
@@ -36,30 +42,35 @@ def highlightHtml(tl, pre=False):
 			if skip == 0:
 				skip, out = eatNonwords(i, out, tl, inle > 0)
 			if not next_is_newline:
-				out += "</li>"
-			out += "</ul>"*(prev_inle-inle)
+				out += item_end
+			out += list_end*(prev_inle-inle)
 		
 		# jos uusi rivi alkaa
 		if not pre and next_is_newline:
-			out += "<li>"
+			if inle == 0:
+				out += document_item_begin
+			else:
+				out += item_begin
 		
 		# jos uusi sisennys alkaa
 		if not pre and inle > prev_inle:
-			out += "<ul><li>"*(inle-prev_inle)
+			out += (list_begin+item_begin)*(inle-prev_inle)
+		
+		# kommenttien tyylit
+		if token.isComment():
+			if i == 0 or "\n" in tl.tokens[i-1].token:
+				style = "comment-global"
+				newline = True
+			else:
+				style = "comment-inline"
+			if token.token[0] != "#":
+				style = "block-" + style
 		
 		# tulostetaan token
 		if skip == 0:
-			if style != "":
-				out += "<span class=\"" + style + "\">" + html.escape(token.token) + "</span>"
-			elif token.isComment():
-				out += "<span class=\"comment\">" + html.escape(token.token) + "</span>"
-			else:
-				out += html.escape(token.token)
+			out += markup(style, token.token)
 		else:
 			skip -= 1
-		
-		if token.isComment() and inle == 0:
-			newline = True
 		
 		i += 1
 		
@@ -68,15 +79,18 @@ def highlightHtml(tl, pre=False):
 			if skip == 0:
 				skip, out = eatNonwords(i, out, tl, inle > 0)
 			
-			out += "</li>"
+			if inle == 0:
+				out += document_item_end
+			else:
+				out += item_end
 		
 		prev_inle = inle
 		next_is_newline = newline
 	
 	if pre:
-		out += "</pre>"
+		out += pre_end
 	else:
-		out += "</li></ul>"
+		out += document_item_end + document_end
 	return out
 
 def eatNonwords(i, out, tl, eat_comments):
@@ -86,6 +100,65 @@ def eatNonwords(i, out, tl, eat_comments):
 		out += html.escape(tl.tokens[j].token)
 		j += 1
 	return j-i, out
+
+def highlightHtml(tl, pre=False):
+	return highlight(tl, pre,
+		pre_begin="<pre>",
+		pre_end="</pre>",
+		document_begin="<ul class=\"syntax-root\">",
+		document_end="</ul>",
+		document_item_begin="<li>",
+		document_item_end="</li>",
+		list_begin="<ul>",
+		list_end="</ul>",
+		item_begin="<li>",
+		item_end="</li>",
+		markup=lambda s,t: "<span class=\"" + s + "\">" + html.escape(t) + "</span>" if s != "" else html.escape(t))
+
+def highlightLatex(tl, use_lists=False):
+	return highlight(tl, use_lists,
+		pre_begin="",
+		pre_end="",
+		document_begin="\\setlength{\\parskip}{5pt}",
+		document_end="",
+		document_item_begin="\n",
+		document_item_end="\n\\noindent",
+		list_begin="\\begin{itemize}",
+		list_end="\\end{itemize}",
+		item_begin="\\item ",
+		item_end="",
+		markup=latexMarkup)
+
+def latexMarkup(style, token):
+	if style == "comment-global":
+		token = token[1:] # poistetaan risuaita edestä
+	if style in LATEX_STYLES:
+		return LATEX_STYLES[style] + "{" + escapeLatex(token) + "}"
+	else:
+		return escapeLatex(token)
+
+LATEX_STYLES = {
+	"keyword": "\\textbf",
+	"function": "\\emph",
+	"variable": "\\textsc",
+	"type": "\\textsc",
+	"comment-global": "\\section",
+	"comment-inline": "\\footnote",
+	"block-comment-inline": "\\footnote"
+}
+
+def escapeLatex(token):
+	return (token
+		.replace("\\", "\\textbackslash")
+		.replace("^", "\\textasciicircum")
+		.replace("~", "\\textasciitilde")
+		.replace("&", "\\&")
+		.replace("%", "\\%")
+		.replace("#", "\\#")
+		.replace("_", "\\_")
+		.replace("{", "\\{")
+		.replace("}", "\\}")
+		.replace("\"", "''"))
 
 def highlightMarkdown(tl):
 	out = ""
@@ -102,5 +175,7 @@ MARKDOWN_STYLES = {
 
 HIGHLIGHTERS = {
 	"html": highlightHtml,
-	"markdown": highlightMarkdown
+	"html-pre": lambda tl: highlightHtml(tl, pre=True),
+	"markdown": highlightMarkdown,
+	"latex": highlightLatex
 }

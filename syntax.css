@@ -24,15 +24,16 @@ span.literal {
 	color: #622;
 }
 
-span.comment {
-	color: #aaa;
+span.comment-inline, span.block-comment-inline {
+	color: #226;
+	font-size: small;
 }
 
 ul:not(.syntax-root) {
 	list-style: disc;
 }
 
-ul.syntax-root > li > span.comment {
+ul.syntax-root > li > span.comment-global {
 	color: black;
 	font-size: 1.5em;
 	border-bottom: 1px solid black;

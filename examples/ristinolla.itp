@@ -1,3 +1,26 @@
+# Lisenssi
+
+(
+Copyright [c] 2017 Iikka Hauhio. Kaikki oikeudet pidätetään.
+
+Jokaiselle tämän ohjelmiston hallussapitäjälle myönnetään täten maksutta
+oikeus käyttää tätä ohjelmistoa rajatta mukaanlukien oikeus käyttää, kopioida,
+muokata, yhdistää, julkaista, levittää, alilisensoida ja/tai myydä tämän
+ohjelmiston kopioita, ja myöntää samat oikeudet niille, joille tätä ohjelmitoa
+on levitetty, seuraavilla ehdoilla:
+
+Yllä oleva tekijänoikeushuomautus ja nämä ehdot on sisällytettävä kaikkiin
+tämän ohjelmiston osittaisiin tai kokonaisiin kopioihin.
+
+OHJELMISTO TARJOTAAN "SELLAISENAAN", ILMAN MINKÄÄNLAISTA ILMAISTUA TAI OLETETTUA
+TAKUUTA MUKAANLUKIEN TAKUUTA JÄLLEENMYYNTIKELPOISUUDESTA TAI SOPIVUUDESTA
+MIHINKÄÄN TIETTYYN TARKOITUKSEEN. OHJELMISTON TEKIJÖITÄ ÄLKÖÖN MISSÄÄN
+TILANTEESSA PIDETTÄKÖ VASTUULLISINA MIHINKÄÄN OHJELMISTON AIHEUTTAMIIN
+VAHINKOIHIN. MIKSIKÖHÄN TÄMÄ TEKSTI KIRJOITETAAN ISOLLA ENGLANNINKIELISISSÄ
+LISENSSEISSÄ? SE ON JOPA VAIKEAMPI LUKEA NIIN... JOKA TAPAUKSESSA OHJELMA ON
+PURKKAA EIKÄ LUULTAVASTI TOIMI. KÄYTÄ OMALLA VASTUULLA.
+)
+
 # Apufunktiot
 
 Luvun seuraaja on se lisättynä yhteen.
@@ -27,19 +50,19 @@ Matriisin koko on
 Matriisin ylärivi on sen ensimmäinen rivi.
 Matriisin alarivi on sen n:s rivi, missä n on sen rivien määrä.
 
-Matriisin etusarake on
+Matriisin etusarake (ensimmäinen sarake) on
 	riippuen siitä, onko sen rivien määrä nolla,
 	joko uusi vektori
 	tai uusi vektori, jonka ruudut ovat sen ylärivin ensimmäinen ruutu liitettynä sen alamatriisin etusarakkeen ruutuihin.
 
-Matriisin ylämatriisi on
+Matriisin ylämatriisi (matriisi, josta on poistettu viimeinen rivi) on
 	uusi matriisi, jonka rivit ovat sen rivit n:nteen päättyen eikä muuta,
 	missä n on sen rivien määrä vähennettynä yhdellä.
 
-Matriisin alamatriisi on
+Matriisin alamatriisi (matriisi, josta on poistettu ylin rivi) on
 	uusi matriisi, jonka rivit ovat sen rivit toisesta alkaen.
 
-Kivan matriisin takamatriisi on
+Kivan matriisin takamatriisi (matriisi, josta on poistettu ensimmäinen sarake) on
 	riippuen siitä, onko sen rivien määrä nolla,
 	joko uusi matriisi
 	tai uusi matriisi, jonka rivit ovat
@@ -51,19 +74,19 @@ Matriisin sarakkeet ovat
 	joko tyhjän listan alkiot
 	tai sen etusarake liitettynä sen takamatriisin sarakkeisiin.
 
-Matriisin laskudiagonaali on
+Matriisin laskudiagonaali (diagonaali yläetukulmasta alatakakulmaan) on
 	riippuen siitä, onko sen koko nolla,
 	joko uusi vektori
 	tai uusi vektori, jonka ruudut ovat sen ylärivin ensimmäinen ruutu liitettynä sen alamatriisin takamatriisin laskudiagonaalin ruutuihin.
 
-Matriisin kasvudiagonaali on
+Matriisin kasvudiagonaali (diagonaali alaetukulmasta ylätakakulmaan) on
 	riippuen siitä, onko sen koko nolla,
 	joko uusi vektori
 	tai uusi vektori, jonka ruudut ovat sen alarivin ensimmäinen ruutu liitettynä sen ylämatriisin takamatriisin kasvudiagonaalin ruutuihin.
 
-Vektorin häntä on uusi vektori, jonka ruudut ovat sen ruudut toisesta alkaen.
+Vektorin häntä (vektori ilman ensimmäistä alkiota) on uusi vektori, jonka ruudut ovat sen ruudut toisesta alkaen.
 
-Vektorin muutosmäärä on
+Vektorin muutosmäärä (niiden alkioiden lukumäärä, jotka ovat erisuuria kuin edeltävä alkio) on
 	riippuen siitä, onko sen ruutujen määrä pienempi kuin kaksi,
 	joko nolla
 	tai sen hännän muutosmäärä

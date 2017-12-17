@@ -51,8 +51,17 @@ def createHTML(code):
 	ans += """\ndocument.avautua_A__N();\n</script></div></div></body></html>"""
 	return ans
 
-TAMPIO_VERSION = "1.12"
-COMPILER_VERSION = "1.19.0"
+def createLatex(code):
+	tokens, _, _ = compileCode(code)
+	ans = """\\documentclass{article}\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\\usepackage[finnish]{babel}"""
+	ans += """\\title{Tampiokoodi}"""
+	ans += """\\begin{document}\\setlength\\emergencystretch{\\hsize}"""
+	ans += prettyPrint(tokens, "latex")
+	ans += "\\end{document}"
+	return ans
+
+TAMPIO_VERSION = "1.13"
+COMPILER_VERSION = "1.20.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
@@ -65,6 +74,7 @@ def main():
 	output_mode = compiler_group.add_mutually_exclusive_group()
 	output_mode.add_argument('-s', '--syntax-markup', type=str, choices=HIGHLIGHTERS.keys(), help='do not compile, instead print the source code with syntax markup')
 	output_mode.add_argument('-p', '--html-page', help='print a html page containing both compiled code and syntax markup', action='store_true')
+	output_mode.add_argument('-l', '--latex-document', help='print a latex document containing the code and markup', action='store_true')
 	output_mode.add_argument('-V', '--validate-syntax', help='parse the code and print syntax errors', action='store_true')
 	
 	args = parser.parse_args()
@@ -81,6 +91,8 @@ def main():
 			code = f.read()
 			if args.html_page:
 				print(createHTML(code))
+			if args.latex_document:
+				print(createLatex(code))
 			else:
 				tokens, compiled, n = compileCode(code)
 				if args.validate_syntax:
