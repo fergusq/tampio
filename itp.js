@@ -18,7 +18,7 @@ Number.prototype.f_merkkijono_E = Number.prototype.toString;
 // String/merkkijono
 String.prototype.f_pituus = function() { return this.length; };
 String.prototype.näyttää_käyttäjälle_P__N = function() { alert(this); };
-String.prototype.jakaa_P_SeT_N = function(sep, list) { for (var s in this.split(sep)) list.push(s); };
+String.prototype.jakaa_P_SeT_N = function(sep, list) { for (var s of this.split(sep)) list.push(s); };
 
 // HTMLDocument/sivu
 HTMLDocument.prototype.näyttää_A_G_N = HTMLDocument.prototype.write;
