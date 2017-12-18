@@ -362,6 +362,7 @@ CMP_OPERATORS = {
 	"yhtä suuri kuin": "===",
 	"yhtäsuuri kuin": "===",
 	"yhtä kuin": "===",
+	"sama kuin": "===",
 	"erisuuri kuin": "!==",
 	"pienempi kuin": "<",
 	"pienempi tai yhtä suuri kuin": "<=",
@@ -383,6 +384,7 @@ for key in CMP_OPERATORS.keys():
 	branch[words[-1]] = CMP_OPERATORS[key]
 
 def parseCondition(tokens, prefix=False):
+	pushFor()
 	if prefix:
 		checkEof(tokens)
 		if tokens.peek().token.lower() == "eikö":
@@ -416,7 +418,11 @@ def parseCondition(tokens, prefix=False):
 	if case != "nimento":
 		syntaxError("predicative is " +formToEnglish(case) + " (should be in the nominative case)", tokens)
 	eatComma(tokens)
-	return CondExpr(negation, operator, operand1, operand2)
+	for_vars = popFor()
+	expr = CondExpr(negation, operator, operand1, operand2)
+	for for_var in for_vars:
+		expr = ForAllCondExpr(for_var.name, for_var.expr, expr)
+	return expr
 
 def parseOperator(tokens):
 	checkEof(tokens)

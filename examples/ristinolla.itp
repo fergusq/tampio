@@ -70,14 +70,6 @@ Matriisin kasvudiagonaali (diagonaali alaetukulmasta ylätakakulmaan) on
 
 Vektorin häntä (vektori ilman ensimmäistä alkiota) on uusi vektori, jonka ruudut ovat sen ruudut toisesta alkaen.
 
-Vektorin muutosmäärä (niiden alkioiden lukumäärä, jotka ovat erisuuria kuin edeltävä alkio) on
-	riippuen siitä, onko sen ruutujen määrä pienempi kuin kaksi,
-	joko nolla
-	tai sen hännän muutosmäärä
-		lisättynä riippuen siitä, onko sen ensimmäisen ruudun omistaja sen toisen ruudun omistaja,
-		joko nollaan
-		tai yhteen.
-
 # HTML:n muodostus
 
 Olkoon viestivä alue uusi muuttuja.
@@ -137,8 +129,8 @@ Kun tarkistetaan voitto,
 ja	tarkistetaan voitto pienen pelikentän laskudiagonaalilla.
 
 Kun tarkistetaan voitto kivalla rivillä,
-	jos kivan rivin ensimmäisen ruudun omistaja ei ole tyhjä pelaaja
-	ja kivan rivin muutosmäärä on nolla,
+	jos kivan rivin ensimmäisen ruudun omistaja ei ole tyhjä pelaaja (eli ruudun omistaa risti tai ruutu)
+	ja kivan rivin jokaisen ruudun omistaja on sama kuin kivan rivin ensimmäisen ruudun omistaja,
 		rekisteröidään voitto.
 
 Kun rekisteröidään voitto,

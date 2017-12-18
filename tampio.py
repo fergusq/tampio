@@ -60,8 +60,8 @@ def createLatex(code):
 	ans += "\\end{document}"
 	return ans
 
-TAMPIO_VERSION = "1.13"
-COMPILER_VERSION = "1.20.1"
+TAMPIO_VERSION = "1.14"
+COMPILER_VERSION = "1.21.0s"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
