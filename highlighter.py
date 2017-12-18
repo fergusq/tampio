@@ -93,10 +93,12 @@ def highlight(tl, pre,
 		out += document_item_end + document_end
 	return out
 
-def eatNonwords(i, out, tl, eat_comments):
+def eatNonwords(i, out, tl, eat_comments, eat_spaces=True):
 	# välimerkit kuuluvat aina listan edellisen elementin loppuun, eivät uuden alkuun
 	j = i
-	while j < len(tl.tokens) and not tl.tokens[j].isWord() and not tl.tokens[j].isString() and (eat_comments or not tl.tokens[j].isComment()):
+	while (j < len(tl.tokens) and not tl.tokens[j].isWord() and not tl.tokens[j].isString()
+		and (eat_comments or not tl.tokens[j].isComment())
+		and (eat_spaces or not tl.tokens[j].isSpace())):
 		out += html.escape(tl.tokens[j].token)
 		j += 1
 	return j-i, out
@@ -170,12 +172,79 @@ def escapeLatex(token):
 		.replace("}", "\\}")
 		.replace("\"", "''"))
 
+def highlightIndent(tl, nl, indent, item_start, global_sep, markup):
+	out = ""
+	prev_inle = 0
+	next_is_newline = False
+	prev_is_space = False
+	skip = 0
+	i = 0
+	while i < len(tl.tokens):
+		token, style, newline, inle = [x[i] for x in [tl.tokens, tl.styles, tl.newlines, tl.indent_levels]]
+		# sisennys muuttuu
+		if inle != prev_inle:
+			if skip == 0:
+				skip, out = eatNonwords(i, out, tl, inle > 0, False)
+			if not next_is_newline:
+				out += nl
+				prev_is_space = True
+		
+		# jos uusi rivi alkaa
+		if next_is_newline or inle != prev_inle:
+			out += indent*inle
+			prev_is_space = True
+			if inle > 0:
+				out += item_start
+			else:
+				out += global_sep
+		
+		# kommenttien tyylit
+		if token.isComment():
+			if i == 0 or "\n" in tl.tokens[i-1].token:
+				style = "comment-global"
+				newline = True
+			else:
+				style = "comment-inline"
+			if token.token[0] != "#":
+				style = "block-" + style
+		
+		# tulostetaan token
+		if skip == 0:
+			if token.isSpace() and not token.isComment():
+				if not prev_is_space: out += " "
+				prev_is_space = True
+			else:
+				out += markup(style, token.token)
+				prev_is_space = False
+		else:
+			skip -= 1
+		
+		i += 1
+		
+		# rivinvaihto
+		if newline:
+			if skip == 0:
+				skip, out = eatNonwords(i, out, tl, inle > 0, False)
+			
+			out += nl
+			prev_is_space = True
+		
+		prev_inle = inle
+		next_is_newline = newline
+	return out
+
 def highlightMarkdown(tl):
 	out = ""
-	for token, style in zip(tl.tokens, tl.styles):
-		code = MARKDOWN_STYLES.get(style, "")
-		out += code + token.token + code
+	for style, token in zip(tl.styles, tl.tokens):
+		out += markupMarkdown(style, token.token)
 	return out
+
+def highlightMarkdownIndent(tl):
+	return highlightIndent(tl, "\n", "  ", "- ", "\n", markupMarkdown)
+
+def markupMarkdown(s, t):
+	code = MARKDOWN_STYLES.get(s, "")
+	return code + t + code
 
 MARKDOWN_STYLES = {
 	"keyword": "**",
@@ -187,5 +256,8 @@ HIGHLIGHTERS = {
 	"html": highlightHtml,
 	"html-pre": lambda tl: highlightHtml(tl, pre=True),
 	"markdown": highlightMarkdown,
-	"latex": highlightLatex
+	"markdown-lists": highlightMarkdownIndent,
+	"latex": highlightLatex,
+	"txt": lambda tl: highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t),
+	"txt-kwuc": lambda tl: highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t.upper() if s == "keyword" else t)
 }
