@@ -140,15 +140,16 @@ class IfStatement:
 			+ "".join([s.compile(indent=indent+1) for s in self.block])
 			+ " "*indent + "}\n")
 
-class ForAllCondExpr:
-	def __init__(self, var, expr, cond):
+class QuantifierCondExpr:
+	def __init__(self, quant, var, expr, cond):
+		self.quantifier = quant
 		self.var = var
 		self.expr = expr
 		self.cond = cond
 	def __str__(self):
-		return "for each " + self.var + " in " + str(self.expr) + ": " + str(self.cond)
+		return ("for all" if self.quantifier == "jokainen" else "exists") + " " + self.var + " in " + str(self.expr) + ": " + str(self.cond)
 	def compile(self):
-		return self.expr.compile() + ".every(" + self.var + " => " + self.cond.compile() + ")"
+		return self.expr.compile() + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile() + ")"
 
 class CondExpr:
 	def __init__(self, negation, operator, left, right):

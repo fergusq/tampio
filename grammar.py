@@ -175,24 +175,24 @@ def parseWheres(tokens):
 # pino jokainen-lausekkeiden tallentamista varten (siis for-silmukoiden, vrt. rödan _)
 FOR_STACK = []
 
-ForVar = namedtuple("ForVar", ["name", "expr"])
+ForVar = namedtuple("ForVar", ["name", "expr", "type"])
 
-def pushFor():
-	FOR_STACK.append([])
+def pushFor(*allowed_types):
+	FOR_STACK.append((allowed_types, []))
 
-def addForVar(i_name, expr):
-	if len(FOR_STACK) == 0:
-		syntaxError("\"jokainen\" can't be used in this context")
+def addForVar(i_name, expr, var_type, tokens):
+	if len(FOR_STACK) == 0 or var_type not in FOR_STACK[-1][0]:
+		syntaxError("\"" + var_type + "\" can't be used in this context", tokens)
 	name = i_name
 	i = 1
-	while [fv.name for fv in FOR_STACK[-1]].count(name) > 0:
+	while [fv.name for fv in FOR_STACK[-1][1]].count(name) > 0:
 		name = i_name + str(i)
 		i += 1
-	FOR_STACK[-1].append(ForVar(name, expr))
+	FOR_STACK[-1][1].append(ForVar(name, expr, var_type))
 	return name
 
 def popFor():
-	return FOR_STACK.pop()
+	return FOR_STACK.pop()[1]
 
 def parseSentence(tokens):
 	args = {}
@@ -210,7 +210,7 @@ def parseSentence(tokens):
 		eatComma(tokens)
 		return IfStatement(conditions, block)
 	
-	pushFor()
+	pushFor("jokainen")
 	word = tokens.peek().toWord(
 		cls=ADJ*2+NUMERAL*2+NAME*2+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
@@ -384,7 +384,7 @@ for key in CMP_OPERATORS.keys():
 	branch[words[-1]] = CMP_OPERATORS[key]
 
 def parseCondition(tokens, prefix=False):
-	pushFor()
+	pushFor("jokainen", "jokin")
 	if prefix:
 		checkEof(tokens)
 		if tokens.peek().token.lower() == "eikö":
@@ -421,7 +421,7 @@ def parseCondition(tokens, prefix=False):
 	for_vars = popFor()
 	expr = CondExpr(negation, operator, operand1, operand2)
 	for for_var in for_vars:
-		expr = ForAllCondExpr(for_var.name, for_var.expr, expr)
+		expr = QuantifierCondExpr(for_var.type, for_var.name, for_var.expr, expr)
 	return expr
 
 def parseOperator(tokens):
@@ -437,7 +437,7 @@ def parseOperator(tokens):
 				syntaxError("unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in branch.keys()]), tokens)
 		return branch
 	else:
-		return "=="
+		return "==="
 
 def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	checkEof(tokens)
@@ -466,13 +466,13 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	elif word.isNoun() and word.possessive == "" and word.form == "olento" and word.word != "tuloksena":
 		tokens.setStyle("field")
 		expr, case = parseNominalPhrase(tokens)
-	elif word.baseform == "jokainen":
+	elif word.baseform in ["jokainen", "jokin"]:
 		tokens.setStyle("keyword")
 		case = word.form
 		expr, case2 = parseNominalPhrase(tokens, case == "omanto")
 		if case != case2:
-			syntaxError("an ordinal and its nominal phrase must be in the same case", tokens)
-		name = addForVar("jokainen", expr)
+			syntaxError("a quantifier and its nominal phrase must be in the same case", tokens)
+		name = addForVar(word.baseform, expr, word.baseform, tokens)
 		expr = VariableExpr(name)
 	elif word.isOrdinal():
 		tokens.setStyle("literal")
@@ -592,11 +592,11 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			token = tokens.peek()
 			if not token.isWord():
 				break
-			word = token.toWord(cls=NOUN+NUMERAL, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"])
+			word = token.toWord(cls=2*NOUN+2*NUMERAL+PRONOUN, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"])
 			if must_be_in_genitive and word.form != "omanto":
 				break
 			peek2 = tokens.peek(2)
-			if word.baseform == "jokainen" and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun():
+			if word.baseform in ["jokainen", "jokin"] and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun():
 				tokens.next()
 				tokens.setStyle("keyword")
 				checkEof(tokens)
@@ -607,7 +607,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				case = word.form
 				field = word2.baseform
 				field_expr = FieldExpr(expr, field)
-				var = addForVar(word.baseform + "_" + word2.baseform, field_expr)
+				var = addForVar(word.baseform + "_" + word2.baseform, field_expr, word.baseform, tokens)
 				expr = VariableExpr(var)
 			elif ((word.isOrdinal() or (word.isVariable() and word.ordinal_like) or word.baseform == "viimeinen")
 				and peek2 and (
