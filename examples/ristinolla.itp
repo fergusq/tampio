@@ -115,7 +115,7 @@ ja	toistetaan pienen pelikentän koko kertaa se, että
 		kasvatetaan laskuria,
 		nykyinen sivu etsii elementin nimellä "cell" yhdistettynä n:ään tuloksenaan etsitty ruutualue, missä n on loistava laskuri eikä muuta,
 	ja	etsittyä ruutualuetta painettaessa käyköön niin, että,
-			jos nykyinen pelaaja ei ole tyhjä pelaaja, niin
+			jos nykyinen pelaaja ei ole tyhjä pelaaja ja lyhyen ruutulistan n:nnen alkion omistaja on tyhjä pelaaja,
 				etsitty ruutualue pyyhitään,
 				etsitylle ruutualueelle kirjoitetaan nykyisen pelaajan tunnus,
 				lyhyen ruutulistan n:nnen alkion omistajaksi asetetaan nykyinen pelaaja,
