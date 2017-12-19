@@ -273,13 +273,17 @@ class FieldExpr:
 		return self.obj.compile() + ".f_" + escapeIdentifier(self.field) + "()"
 
 class SubscriptExpr:
-	def __init__(self, obj, index):
+	def __init__(self, obj, index, is_end_index=False):
 		self.obj = obj
 		self.index = index
+		self.is_end_index = is_end_index
 	def __str__(self):
 		return str(self.obj) + "[" + str(self.index) + "]"
 	def compile(self):
-		return self.obj.compile() + "[" + self.index.compile() + "-1]"
+		if self.is_end_index:
+			return self.obj.compile() + ".nth_last(" + self.index.compile() + ")"
+		else:
+			return self.obj.compile() + "[" + self.index.compile() + "-1]"
 
 class SliceExpr:
 	def __init__(self, obj, start, end):

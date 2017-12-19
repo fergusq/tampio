@@ -599,6 +599,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			if word.baseform == "jokainen" and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun():
 				tokens.next()
 				tokens.setStyle("keyword")
+				checkEof(tokens)
 				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
 				if not word2.isNoun() or word2.form != word.form:
 					syntaxError("expected a noun " + formToEnglish(word.form, article=False), tokens)
@@ -608,22 +609,37 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				field_expr = FieldExpr(expr, field)
 				var = addForVar(word.baseform + "_" + word2.baseform, field_expr)
 				expr = VariableExpr(var)
-			elif ((word.isOrdinal() or (word.isVariable() and word.ordinal_like))
-				and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun()):
+			elif ((word.isOrdinal() or (word.isVariable() and word.ordinal_like) or word.baseform == "viimeinen")
+				and peek2 and (
+					peek2.toWord(cls=NOUN, forms=[word.form]).isNoun()
+					or peek2.toWord(cls=ADJ, forms=[word.form]).baseform == "viimeinen")):
 				tokens.next()
 				if word.isOrdinal():
 					tokens.setStyle("literal")
 					index = NumExpr(ORDINALS.index(word.baseform)+1)
+					end_index = False
+				elif word.baseform == "viimeinen":
+					tokens.setStyle("keyword")
+					index = NumExpr(1)
+					end_index = True
 				else:
 					tokens.setStyle("variable")
 					index = VariableExpr(word.baseform)
+					end_index = False
+				checkEof(tokens)
 				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
+				if word.form == "tulento" and word2.baseform == "viimeinen" and not end_index:
+					tokens.setStyle("keyword")
+					end_index = True
+					checkEof(tokens)
+					word = word2
+					word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
 				if not word2.isNoun() or word2.form != word.form:
 					syntaxError("expected a noun " + formToEnglish(word.form, article=False), tokens)
 				tokens.setStyle("field")
 				case = word.form
 				field = word2.baseform
-				expr = SubscriptExpr(FieldExpr(expr, field), index)
+				expr = SubscriptExpr(FieldExpr(expr, field), index, end_index)
 				cont = True
 			elif word.isNoun() and word.possessive == "":
 				tokens.next()

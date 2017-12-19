@@ -6,7 +6,7 @@ Copyright [c] 2017 Iikka Hauhio. Kaikki oikeudet pidätetään.
 Jokaiselle tämän ohjelmiston hallussapitäjälle myönnetään täten maksutta
 oikeus käyttää tätä ohjelmistoa rajatta mukaanlukien oikeus käyttää, kopioida,
 muokata, yhdistää, julkaista, levittää, alilisensoida ja/tai myydä tämän
-ohjelmiston kopioita, ja myöntää samat oikeudet niille, joille tätä ohjelmitoa
+ohjelmiston kopioita, ja myöntää samat oikeudet niille, joille tätä ohjelmistoa
 on levitetty, seuraavilla ehdoilla:
 
 Yllä oleva tekijänoikeushuomautus ja nämä ehdot on sisällytettävä kaikkiin
@@ -32,7 +32,7 @@ Matriisin koko on
 	tai sen rivien määrä kerrottuna sen ylärivin ruutujen määrällä.
 
 Matriisin ylärivi on sen ensimmäinen rivi.
-Matriisin alarivi on sen n:s rivi, missä n on sen rivien määrä.
+Matriisin alarivi on sen viimeinen rivi.
 
 Matriisin etusarake (ensimmäinen sarake) on
 	riippuen siitä, onko sen rivien määrä nolla,
