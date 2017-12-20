@@ -166,11 +166,21 @@ class CondExpr:
 		else:
 			return ans
 
+class BlockStatement:
+	def __init__(self, stmts, wheres):
+		self.stmts = stmts
+		self.wheres = wheres
+	def __str__(self):
+		return "; ".join(map(str, self.stmts))
+	def compileWheres(self):
+		return "".join(["var "+escapeIdentifier(where[0])+" = "+where[1].compile()+"; " for where in self.wheres])
+	def compile(self, semicolon=True, indent=0):
+		return " "*indent + self.compileWheres() + "\n" + " "*indent + ("\n"+" "*indent).join([s.compile(indent=indent) for s in self.stmts])
+
 class CallStatement:
-	def __init__(self, name, args, wheres, output_var):
+	def __init__(self, name, args, output_var):
 		self.name = name
 		self.args = args
-		self.wheres = wheres
 		self.output_var = output_var
 	def compileName(self):
 		keys = sorted(self.args.keys())
@@ -178,15 +188,13 @@ class CallStatement:
 	def compileArgs(self):
 		keys = sorted(self.args.keys())
 		return "(" + ", ".join([self.args[key].compile() for key in keys]) + ")"
-	def compileWheres(self):
-		return "".join(["var "+escapeIdentifier(where[0])+" = "+where[1].compile()+"; " for where in self.wheres])
 	def compileAssignment(self):
 		if self.output_var:
 			return "var " + self.output_var + " = "
 		else:
 			return ""
 	def compile(self, semicolon=True, indent=0):
-		ans = " "*indent + self.compileWheres() + self.compileAssignment() + self.compileName() + self.compileArgs()
+		ans = " "*indent + self.compileAssignment() + self.compileName() + self.compileArgs()
 		if semicolon:
 			ans += ";\n"
 		return ans
@@ -196,12 +204,11 @@ class ProcedureCallStatement(CallStatement):
 		return self.name + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 
 class MethodCallStatement(CallStatement):
-	def __init__(self, obj, obj_case, name, args, wheres, output_var):
+	def __init__(self, obj, obj_case, name, args, output_var):
 		self.obj = obj
 		self.obj_case = obj_case
 		self.name = name
 		self.args = args
-		self.wheres = wheres
 		self.output_var = output_var
 	def __str__(self):
 		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
@@ -221,7 +228,7 @@ class MethodCallStatement(CallStatement):
 		elif self.name == "palauttaa_P" and self.obj_case == "nimento" and len(self.args) == 0:
 			ans += "return " + self.obj.compile()
 		else:
-			ans += self.compileWheres() + self.compileAssignment() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
+			ans += self.compileAssignment() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
 		if semicolon:
 			ans += ";\n"
 		return ans

@@ -123,10 +123,8 @@ ja	toistetaan pienen pelikentän koko kertaa se, että
 			ja	vaihdetaan vuoroa.
 
 Kun tarkistetaan voitto,
-	tarkistetaan voitto pienen pelikentän jokaisella rivillä,
-	tarkistetaan voitto pienen pelikentän jokaisella sarakkeella,
-	tarkistetaan voitto pienen pelikentän kasvudiagonaalilla
-ja	tarkistetaan voitto pienen pelikentän laskudiagonaalilla.
+	tarkistetaan voitto pienen pelikentän jokaisella rivillä sekä pienen pelikentän jokaisella sarakkeella
+ja	tarkistetaan voitto pienen pelikentän kasvudiagonaalilla sekä pienen pelikentän laskudiagonaalilla.
 
 Kun tarkistetaan voitto kivalla rivillä,
 	jos kivan rivin ensimmäisen ruudun omistaja ei ole tyhjä pelaaja (eli ruudun omistaa risti tai ruutu)

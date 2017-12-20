@@ -195,7 +195,6 @@ def popFor():
 	return FOR_STACK.pop()[1]
 
 def parseSentence(tokens):
-	args = {}
 	checkEof(tokens)
 	token = tokens.peek()
 	if token.token.lower() == "jos" or (token.token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "jos"):
@@ -218,6 +217,8 @@ def parseSentence(tokens):
 		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento", "omanto"])
 		
 		place = tokens.place()
+		
+		for_vars = popFor()
 		
 		checkEof(tokens)
 		word = tokens.next().toWord(
@@ -258,7 +259,6 @@ def parseSentence(tokens):
 			eatComma(tokens)
 			stmt = MethodAssignmentStatement(subject, subject_case, method, params, body)
 			
-			for_vars = popFor()
 			for for_var in for_vars:
 				stmt = ForStatement(for_var.name, for_var.expr, stmt)
 			return stmt
@@ -279,6 +279,7 @@ def parseSentence(tokens):
 		tokens.next()
 		tokens.setStyle("function")
 		place = tokens.place()
+		for_vars = popFor()
 		subjectless = True
 		passive = True
 		if word.form == "imperative_present_simple2":
@@ -290,40 +291,67 @@ def parseSentence(tokens):
 	else:
 		syntaxError("malformed sentence", tokens)
 	
-	while not tokens.eof():
-		if tokens.peek().token.lower() in [",", ".", "eikä", "ja", "tuloksenaan"]:
-			break
-		arg, case = parseNominalPhrase(tokens)
-		if case in args:
-			syntaxError(formToEnglish(case, short=True) + " argument repeated twice", tokens)
-		args[case] = arg
-		if isinstance(arg, LambdaExpr): # että-lohkot ovat lauseissa aina viimeisenä
-			break
+	for_var_list = []
+	args_list = []
+	output_vars = []
 	
-	if (not tokens.eof() and (
-			(tokens.peek().token.lower() == "tuloksenaan" and not passive)
-			or (tokens.peek().token.lower() == "tuloksena" and passive)
-			)):
-		tokens.next()
-		tokens.setStyle("keyword")
-		w1, w2 = parseVariable(tokens)
-		output_var = w1.baseform + "_" + w2.baseform
-	else:
-		output_var = None
+	prev_args = {}
+	while True:
+		pushFor("jokainen")
+		args = {}
+		while not tokens.eof():
+			if tokens.peek().token.lower() in ["sekä", ",", ".", "eikä", "ja", "tuloksenaan"]:
+				break
+			arg, case = parseNominalPhrase(tokens)
+			if case in args:
+				syntaxError(formToEnglish(case, short=True) + " argument repeated twice", tokens)
+			args[case] = arg
+			if isinstance(arg, LambdaExpr): # että-lohkot ovat lauseissa aina viimeisenä
+				break
+		args_list.append({**prev_args, **args})
+		prev_args = args
+		
+		if (not tokens.eof() and (
+				(tokens.peek().token.lower() == "tuloksenaan" and not passive)
+				or (tokens.peek().token.lower() == "tuloksena" and passive)
+				)):
+			tokens.next()
+			tokens.setStyle("keyword")
+			w1, w2 = parseVariable(tokens)
+			output_vars.append(w1.baseform + "_" + w2.baseform)
+		else:
+			output_vars.append(None)
+		
+		for_var_list.append(for_vars+popFor())
+		
+		if not tokens.eof() and tokens.peek().token.lower() == "sekä":
+			tokens.next()
+			tokens.setStyle("keyword")
+			continue
+		else:
+			break
 	
 	eatComma(tokens)
 	
 	wheres = parseWheres(tokens)
 	
-	if subjectless:
-		stmt = ProcedureCallStatement(predicate, args, wheres, output_var)
-	else:
-		stmt = MethodCallStatement(subject, subject_case, predicate, args, wheres, output_var)
+	stmts = []
 	
-	for_vars = popFor()
-	for for_var in for_vars:
-		stmt = ForStatement(for_var.name, for_var.expr, stmt)
-	return stmt
+	for args, output_var, for_vars in zip(args_list, output_vars, for_var_list):
+		if subjectless:
+			stmt = ProcedureCallStatement(predicate, args, output_var)
+		else:
+			stmt = MethodCallStatement(subject, subject_case, predicate, args, output_var)
+		
+		for for_var in for_vars:
+			stmt = ForStatement(for_var.name, for_var.expr, stmt)
+		
+		stmts.append(stmt)
+	
+	if len(stmts) == 1 and len(wheres) == 0:
+		return stmts[0]
+	else:
+		return BlockStatement(stmts, wheres)
 
 def readVerbModifiers(tokens):
 	ans = ""
