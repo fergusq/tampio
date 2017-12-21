@@ -37,24 +37,28 @@ String.prototype.näyttää_käyttäjälle_P__N = function() { alert(this); };
 String.prototype.jakaa_P_SeT_N = function(sep, list) { for (var s of this.split(sep)) list.push(s); };
 
 // HTMLDocument/sivu
-HTMLDocument.prototype.näyttää_A_G_N = HTMLDocument.prototype.write;
-HTMLDocument.prototype.etsiä_elementin_A_StUo_N = function(muuttuja, id) {
- muuttuja.arvo = this.getElementById(id);
-};
-HTMLDocument.prototype.etsiä_elementin_A_Uo_N = HTMLDocument.prototype.getElementById;
+if (typeof HTMLDocument !== 'undefined') {
+ HTMLDocument.prototype.näyttää_A_G_N = HTMLDocument.prototype.write;
+ HTMLDocument.prototype.etsiä_elementin_A_StUo_N = function(muuttuja, id) {
+  muuttuja.arvo = this.getElementById(id);
+ };
+ HTMLDocument.prototype.etsiä_elementin_A_Uo_N = HTMLDocument.prototype.getElementById;
+}
 
 // HTMLElement/elementti
-HTMLElement.prototype.assign = function(n, v) {
- switch (n) {
-  case "painaa_P__P":
-   this.addEventListener("click", v);
-   break;
- }
- this[n] = v;
-};
-HTMLElement.prototype.kirjoittaa_P_N_Ut = function(text) { this.innerHTML += text; };
-HTMLElement.prototype.kirjoittaa_P_N_St = function(text) { this.innerHTML += text; };
-HTMLElement.prototype.pyyhkiä_P__N = function() { this.innerHTML = ""; };
+if (typeof HTMLElement !== 'undefined') {
+ HTMLElement.prototype.assign = function(n, v) {
+  switch (n) {
+   case "painaa_P__P":
+    this.addEventListener("click", v);
+    break;
+  }
+  this[n] = v;
+ };
+ HTMLElement.prototype.kirjoittaa_P_N_Ut = function(text) { this.innerHTML += text; };
+ HTMLElement.prototype.kirjoittaa_P_N_St = function(text) { this.innerHTML += text; };
+ HTMLElement.prototype.pyyhkiä_P__N = function() { this.innerHTML = ""; };
+}
 
 // Date/aika
 Date.prototype.f_päivämäärämerkkijono_E = function() { return this.getLocaleDateString(); };

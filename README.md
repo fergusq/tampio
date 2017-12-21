@@ -27,9 +27,9 @@ To compile a file to JavaScript:
 
     python3 tampio.py file.itp
 
-To print HTML code that contains the syntax highlighting data of the file:
+To print Markdown code that contains the syntax highlighting data of the file:
 
-    python3 tampio.py -s file.itp
+    python3 tampio.py -s markdown-lists file.itp
 
 To print a HTML page that contains both JavaScript and the syntax highlighted code:
 
