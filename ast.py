@@ -160,7 +160,13 @@ class CondExpr:
 	def __str__(self):
 		return str(self.left) + self.operator + str(self.right)
 	def compile(self):
-		ans = self.left.compile() + self.operator + self.right.compile()
+		ans = self.left.compile() + self.operator
+		if self.operator[0] == ".":
+			ans += "("
+		if self.right:
+			ans += self.right.compile()
+		if self.operator[0] == ".":
+			ans += ")"
 		if self.negation:
 			return "!(" + ans + ")"
 		else:

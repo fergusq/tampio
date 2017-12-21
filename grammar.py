@@ -441,10 +441,13 @@ def parseCondition(tokens, prefix=False):
 	elif negation:
 		accept(["ole"], tokens)
 		tokens.setStyle("keyword")
-	operator = parseOperator(tokens)
-	operand2, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
-	if case != "nimento":
-		syntaxError("predicative is " +formToEnglish(case) + " (should be in the nominative case)", tokens)
+	operator, requires_second_operand = parseOperator(tokens)
+	if requires_second_operand:
+		operand2, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
+		if case != "nimento":
+			syntaxError("predicative is " +formToEnglish(case) + " (should be in the nominative case)", tokens)
+	else:
+		operand2 = None
 	eatComma(tokens)
 	for_vars = popFor()
 	expr = CondExpr(negation, operator, operand1, operand2)
@@ -463,9 +466,20 @@ def parseOperator(tokens):
 				tokens.setStyle("keyword")
 			else:
 				syntaxError("unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in branch.keys()]), tokens)
-		return branch
+		return branch, True
+	elif tokens.peek(2) and tokens.peek().toWord(cls=ADJ).isAdjective() and (not tokens.peek(2).isWord() or not tokens.peek(2).toWord(cls=NOUN).isNoun()):
+		word = tokens.next().toWord(cls=ADJ)
+		tokens.setStyle("function")
+		if word.form != "nimento":
+			syntaxError("expected an adjective in the nominative case", tokens)
+		if word.comparison == "comparative":
+			accept(["kuin"], tokens)
+			tokens.setStyle("keyword")
+			return ".c_" + word.baseform, True
+		else:
+			return ".p_" + word.baseform, False
 	else:
-		return "==="
+		return "===", True
 
 def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	checkEof(tokens)

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import html
+import html, json
 
 def prettyPrint(tokens, lang):
 	return HIGHLIGHTERS[lang](tokens)
@@ -252,12 +252,34 @@ MARKDOWN_STYLES = {
 	"literal": "`"
 }
 
+def highlightTxt(tl):
+	return highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t)
+
+def highlightTxtWithKeywords(tl):
+	return highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t.upper() if s == "keyword" else t)
+
+def highlightJson(tl):
+	tokens = []
+	line = 1
+	column = 1
+	for style, token in zip(tl.styles, tl.tokens):
+		new_line = line + token.token.count("\n")
+		if line != new_line:
+			new_column = len(token.token.split("\n")[-1])+1
+		else:
+			new_column = column + len(token.token)
+		tokens.append({"token": token.token, "style": style, "startLine": line, "startColumn": column, "endLine": new_line, "endColumn": new_column})
+		line = new_line
+		column = new_column
+	return json.dumps({"tokens": tokens})
+
 HIGHLIGHTERS = {
 	"html": highlightHtml,
 	"html-pre": lambda tl: highlightHtml(tl, pre=True),
 	"markdown": highlightMarkdown,
 	"markdown-lists": highlightMarkdownIndent,
 	"latex": highlightLatex,
-	"txt": lambda tl: highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t),
-	"txt-kwuc": lambda tl: highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t.upper() if s == "keyword" else t)
+	"txt": highlightTxt,
+	"txt-kwuc": highlightTxtWithKeywords,
+	"json": highlightJson
 }

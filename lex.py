@@ -55,9 +55,10 @@ def lexCode(code):
 			cl = analysis["CLASS"]
 			if bf in ORDINALS+CARDINALS:
 				cl = "lukusana"
-			number = analysis["NUMBER"] if "NUMBER" in analysis else ""
-			person = analysis["PERSON"] if "PERSON" in analysis else ""
-			possessive = analysis["POSSESSIVE"] if "POSSESSIVE" in analysis else ""
+			number = analysis.get("NUMBER", "")
+			person = analysis.get("PERSON", "")
+			comparison = analysis.get("COMPARISON", "")
+			possessive = analysis.get("POSSESSIVE", "")
 			if "SIJAMUOTO" in analysis:
 				form = analysis["SIJAMUOTO"]
 			elif "MOOD" in analysis and "TENSE" in analysis:
@@ -81,7 +82,7 @@ def lexCode(code):
 				form = analysis["MOOD"]
 			else:
 				form = ""
-			alternatives += [Word(word, bf, form + person, number, cl, possessive)]
+			alternatives += [Word(word, bf, form + person, number, cl, possessive, comparison)]
 		if len(alternatives) == 0:
 			alternatives = [Word(word, word, "", "", "")]
 		output += [AltWords(word, alternatives)]
@@ -220,7 +221,7 @@ class AltWords:
 		return False
 	def toWord(self, cls=[], forms=[], numbers=[]):
 		def score(w):
-			return cls.count(w.word_class) + forms.count(w.form) + numbers.count(w.number)
+			return cls.count(w.word_class) + forms.count(w.form) + numbers.count(w.number) + (-2 if w.form == "keinonto" and "nimisana" in cls else 0)
 		return sorted(self.alternatives, key=score)[-1]
 	def __str__(self):
 		return self.token
@@ -236,7 +237,7 @@ VERB = ["teonsana", "kieltosana"]
 CONJ = ["sidesana"]
 
 class Word:
-	def __init__(self, word, baseform, form, number, word_class, possessive="", ordinal_like=False):
+	def __init__(self, word, baseform, form, number, word_class, possessive="", comparison="", ordinal_like=False):
 		#print(word, baseform, form, number, word_class)
 		self.word = word
 		self.baseform = baseform
@@ -245,6 +246,7 @@ class Word:
 		self.word_class = word_class
 		self.possessive = possessive
 		self.ordinal_like = ordinal_like
+		self.comparison = comparison
 	def __str__(self):
 		return self.baseform + "(" + self.word_class + ":" + self.form + ":" + self.number + ")"
 	def __repr__(self):
