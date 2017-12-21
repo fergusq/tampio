@@ -4,6 +4,7 @@ Object.prototype.prepend = function(x) { return [this].concat(x); };
 // Array
 Array.prototype.lisätä_P_N_T = function(kiva_arvo) { this.push(kiva_arvo); };
 Array.prototype.f_määrä = function() { return this.length; };
+Array.prototype.f_summa = function() { return this.reduce((a,b) => a+b); }
 Array.prototype.nth_last = function(n) { return this[this.length-n]; };
 
 // Lista
@@ -15,6 +16,7 @@ lista.prototype.f_alkio = function() { return this.alkio; };
 lista.prototype.f_koko = function() { return this.alkio.length; };
 lista.prototype.f_häntä = function() { return new lista({"alkio": this.alkio.slice(1)}); };
 lista.prototype.etsiä_indeksin_A_Ut_N = function(item) { return this.alkio.indexOf(item); };
+lista.prototype.lisätä_P_N_St = function(item) { this.alkio.push(item); }
 lista.prototype.p_tyhjä = function() { return this.f_alkio().f_määrä() === 0; };
 const tyhjä_lista = new lista({});
 
