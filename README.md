@@ -231,6 +231,7 @@ These rules are the same in both method definitions and method calls.
 |`edestä`    |genitive     |
 |`eteen`     |genitive     |
 |`kertaa`    |nominative   |
+|`kuluttua`  |genitive     |
 |`mukaisesti`|genitive     |
 |`takana`    |genitive     |
 |`takaa`     |genitive     |
@@ -565,11 +566,13 @@ Lists of lists are possible.
 Pseudodeclaration:
 
     "Arrayn" määrä on ...
+    "Arrayn" summa on ...
     Kun kivaksi "arrayksi" lisätään kiva arvo, ...
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
 |`määrä`     |Function|The length of this array (`this.length`).
+|`summa`     |Function|The sum of the elements of this array (`this.reduce((a,b)=>a+b)`).
 |`lisätään`  |Method  |Appends the given value to this array (`this.push(arg)`).
 
 ### `ajankohta` class
@@ -632,6 +635,7 @@ Declaration:
     Listan koko on sen alkioiden määrä.
     Listan häntä on uusi lista, jonka alkiot ovat sen alkiot toisesta alkaen.
     Kun lyhyt lista etsii indeksin ihanalle alkiolle, ...
+    Kun lyhyeen listaan lisätään ihana alkio, ...
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
@@ -639,6 +643,7 @@ Declaration:
 |`koko`      |Function|The number of items in this list (`this.alkio.length`).
 |`häntä`     |Function|The tail of this list (`this.alkio.slice(1)`).
 |`etsii indeksin`|Method|Returns the index of the given element (`this.alkio.indexOf(item)`).
+|`lisätään`  |Method  |Appends a new element to this list (`this.alkio.push(item)`).
 |`tyhjä`     |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
 
 ### `luku` class
