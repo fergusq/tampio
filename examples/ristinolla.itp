@@ -93,7 +93,7 @@ Kun muodostetaan ruudukko kivalle alueelle annetussa koossa,
 		pienen pelikentän riviksi lisätään pieni rivi, missä pieni rivi on uusi vektori eikä muuta,
 		lisätään koodiin teksti "<tr>",
 		toistetaan annettu koko kertaa se, että
-			pienen rivin ruuduksi lisätään kiva ruutu, missä kiva ruutu on uusi ruutu, jonka omistaja on tyhjä pelaaja eikä muuta, eikä muuta,
+			pienen rivin ruuduksi lisätään kiva ruutu, missä kiva ruutu on uusi ruutu, jonka omistaja on määrittelemätön pelaaja eikä muuta, eikä muuta,
 			lyhyen ruutulistan alkioksi lisätään kiva ruutu,
 			kasvatetaan laskuria
 		ja	lisätään koodiin
@@ -115,7 +115,7 @@ ja	toistetaan pienen pelikentän koko kertaa se, että
 		kasvatetaan laskuria,
 		nykyinen sivu etsii elementin nimellä "cell" yhdistettynä n:ään tuloksenaan etsitty ruutualue, missä n on loistava laskuri eikä muuta,
 	ja	etsittyä ruutualuetta painettaessa käyköön niin, että,
-			jos nykyinen pelaaja ei ole tyhjä pelaaja ja lyhyen ruutulistan n:nnen alkion omistaja on tyhjä pelaaja,
+			jos nykyinen pelaaja ei ole määrittelemätön ja lyhyen ruutulistan n:nnen alkion omistaja on määrittelemätön,
 				etsitty ruutualue pyyhitään,
 				etsitylle ruutualueelle kirjoitetaan nykyisen pelaajan tunnus,
 				lyhyen ruutulistan n:nnen alkion omistajaksi asetetaan nykyinen pelaaja,
@@ -127,14 +127,14 @@ Kun tarkistetaan voitto,
 ja	tarkistetaan voitto pienen pelikentän kasvudiagonaalilla sekä pienen pelikentän laskudiagonaalilla.
 
 Kun tarkistetaan voitto kivalla rivillä,
-	jos kivan rivin ensimmäisen ruudun omistaja ei ole tyhjä pelaaja (eli ruudun omistaa risti tai ruutu)
+	jos kivan rivin ensimmäisen ruudun omistaja ei ole määrittelemätön (eli ruudun omistaa risti tai ruutu)
 	ja kivan rivin jokaisen ruudun omistaja on sama kuin kivan rivin ensimmäisen ruudun omistaja,
 		rekisteröidään voitto.
 
 Kun rekisteröidään voitto,
 	viestivä alue pyyhitään,
 	viestivälle alueelle kirjoitetaan nykyisen pelaajan nimi yhdistettynä tekstiin " voitti!"
-ja	nykyiseksi pelaajaksi asetetaan tyhjä pelaaja.
+ja	nykyiseksi pelaajaksi asetetaan määrittelemätön pelaaja.
 
 # Ruudut ja pelaajaoliot
 
@@ -144,13 +144,15 @@ Pelaajalla on nimi ja tunnus.
 Olkoon pieni pelikenttä uusi matriisi.
 Olkoon lyhyt ruutulista uusi lista.
 
-Olkoon tyhjä pelaaja uusi pelaaja, jonka tunnus on merkki "-".
+Olkoon määrittelemätön pelaaja uusi pelaaja, jonka tunnus on merkki "-".
+Pelaaja on määrittelemätön, jos se on sama kuin määrittelemätön pelaaja.
+
 Olkoon raivoisa risti uusi pelaaja, jonka nimi on sana "risti" ja tunnus on merkki "X".
 Olkoon ryhdikäs ruutu uusi pelaaja, jonka nimi on sana "ruutu" ja tunnus on merkki "O".
 Olkoon nykyinen pelaaja ryhdikäs ruutu.
 
 Kun vaihdetaan vuoroa,
-	jos nykyinen pelaaja ei ole tyhjä pelaaja, niin
+	jos nykyinen pelaaja ei ole määrittelemätön, niin
 		nykyiseksi pelaajaksi asetetaan riippuen siitä, onko nykyinen pelaaja raivoisa risti,
 			joko ryhdikäs ruutu
 			tai raivoisa risti,

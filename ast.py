@@ -114,6 +114,33 @@ class FunctionDecl:
 		ans += " return " + self.body.compile() + ";\n};"
 		return ans
 
+class CondFunctionDecl:
+	def __init__(self, vtype, name, self_param, param, conditions, wheres):
+		assert name[0] == "."
+		self.type = vtype
+		self.name = name
+		self.self_param = self_param
+		self.param = param
+		self.conditions = conditions
+		self.wheres = wheres
+	def __str__(self):
+		ans = self.type + self.name
+		if self.param:
+			ans += "(" + self.param + ")"
+		return ans + " := " + self.self_param + " => " + " and ".join(map(str, self.conditions))
+	def compileWheres(self):
+		return "".join([" var "+escapeIdentifier(where[0])+" = "+where[1].compile()+";\n" for where in self.wheres])
+	def compile(self):
+		ans = typeToJs(self.type) + ".prototype" + self.name + " = function("
+		if self.param != "":
+			ans += self.param
+		ans += ") {\n"
+		if self.self_param != "":
+			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
+		ans += self.compileWheres()
+		ans += " return (" + ") && (".join([c.compile() for c in self.conditions]) + ");\n};"
+		return ans
+
 class ForStatement:
 	def __init__(self, var, expr, stmt):
 		self.var = var

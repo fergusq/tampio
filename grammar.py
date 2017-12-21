@@ -80,48 +80,72 @@ def parseDeclaration(tokens):
 			eatPeriod(tokens)
 			tokens.addNewline()
 			return ClassDecl(word.baseform, fields)
-		elif word.isNoun() and word.form == "nimento":
-			tokens.next()
-			tokens.setStyle("type")
-			accept(["on"], tokens)
-			tokens.setStyle("keyword")
-			checkEof(tokens)
-			super_type = tokens.next().toWord(cls=NOUN,forms=["nimento"])
-			if not super_type.isNoun() or super_type.form != "nimento":
-				syntaxError("super type must be a noun in the nominative case", tokens)
-			accept([","], tokens)
-			accept(["jolla"], tokens)
-			tokens.setStyle("keyword")
-			accept(["on"], tokens)
-			tokens.setStyle("keyword")
-			fields = parseList(parseFieldName, tokens)
-			eatPeriod(tokens)
-			tokens.addNewline()
-			return ClassDecl(word.baseform, fields, super_type=super_type.baseform)
-		elif (word.isAdjective() or word.isNoun()) and word.form == "omanto":
+		elif word.isNoun() or word.isAdjective():
 			if word.isAdjective():
 				tokens.next()
 				tokens.setStyle("variable")
-				_, typeword = parseVariable(tokens, word=word, case="omanto")
+				_, typeword = parseVariable(tokens, word=word, case="")
 				varname = word.baseform + "_" + typeword.baseform
 			elif word.isNoun():
 				typeword = word
 				tokens.next()
 				tokens.setStyle("type")
 				varname = ""
-			field, field_number = parseFieldName(tokens, word.form)
-			if field_number == "plural":
-				accept(["ovat"], tokens)
-			else:
-				accept(["on"], tokens)
-			tokens.setStyle("keyword")
-			body, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
-			if case != "nimento":
-				syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
-			wheres = parseWheres(tokens)
-			eatPeriod(tokens)
-			tokens.addNewline()
-			return FunctionDecl(typeword.baseform, field, varname, body, wheres)
+			if tokens.peek() and tokens.peek().token.lower() == "on":
+				tokens.next()
+				tokens.setStyle("keyword")
+				peek = tokens.peek()
+				if varname == "" and peek and peek.isWord() and peek.toWord(forms=["nimento"]).isNoun():
+					if word.form != "nimento":
+						syntaxError("class name not in the nominative case", tokens)
+					checkEof(tokens)
+					super_type = tokens.next().toWord(cls=NOUN,forms=["nimento"])
+					if not super_type.isNoun() or super_type.form != "nimento":
+						syntaxError("super type must be a noun in the nominative case", tokens)
+					accept([","], tokens)
+					accept(["jolla"], tokens)
+					tokens.setStyle("keyword")
+					accept(["on"], tokens)
+					tokens.setStyle("keyword")
+					fields = parseList(parseFieldName, tokens)
+					eatPeriod(tokens)
+					tokens.addNewline()
+					return ClassDecl(word.baseform, fields, super_type=super_type.baseform)
+				elif peek and peek.isWord() and peek.toWord(forms=["nimento"]).isAdjective():
+					if word.form != "nimento":
+						syntaxError("self parameter not in the nominative case", tokens)
+					place = tokens.place()
+					operator, req_second_param = parseOperator(tokens)
+					if operator[0] != ".":
+						tokens.setPlace(place)
+						tokens.next()
+						syntaxError("redefinition of builtin", tokens)
+					if req_second_param:
+						w1, w2 = parseVariable(tokens)
+						param = w1.baseform+"_"+w2.baseform
+					else:
+						param = ""
+					accept([","], tokens)
+					accept(["jos"], tokens)
+					conditions = parseList(parseCondition, tokens)
+					wheres = parseWheres(tokens)
+					eatPeriod(tokens)
+					tokens.addNewline()
+					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres)
+			elif word.form == "omanto":
+				field, field_number = parseFieldName(tokens, word.form)
+				if field_number == "plural":
+					accept(["ovat"], tokens)
+				else:
+					accept(["on"], tokens)
+				tokens.setStyle("keyword")
+				body, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
+				if case != "nimento":
+					syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
+				wheres = parseWheres(tokens)
+				eatPeriod(tokens)
+				tokens.addNewline()
+				return FunctionDecl(typeword.baseform, field, varname, body, wheres)
 	tokens.next()
 	syntaxError("unexpected token \"" + token.token + "\"", tokens)
 
@@ -129,13 +153,15 @@ def parseVariable(tokens, word=None, case="nimento"):
 	if not word:
 		checkEof(tokens)
 		word = tokens.next().toWord(cls=ADJ, forms=[case])
-		if not word.isAdjective() or word.form != case:
+		if not word.isAdjective() or (case and word.form != case):
 			syntaxError("this variable must begin with an adjective " + formToEnglish(case, article=False), tokens)
 		tokens.setStyle("variable")
 	checkEof(tokens)
-	word2 = tokens.next().toWord(cls=NOUN, forms=[case])
-	if not word2.isNoun() or word2.form != case:
+	word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
+	if not word2.isNoun() or (case and word2.form != case):
 		syntaxError("this variable must end with a noun " + formToEnglish(case, article=False), tokens)
+	if word.form != word2.form:
+		syntaxError("variable words do not accept in case")
 	if word.number != word2.number:
 		syntaxError("variable words do not accept in number", tokens)
 	tokens.setStyle("type")

@@ -15,6 +15,7 @@ lista.prototype.f_alkio = function() { return this.alkio; };
 lista.prototype.f_koko = function() { return this.alkio.length; };
 lista.prototype.f_häntä = function() { return new lista({"alkio": this.alkio.slice(1)}); };
 lista.prototype.etsiä_indeksin_A_Ut_N = function(item) { return this.alkio.indexOf(item); };
+lista.prototype.p_tyhjä = function() { return this.f_alkio().f_määrä() === 0; };
 const tyhjä_lista = new lista({});
 
 // Function
