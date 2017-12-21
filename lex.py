@@ -37,13 +37,17 @@ def lexCode(code):
 		for number in CASE_REGEXES:
 			for case in CASE_REGEXES[number]:
 				if re.fullmatch(CASE_REGEXES[number][case], word):
-					output += [AltWords(word, [Word(word, word[:word.index(":")], case, number, "nimisana")])]
+					bf = word[:word.index(":")]
+					cl = "lukusana" if re.fullmatch(r'\d+', bf) else "nimisana"
+					output += [AltWords(word, [Word(word, bf, case, number, cl)])]
 					cont = True
 		if cont:
 			continue
 		for case in ORDINAL_CASE_REGEXES:
 			if re.fullmatch(ORDINAL_CASE_REGEXES[case], word):
-				output += [AltWords(word, [Word(word, word[:word.index(":")], case, number, "nimisana", ordinal_like=True)])]
+				bf = word[:word.index(":")]
+				cl = "lukusana" if re.fullmatch(r'\d+', bf) else "nimisana"
+				output += [AltWords(word, [Word(word, bf, case, number, cl, ordinal_like=True)])]
 				cont = True
 		if cont:
 			continue
@@ -53,7 +57,7 @@ def lexCode(code):
 		for analysis in analysis_list:
 			bf = analysis["BASEFORM"]
 			cl = analysis["CLASS"]
-			if bf in ORDINALS+CARDINALS:
+			if bf in ORDINALS+CARDINALS or re.fullmatch(r'\d+', bf):
 				cl = "lukusana"
 			number = analysis.get("NUMBER", "")
 			person = analysis.get("PERSON", "")
@@ -256,7 +260,7 @@ class Word:
 	def isNoun(self):
 		return self.word_class in ["nimisana"] or self.isVariable()
 	def isName(self):
-		return self.word_class in ["etunimi", "sukunimi"]
+		return self.word_class in ["etunimi", "sukunimi"] and self.word[0].upper() == self.word[0]
 	def isPronoun(self):
 		return self.word_class in ["asemosana"]
 	def isAdjective(self):

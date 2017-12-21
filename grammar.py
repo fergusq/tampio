@@ -30,6 +30,7 @@ POSTPOSITIONS = {
 		"keskellä", "keskeltä", "keskelle",
 		"edessä", "edestä", "eteen",
 		"takana", "takaa", "taakse",
+		"kuluttua",
 		"mukaisesti"
 	]
 }
@@ -379,25 +380,26 @@ def parseSentence(tokens):
 	else:
 		return BlockStatement(stmts, wheres)
 
+def nextIsValidVerbModifier(tokens, allow_adverbs=True):
+	token = tokens.peek()
+	if not token or not token.isWord():
+		return False
+	word = token.toWord(cls=2*ADJ+2*NUMERAL+2*CONJ+2*PRONOUN+NOUN)
+	return ((word.isNoun()
+		and word.baseform not in CARDINALS
+		and word.baseform not in ORDINALS
+		and (not tokens.peek(2) or not tokens.peek(2).isString())
+		and word.form != "olento"
+		and len(word.baseform) > 1)
+		or (allow_adverbs and word.isAdverb()))
+
 def readVerbModifiers(tokens):
 	ans = ""
 	while not tokens.eof():
-		token = tokens.peek()
-		if token.isWord():
-			word = token.toWord(cls=ADJ+NUMERAL+CONJ+PRONOUN)
-			if ((word.isNoun()
-				and word.baseform not in CARDINALS
-				and word.baseform not in ORDINALS
-				and (not tokens.peek(2) or not tokens.peek(2).isString())
-				and word.form != "olento"
-				and len(word.baseform) > 1)
-				or word.isAdverb()):
-				
-				tokens.next()
-				tokens.setStyle("function")
-				ans += "_" + token.token.lower()
-			else:
-				break
+		if nextIsValidVerbModifier(tokens):
+			token = tokens.next()
+			tokens.setStyle("function")
+			ans += "_" + token.token.lower()
 		else:
 			break
 	return ans
@@ -556,7 +558,12 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		expr = NumExpr(CARDINALS.index(word.baseform))
 	elif re.fullmatch(r'\d+', word.baseform):
 		tokens.setStyle("literal")
-		case = word.form
+		if word.form == "nimento" and nextIsValidVerbModifier(tokens, allow_adverbs=False):
+			word2 = tokens.next().toWord(cls=NOUN)
+			tokens.setStyle("keyword")
+			case = word2.form
+		else:
+			case = word.form
 		expr = NumExpr(int(word.baseform))
 	elif word.isNoun() and tokens.peek() and tokens.peek().isString():
 		tokens.setStyle("keyword")
@@ -658,7 +665,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		
 		while case == "omanto" and not tokens.eof():
 			token = tokens.peek()
-			if not token.isWord():
+			if not token.isWord() or token.token.lower() in POSTPOSITIONS["omanto"]:
 				break
 			word = token.toWord(cls=2*NOUN+2*NUMERAL+PRONOUN, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"])
 			if must_be_in_genitive and word.form != "omanto":
