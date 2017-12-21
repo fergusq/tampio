@@ -40,7 +40,7 @@ To print a HTML page that contains both JavaScript and the syntax highlighted co
 Tampio is an object-oriented language that compiles to JavaScript.
 Its syntax is directly inspired by the Finnish language and is therefore based on inflecting words.
 
-A Tampio file is a list of definitions, each which defines either a class, a function, a method or a global variable.
+A Tampio file is a list of definitions, each which defines either a class, a function, a method, a comparison operator or a global variable.
 For example, here is a simple program that calculates the factorial of a given number.
 
     Pienen luvun kertoma on
@@ -155,6 +155,10 @@ For example:
 
 This very simple class, `vektori`, has one field: `komponentit`. As the name of the field is plural, it is an array.
 
+There is a special syntax that is used to declare a subclass:
+
+    [name/nominative] on [super type/nominative], jolla on [field list/nominative].
+
 ## Functions
 
 In Tampio, a function is always defined for one class and is polymorphic to that class.
@@ -242,6 +246,20 @@ For example:
         jos n on suurempi kuin nolla, niin
             tehokas toiminto suoritetaan
         ja  toistetaan m kertaa tehokas toiminto, missä m on n vähennettynä yhdellä.
+
+## Comparison operators
+
+Comparison operators are functions that return boolean values.
+They can only be used inside other comparison operators, if statements and conditional expressions.
+Comparison operators can have either zero or one parameters.
+
+    [parameter/nominative] on [adjective/positive nominative], jos [condition list].
+    [parameter/nominative] on [adjective/positive comparative] kuin [parameter/nominative], jos [condition list].
+
+For example:
+
+    Lista on tyhjä, jos sen alkioiden määrä on nolla.
+    Vektori on pidempi kuin lyhyt vektori, jos sen pituus on suurempi kuin lyhyen vektorin pituus.
 
 ## Statements
 
@@ -341,14 +359,16 @@ Below is a table of available comparison operators.
 
 |Operator                      |JavaScript equivalent|
 |:-----------------------------|:--------------------|
-|(empty)                       |`==`                 |
-|`yhtä kuin`                   |`==`                 |
-|`yhtä suuri kuin`             |`==`                 |
-|`erisuuri kuin`               |`!=`                 |
+|(empty)                       |`===`                |
+|`yhtä kuin`                   |`===`                |
+|`yhtä suuri kuin`             |`===`                |
+|`erisuuri kuin`               |`!==`                |
 |`pienempi kuin`               |`<`                  |
 |`suurempi kuin`               |`>`                  |
 |`pienempi tai yhtä suuri kuin`|`<=`                 |
 |`suurempi tai yhtä suuri kuin`|`>=`                 |
+
+It is possible to define custom comparison operators for classes.
 
 ### Assignments
 
@@ -619,6 +639,7 @@ Declaration:
 |`koko`      |Function|The number of items in this list (`this.alkio.length`).
 |`häntä`     |Function|The tail of this list (`this.alkio.slice(1)`).
 |`etsii indeksin`|Method|Returns the index of the given element (`this.alkio.indexOf(item)`).
+|`tyhjä`     |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
 
 ### `luku` class
 
