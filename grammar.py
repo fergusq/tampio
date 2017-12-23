@@ -558,10 +558,15 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		expr = NumExpr(CARDINALS.index(word.baseform))
 	elif re.fullmatch(r'\d+', word.baseform):
 		tokens.setStyle("literal")
-		if word.form == "nimento" and nextIsValidVerbModifier(tokens, allow_adverbs=False):
+		if word.form in ["nimento", "osanto"] and nextIsValidVerbModifier(tokens, allow_adverbs=False):
 			word2 = tokens.next().toWord(cls=NOUN)
 			tokens.setStyle("keyword")
-			case = word2.form
+			if word.form == "nimento":
+				case = word2.form if word2.form != "osanto" else "nimento"
+			elif word.form == "osanto" and word2.form == "osanto":
+				case = "osanto"
+			else:
+				syntaxError("the unit should be in the partitive case", tokens)
 		else:
 			case = word.form
 		expr = NumExpr(int(word.baseform))

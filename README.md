@@ -430,6 +430,17 @@ Literal numbers can appear in the code both written with digits or as words.
 |`yhdeksän`   |9                  |
 |`kymmenen`   |10                 |
 
+There can be an optional unit noun after the number.
+If it is present, it must be inflected instead of the number.
+The noun is functionally a comment.
+
+    Olkoon nykyinen massa 10 kilogrammaa.
+
+If the noun is inflected in anything else than nominative or partitive,
+the case of the noun will be the case of the expression.
+However, if the noun is inflected in partitive,
+the case of the expression will be nominative unless the number is also in partitive.
+
 ### Literal strings
 
 Literal strings are written inside `"quotation marks"`.
