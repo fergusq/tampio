@@ -400,7 +400,11 @@ It is possible to dynamically add new methods to a class.
 These methods are closures and can capture local variables in the context where they are created.
 It is not possible to specify names of these methods in the class declaration.
 
-    [expression/genitive] [method/e-infinitive inessive] [parameter list] käyköön niin, että [statement list],
+    [expression/genitive] [method/e-infinitive active inessive] [parameter list] käyköön niin, että [statement list],
+    [expression] [method/e-infinitive passive inessive] [parameter list] käyköön niin, että [statement list],
+
+If the verb is in passive voice, the case of the object can be anything.
+If it is in active voice, however, the the object must be in the genitive case.
 
 For example:
 
