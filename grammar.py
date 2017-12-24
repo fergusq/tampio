@@ -133,8 +133,8 @@ def parseDeclaration(tokens):
 					eatPeriod(tokens)
 					tokens.addNewline()
 					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres)
-			elif word.form == "omanto":
-				field, field_number = parseFieldName(tokens, word.form)
+			elif word.form in ["omanto", "nimento"]:
+				field, field_number, param, param_case = parseFieldName(tokens, word.form)
 				if field_number == "plural":
 					accept(["ovat"], tokens)
 				else:
@@ -146,7 +146,7 @@ def parseDeclaration(tokens):
 				wheres = parseWheres(tokens)
 				eatPeriod(tokens)
 				tokens.addNewline()
-				return FunctionDecl(typeword.baseform, field, varname, body, wheres)
+				return FunctionDecl(typeword.baseform, field, varname, param, param_case, body, wheres)
 	tokens.next()
 	syntaxError("unexpected token \"" + token.token + "\"", tokens)
 
@@ -178,7 +178,10 @@ def parseFieldName(tokens, form="omanto"):
 	field = word.baseform
 	if word.form == "olento":
 		field += "_E"
-	return field, word.number
+		if tokens.peek() and tokens.peek.toWord(cls=VERB).isAdjective():
+			w1, w2 = parseVariable(tokens, case="")
+			return field, word.number, w1.baseform + "_" + w2.baseform, w1.form
+	return field, word.number, None, None
 
 def parseWheres(tokens):
 	token = tokens.peek()
@@ -240,7 +243,20 @@ def parseSentence(tokens):
 	word = tokens.peek().toWord(
 		cls=ADJ*2+NUMERAL*2+NAME*2+VERB,
 		forms=["imperative_present_simple2", "indicative_present_simple4", "nimento", "osanto"])
-	if word.isAdjective() or word.isOrdinal() or word.isName() or word.isPronoun() or word.isNoun():
+	if word.isVerb():
+		tokens.next()
+		tokens.setStyle("function")
+		place = tokens.place()
+		for_vars = popFor()
+		subjectless = True
+		passive = True
+		if word.form == "imperative_present_simple2":
+			predicate = word.baseform + "!"
+		elif word.form == "indicative_present_simple4":
+			predicate = word.baseform + readVerbModifiers(tokens)
+		else:
+			syntaxError("predicate ("+word.word+") is not in indicative or imperative simple present", tokens, place)
+	else:
 		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento", "omanto"])
 		
 		place = tokens.place()
@@ -302,21 +318,6 @@ def parseSentence(tokens):
 		
 		subjectless = False
 		subject_case = case
-	elif word.isVerb():
-		tokens.next()
-		tokens.setStyle("function")
-		place = tokens.place()
-		for_vars = popFor()
-		subjectless = True
-		passive = True
-		if word.form == "imperative_present_simple2":
-			predicate = word.baseform + "!"
-		elif word.form == "indicative_present_simple4":
-			predicate = word.baseform + readVerbModifiers(tokens)
-		else:
-			syntaxError("predicate ("+word.word+") is not in indicative or imperative simple present", tokens, place)
-	else:
-		syntaxError("malformed sentence", tokens)
 	
 	for_var_list = []
 	args_list = []
@@ -386,11 +387,8 @@ def nextIsValidVerbModifier(tokens, allow_adverbs=True):
 		return False
 	word = token.toWord(cls=2*ADJ+2*NUMERAL+2*CONJ+2*PRONOUN+NOUN)
 	return ((word.isNoun()
-		and word.baseform not in CARDINALS
-		and word.baseform not in ORDINALS
-		and (not tokens.peek(2) or not tokens.peek(2).isString())
-		and word.form != "olento"
-		and len(word.baseform) > 1)
+		and not canStartNominalPhrase(word, tokens)
+		and word.form != "olento")
 		or (allow_adverbs and word.isAdverb()))
 
 def readVerbModifiers(tokens):
@@ -415,11 +413,11 @@ ARI_OPERATORS = {
 }
 
 CMP_OPERATORS = {
-	"yhtä suuri kuin": "===",
-	"yhtäsuuri kuin": "===",
-	"yhtä kuin": "===",
+	"yhtä suuri kuin": "==",
+	"yhtäsuuri kuin": "==",
+	"yhtä kuin": "==",
 	"sama kuin": "===",
-	"erisuuri kuin": "!==",
+	"erisuuri kuin": "!=",
 	"pienempi kuin": "<",
 	"pienempi tai yhtä suuri kuin": "<=",
 	"pienempi tai yhtäsuuri kuin": "<=",
@@ -507,7 +505,25 @@ def parseOperator(tokens):
 		else:
 			return ".p_" + word.baseform, False
 	else:
-		return "===", True
+		return "==", True
+
+def nextStartsNominalPhrase(tokens):
+	if tokens.eof():
+		return False
+	peek = tokens.peek()
+	if not peek.isWord():
+		return False
+	word = peek.toWord(cls=2*ADJ+2*NUMERAL+2*CONJ+2*PRONOUN+NOUN)
+	return canStartNominalPhrase(word, tokens)
+
+def canStartNominalPhrase(word, tokens):
+	return (word.isAdjective()
+		or word.isPronoun()
+		or word.isVariable()
+		or word.isOrdinal()
+		or word.isCardinal()
+		or re.fullmatch(r'\d+', word.baseform)
+		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).isString()))
 
 def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	checkEof(tokens)
@@ -754,6 +770,15 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				tokens.setStyle("field")
 				expr = FieldExpr(expr, word.baseform + "_E")
 				cont = True
+			elif word.isAdjective() and word.form == "olento":
+				tokens.next()
+				tokens.setStyle("field")
+				if nextStartsNominalPhrase(tokens) and tokens.peek().toWord(cls=NOUN).form != "olento":
+					arg, arg_case = parseNominalPhrase(tokens)
+					expr = FieldExpr(expr, word.baseform + "_E", arg_case, arg)
+				else:
+					expr = FieldExpr(expr, word.baseform + "_E")
+				cont = True
 			else:
 				break
 			peek1 = tokens.peek(1)
@@ -761,7 +786,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			word2 = peek2.toWord(cls=NOUN, forms="olento") if peek2 and peek2.isWord() else None
 			if (peek1 and peek2 and peek1.token.lower() in [",", "ja"]
 				and (peek2.token.lower() in ARI_OPERATORS.keys()
-					or (peek2.isWord() and word2.isNoun() and word2.form == "olento"))):
+					or (peek2.isWord() and (word2.isNoun() or word2.isAdjective()) and word2.form == "olento"))):
 				if tokens.next().token == ",":
 					require_ja = True
 				else: # ja

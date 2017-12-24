@@ -27,15 +27,33 @@ Function.prototype.suorittaa_P__N = function() { this(); }
 const power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};
 Number.prototype.f_potenssi = function() { return new Proxy(this, power_handler); };
 Number.prototype.f_neliöjuuri = function() { return Math.sqrt(this); };
+Number.prototype.f_kuutiojuuri = function() { return Math.cbrt(this); };
+Number.prototype.f_sini = function() { return Math.sin(this); };
+Number.prototype.f_kosini = function() { return Math.cos(this); };
+Number.prototype.f_tangentti = function() { return Math.tan(this); };
+Number.prototype.f_logaritmi = function() { return Math.log(this); };
+Number.prototype.f_vastalogaritmi = function() { return Math.exp(this); };
+Number.prototype.f_merkki = function() { return Math.sign(this); };
+Number.prototype.f_itseisarvo = function() { return Math.abs(this); };
 Number.prototype.f_vastaluku = function() { return -this; };
 Number.prototype.f_käänteisluku = function() { return 1/this; };
 Number.prototype.f_seuraaja = function() { return this+1; };
 Number.prototype.f_edeltäjä = function() { return this-1; };
+Number.prototype.f_tekijä = function() { var l=[]; for (var i=1; i<=this; i++) if (this%i===0) l.push(i); return l; }
+Number.prototype.f_alkutekijä = function() { var l=[]; for (var i=2; i<this; i++) if (this%i===0&&!l.some(j=>i%j===0)) l.push(i); return l; }
+Number.prototype.f_pyöristetty_E = Math.round;
+Number.prototype.f_pyöristetty_E_St = function(e) { e = Math.pow(10, e); return Math.round(this*e)/e; };
+Number.prototype.f_kokonaisluku_E
 Number.prototype.f_merkkijono_E = Number.prototype.toString;
 
 // String/merkkijono
 String.prototype.f_pituus = function() { return this.length; };
+String.prototype.f_merkki = function() { return Array.from(this); };
+String.prototype.f_sana = function() { return this.split(/\s+/); };
+String.prototype.f_kenttä = function() { return this.split(/,/); };
+String.prototype.f_siistitty_E = String.prototype.trim;
 String.prototype.näyttää_käyttäjälle_P__N = function() { alert(this); };
+String.prototype.merkitä_lokiin_P__N = function() { console.log(this); };
 String.prototype.jakaa_P_SeT_N = function(sep, list) { for (var s of this.split(sep)) list.push(s); };
 
 // HTMLDocument/sivu
@@ -86,3 +104,6 @@ muuttuja.prototype.lukea_luku_P_Uo_St = function(p) { this.arvo = Number.parseIn
 
 // toistetaan
 function toistaa_KertaaN(n, tehokas_toiminto) { for (var i = 0; i < n; i++) tehokas_toiminto(); };
+
+// console
+function tulostaa_N(t) { console.log(t); }

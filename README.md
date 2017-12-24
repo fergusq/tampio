@@ -360,10 +360,11 @@ Below is a table of available comparison operators.
 
 |Operator                      |JavaScript equivalent|
 |:-----------------------------|:--------------------|
-|(empty)                       |`===`                |
-|`yhtä kuin`                   |`===`                |
-|`yhtä suuri kuin`             |`===`                |
-|`erisuuri kuin`               |`!==`                |
+|(empty)                       |`==`                 |
+|`yhtä kuin`                   |`==`                 |
+|`yhtä suuri kuin`             |`==`                 |
+|`sama kuin`                   |`===`                |
+|`erisuuri kuin`               |`!=`                 |
 |`pienempi kuin`               |`<`                  |
 |`suurempi kuin`               |`>`                  |
 |`pienempi tai yhtä suuri kuin`|`<=`                 |

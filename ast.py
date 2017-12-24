@@ -80,7 +80,7 @@ class ClassDecl:
 		ans = "function " + escapeIdentifier(self.name) + "(vals) {\n"
 		if self.super:
 			ans += " " + escapeIdentifier(self.super) + ".call(this, vals);\n"
-		for name, number in self.fields:
+		for name, number, _, _ in self.fields:
 			ans += " this." + escapeIdentifier(name) + " = (\"" + name + "\" in vals) ? vals[\"" + name + "\"] : "
 			if number == "plural":
 				ans += "[];\n"
@@ -91,25 +91,33 @@ class ClassDecl:
 			ans += "\n" + escapeIdentifier(self.name) + ".prototype = Object.create(" + escapeIdentifier(self.super) + ".prototype);"
 			ans += "\n" + escapeIdentifier(self.name) + ".prototype.constructor = " + escapeIdentifier(self.name) + ";"
 		ans += "\n" + typeToJs(self.name) + ".prototype.assign = function(n, v) { this[n] = v; };"
-		for name, number in self.fields:
+		for name, number, _, _ in self.fields:
 			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + name + " = function() { return this." + name + "; };"
 		return ans
 
 class FunctionDecl:
-	def __init__(self, vtype, field, param, body, wheres):
+	def __init__(self, vtype, field, self_param, param, param_case, body, wheres):
 		self.type = vtype
 		self.field = field
+		self.self_param = self_param
 		self.param = param
+		self.param_case = param_case
 		self.body = body
 		self.wheres = wheres
 	def __str__(self):
-		return self.type + "." + self.field + " := " + self.param + " => " + str(self.body)
+		return self.type + "." + self.field + " := " + self.self_param + (", " + self.param if self.param else "") + " => " + str(self.body)
 	def compileWheres(self):
 		return "".join([" var "+escapeIdentifier(where[0])+" = "+where[1].compile()+";\n" for where in self.wheres])
 	def compile(self):
-		ans = typeToJs(self.type) + ".prototype.f_" + self.field + " = function() {\n"
-		if self.param != "":
-			ans += " var " + escapeIdentifier(self.param) + " = this;\n"
+		ans = typeToJs(self.type) + ".prototype.f_" + self.field
+		if self.param_case:
+			ans += "_" + formAbrv(self.param_case)
+		ans += " = function("
+		if self.param:
+			ans += self.param
+		ans += ") {\n"
+		if self.self_param != "":
+			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
 		ans += self.compileWheres()
 		ans += " return " + self.body.compile() + ";\n};"
 		return ans
@@ -305,13 +313,21 @@ class VariableExpr:
 		return escapeIdentifier(self.name)
 
 class FieldExpr:
-	def __init__(self, obj, field):
+	def __init__(self, obj, field, arg_case=None, arg=None):
 		self.obj = obj
 		self.field = field
+		self.arg_case = arg_case
+		self.arg = arg
 	def __str__(self):
 		return str(self.obj) + "." + self.field
 	def compile(self):
-		return self.obj.compile() + ".f_" + escapeIdentifier(self.field) + "()"
+		ans = self.obj.compile() + ".f_" + escapeIdentifier(self.field)
+		if self.arg_case:
+			ans += "_" + formAbrv(self.arg_case)
+		ans += "("
+		if self.arg:
+			ans += self.arg.compile()
+		return ans + ")"
 
 class SubscriptExpr:
 	def __init__(self, obj, index, is_end_index=False):
