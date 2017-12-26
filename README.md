@@ -164,10 +164,12 @@ There is a special syntax that is used to declare a subclass:
 In Tampio, a function is always defined for one class and is polymorphic to that class.
 This means that it is possible to define the same function differently for multiple classes.
 
-A function always has one parameter and one expression that is the return value.
+A function normally has one parameter and one expression that is the return value.
+Certain essive functions can have two parameters.
 
     [parameter/genitive] [function name] on [expression/nominative].
     [parameter/nominative] [function name/essive] on [expression/nominative]
+    [parameter/nominative] [function name/past passive participle essive] [parameter] on [expression/nominative]
 
 The name of the parameter must have two words: an adjective and the name of the class.
 For example, to define a function called `dimensio` for the `vektori` class,
@@ -190,6 +192,9 @@ It is possible to not name the parameter, in which case only the class name appe
 In the body, the word `se` can be used to refer to the unnamed parameter.
 
     Vektorin dimensio on sen komponenttien määrä.
+
+If the function name is in essive case and is a past passive participle (ie. ending with `-ttuna`/`-ttynä`),
+it can have an optional second parameter.
 
 ## Methods
 
@@ -221,6 +226,7 @@ The parameter must usually be in the genitive case and the postposition must imm
 These rules are the same in both method definitions and method calls.
 
     [parameter/required case] [postposition]
+    [parameter/genitive] [intransitive verb past passive participle/partitive]
 
 |Postposition|Required case|
 |:-----------|:------------|
@@ -230,18 +236,22 @@ These rules are the same in both method definitions and method calls.
 |`edessä`    |genitive     |
 |`edestä`    |genitive     |
 |`eteen`     |genitive     |
+|`kanssa`    |genitive     |
 |`kertaa`    |nominative   |
-|`kuluttua`  |genitive     |
+|`mukaan`    |genitive     |
 |`mukaisesti`|genitive     |
 |`takana`    |genitive     |
 |`takaa`     |genitive     |
 |`taakse`    |genitive     |
+
+The passive past participles of intransitive verbs ending in `-uttu`/`-ytty` work similarly to postpositions.
 
 For example:
 
     toteuteutetaan työ annettujen ohjeiden mukaisesti
     lisätään loistava luku lyhyen listan eteen
     luetaan arvo oivan osoittimen alta mukavaan muuttujaan
+    noustaan ilmaan 3 sekunnin kuluttua
 
     Kun toistetaan n kertaa tehokas toiminto,
         jos n on suurempi kuin nolla, niin
@@ -470,15 +480,43 @@ For example:
     viiden kertoma      # factorial(5)
     neljän neliöjuuri   # sqrt(4)
 
-The essive calls are typically used to convert a value to another type.
+The essive calls are typically used to convert a value to another type, form or representation.
 The function name is in the essive case and can appear either before or after the argument.
 
     [argument] [function name/essive]
+    [argument] [function name/essive] [second argument]
     [function name/essive] [argument]
+
+If the function name is a past passive participle (ie. ending in `-ttu`/`-tty`),
+it can have an optional second argument, which can be in any case except nominative and genitive.
 
 For example:
 
-    viisi merkkijonona  # toString(5)
+    viisi merkkijonona                       # toString(5)
+    annettu luku pyöristettynä 4 desimaaliin # Math.round(this*10000)/10000
+
+There is a small number of builtin essive functions
+that perform the basic mathematical operations of addition, subtraction, multiplication and division.
+
+|Builtin operator|Second argument case|JavaScript equivalent|
+|:--------------:|:------------------:|:-------------------:|
+|`lisättynä`     |illative            |`+`                  |
+|`ynnättynä`     |illative            |`+`                  |
+|`kasvatettuna`  |adessive            |`+`                  |
+|`vähennettynä`  |adessive            |`-`                  |
+|`kerrottuna`    |adessive            |`*`                  |
+|`jaettuna`      |adessive            |`/`                  |
+|`yhdistettynä`  |illative            |`.concat`            |
+|`liitettynä`    |illative            |`.prepend`           |
+
+There are no parentheses in Tampio, so the operator precedence is defined using the list syntax.
+Two or more essive function calls can form an essive chain.
+It is not possible to use `eikä muuta`.
+
+    x jaettuna y:llä vähennettynä z:lla lisättynä w:hen     # x/(y-(z+w))
+    x jaettuna y:llä vähennettynä z:lla ja lisättynä w:hen  # x/((y-z)+w)
+    x jaettuna y:llä, vähennettynä z:lla ja lisättynä w:hen # ((x/y)-z)+w
+    x jaettuna y:llä ja vähennettynä z:lla lisättynä w:hen  # (x/y)-(z+w)
 
 ### Object initialization
 
@@ -583,6 +621,7 @@ Pseudodeclaration:
 
     "Arrayn" määrä on ...
     "Arrayn" summa on ...
+    
     Kun kivaksi "arrayksi" lisätään kiva arvo, ...
 
 |Member name |Type    |Description|
@@ -598,7 +637,9 @@ Pseudodeclaration:
 Pseudodeclaration:
 
     Ajankohdalla on vuosi, kuukausi, päivä, tunti, minuutti, sekunti.
+    
     Ajankohta millisekunteina on ...
+    
     Ajankohta merkkijonona on ...
     Ajankohta päivämäärämerkkijonona on ...
     Ajankohta kellonaikamerkkijonona on ...
@@ -648,8 +689,12 @@ Pseudodeclaration:
 Declaration:
 
     Listalla on alkiot.
+    
     Listan koko on sen alkioiden määrä.
     Listan häntä on uusi lista, jonka alkiot ovat sen alkiot toisesta alkaen.
+    
+    Lista on tyhjä, jos sen alkioiden määrä on nolla.
+    
     Kun lyhyt lista etsii indeksin ihanalle alkiolle, ...
     Kun lyhyeen listaan lisätään ihana alkio, ...
 
@@ -658,9 +703,9 @@ Declaration:
 |`alkiot`    |Field   |The items in this list.
 |`koko`      |Function|The number of items in this list (`this.alkio.length`).
 |`häntä`     |Function|The tail of this list (`this.alkio.slice(1)`).
+|`tyhjä`     |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
 |`etsii indeksin`|Method|Returns the index of the given element (`this.alkio.indexOf(item)`).
 |`lisätään`  |Method  |Appends a new element to this list (`this.alkio.push(item)`).
-|`tyhjä`     |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
 
 ### `luku` class
 
@@ -669,18 +714,58 @@ Declaration:
 Pseudodeclaration:
 
     Luvun neliöjuuri on ...
+    Luvun kuutiojuuri on ...
+    
     Luvun vastaluku on ...
+    Luvun käänteisluku on ...
+    
+    Luvun edeltäjä on ...
+    Luvun seuraaja on ...
+    
+    Luvun itseisarvo on ...
+    Luvun merkki on ...
+    
+    Luvun sini on ...
+    Luvun kosini on ...
+    Luvun tangentti on ...
+    
+    Luvun logaritmi on ...
+    Luvun vastalogaritmi on ...
+    
+    Luvun kertoma on ...
+    
+    Luvun tekijät ovat ...
+    Luvun alkutekijät ovat ...
+    
     Luvun potenssit ovat ...
+    
+    Luku kokonaislukuna on ...
+    Luku pyöristettynä on ...
+    Luku pyöristettynä annettuun tarkkuuteen on ...
+    
     Luku merkkijonona on ...
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
-|`neliöjuuri`|Function|The square root of this number (`sqrt(this)`).
+|`neliöjuuri`|Function|The square root of this number (`Math.sqrt(this)`).
+|`kuutiojuuri`|Function|The cube root of this number (`Math.cbrt(this)`).
 |`vastaluku` |Function|The opposite of this number (`-this`).
 |`käänteisluku`|Function|The inverse of this number (`1/this`).
 |`edeltäjä`  |Function|The predecessor of this number (`this-1`).
 |`seuraaja`  |Function|The successor of this number (`this+1`).
+|`itseisarvo`|Function|The absolute value of this number (`Math.abs(this)`).
+|`merkki`    |Function|The sign of this number (`Math.sign(this)`).
+|`sini`      |Function|The sine (`Math.sin(this)`).
+|`kosini`    |Function|The cosine (`Math.cos(this)`).
+|`tangentti` |Function|The tangent (`Math.tan(this)`).
+|`logaritmi` |Function|The natural logarithm (`Math.log(this)`).
+|`vastalogaritmi`|Function|The natural antilogarithm (`Math.exp(this)`).
+|`kertoma`   |Function|The factorial of this number.
 |`potenssit` |Function|An infinite array of the powers of this number.
+|`tekijät`   |Function|The factors of this number.
+|`alkutekijät`|Function|The prime factors of this number.
+|`kokonaislukuna`|Function|Rounds this number (`Math.round(this)`).
+|`pyöristettynä`|Function|Rounds this number (`Math.round(this)`).
 |`merkkijonona`|Function|Converts this number to string (`this.toString()`).
 
 ### `merkkijono` class
@@ -690,14 +775,27 @@ Pseudodeclaration:
 Pseudodeclaration:
 
     Merkkijonon pituus on ...
+    
+    Merkkijonon merkit ovat ...
+    Merkkijonon sanat ovat ...
+    Merkkijonon kentät ovat ...
     Kun mukava merkkijono jaetaan annetusta erottimesta kivoiksi arvoiksi, ...
+    
+    Merkkijono siistittynä on ...
+    
     Kun mukava merkkijono näytetään käyttäjälle, ...
+    Kun mukava merkkijono tulostetaan lokiin, ...
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
 |`pituus`    |Function|The length of this string (`this.length`).
+|`merkit`    |Function|The characters of this string (`Array.from(this)`).
+|`sanat`     |Function|The words in this string (`this.split(/\s+/)`).
+|`kentät`    |Function|The fields in this string (`this.split(/,/)`).
 |`jaetaan`   |Method  |Splits this string and stores it to the given array. (`for (var s of this.split(sep)) list.push(s)`).
+|`siistittynä`|Function|This string trimmed (`this.trim()`).
 |`näytetään käyttäjälle`|Method|Displays this string to the user (`alert(this)`).
+|`tulostetaan lokiin`|Method|Prints this string (`console.log(this)`).
 
 ### `muuttuja` class
 
