@@ -30,10 +30,42 @@ POSTPOSITIONS = {
 		"keskellä", "keskeltä", "keskelle",
 		"edessä", "edestä", "eteen",
 		"takana", "takaa", "taakse",
-		"kuluttua",
-		"mukaisesti"
+		"mukaisesti", "mukaan",
+		"kanssa"
 	]
 }
+
+FAKE_INTRANSITIVES = [
+	"ammuttu",
+	"halveksuttu",
+	"haukuttu",
+	"hyväksytty",
+	"kammoksuttu",
+	"kaduttu",
+	"kehuttu",
+	"kutsuttu",
+	"kysytty",
+	"lausuttu",
+	"lähestytty",
+	"manguttu",
+	"noiduttu", 
+	"omaksuttu",
+	"oudoksuttu",
+	"paheksuttu",
+	"peruttu",
+	"puhuttu",
+	"riisuttu",
+	"uhkuttu",
+	"väheksytty",
+	"väijytty",
+	"yllätytty"
+]
+
+def isPartitiveIntransitiveParticiple(word):
+	return (word.isAdjective()
+		and word.form == "osanto"
+		and len(word.baseform) > 4 and word.baseform[-4:] in ["uttu", "ytty"]
+		and word.baseform not in FAKE_INTRANSITIVES)
 
 def formToEnglish(form, article=True, short = False):
 	if short:
@@ -46,8 +78,8 @@ def formToEnglish(form, article=True, short = False):
 			return "in " + CASES_ENGLISH[form] + " case"
 		elif form in chain.from_iterable(POSTPOSITIONS.values()):
 			return ("an " if article else "") + "argument to the " + form + " postposition"
-		else:
-			return "in " + form
+		else: # intransitive participle
+			return "an agent to the " + form + " participle"
 
 def parseDeclaration(tokens):
 	checkEof(tokens)
@@ -134,7 +166,12 @@ def parseDeclaration(tokens):
 					tokens.addNewline()
 					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres)
 			elif word.form in ["omanto", "nimento"]:
+				place = tokens.place()
 				field, field_number, param, param_case = parseFieldName(tokens, word.form)
+				if field in ARI_OPERATORS:
+					tokens.setPlace(place)
+					tokens.next()
+					syntaxError("redefinition of builtin", tokens)
 				if field_number == "plural":
 					accept(["ovat"], tokens)
 				else:
@@ -184,7 +221,7 @@ def parseFieldName(tokens, form="omanto"):
 	field = word.baseform
 	if word.form == "olento":
 		field += "_E"
-		if tokens.peek() and tokens.peek.toWord(cls=VERB).isAdjective():
+		if tokens.peek() and tokens.peek().toWord(cls=VERB).isAdjective():
 			w1, w2 = parseVariable(tokens, case="")
 			return field, word.number, w1.baseform + "_" + w2.baseform, w1.form
 	return field, word.number, None, None
@@ -410,16 +447,6 @@ def readVerbModifiers(tokens):
 			break
 	return ans
 
-ARI_OPERATORS = {
-	"lisättynä": ("sisatulento", "+"),
-	"ynnättynä": ("sisatulento", "+"),
-	"yhdistettynä": ("sisatulento", ".concat"),
-	"liitettynä": ("sisatulento", ".prepend"),
-	"vähennettynä": ("ulkoolento", "-"),
-	"kerrottuna": ("ulkoolento", "*"),
-	"jaettuna": ("ulkoolento", "/")
-}
-
 CMP_OPERATORS = {
 	"yhtä suuri kuin": "==",
 	"yhtäsuuri kuin": "==",
@@ -503,7 +530,7 @@ def parseOperator(tokens):
 		return branch, True
 	elif tokens.peek(2) and tokens.peek().toWord(cls=ADJ).isAdjective() and (not tokens.peek(2).isWord() or not tokens.peek(2).toWord(cls=NOUN).isNoun()):
 		word = tokens.next().toWord(cls=ADJ)
-		tokens.setStyle("function")
+		tokens.setStyle("conditional-operator")
 		if word.form != "nimento":
 			syntaxError("expected an adjective in the nominative case", tokens)
 		if word.comparison == "comparative":
@@ -768,24 +795,14 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		chain_end = False
 		while not tokens.eof() and tokens.peek().isWord():
 			word = tokens.peek().toWord(cls=NOUN, forms="olento")
-			if word.word.lower() in ARI_OPERATORS.keys():
-				operator = tokens.next().token.lower()
-				tokens.setStyle("keyword")
-				required_arg_case, op = ARI_OPERATORS[operator]
-				arg, arg_case = parseNominalPhrase(tokens, promoted_cases=[required_arg_case])
-				if arg_case != required_arg_case:
-					syntaxError("the operand of \"" + operator + "\" must be "
-						+ formToEnglish(required_arg_case), tokens)
-				expr = ArithmeticExpr(op, expr, arg)
-				cont = True
-			elif word.isNoun() and word.form == "olento" and word.possessive == "" and word.word != "tuloksena":
+			if word.isNoun() and word.form == "olento" and word.possessive == "" and word.word != "tuloksena":
 				tokens.next()
-				tokens.setStyle("field")
+				tokens.setStyle("operator")
 				expr = FieldExpr(expr, word.baseform + "_E")
 				cont = True
 			elif word.isAdjective() and word.form == "olento":
 				tokens.next()
-				tokens.setStyle("field")
+				tokens.setStyle("operator")
 				if nextStartsNominalPhrase(tokens) and tokens.peek().toWord(cls=NOUN).form != "olento":
 					arg, arg_case = parseNominalPhrase(tokens)
 					expr = FieldExpr(expr, word.baseform + "_E", arg_case, arg)
@@ -800,8 +817,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			peek2 = tokens.peek(2)
 			word2 = peek2.toWord(cls=NOUN, forms="olento") if peek2 and peek2.isWord() else None
 			if (peek1 and peek2 and peek1.token.lower() in [",", "ja"]
-				and (peek2.token.lower() in ARI_OPERATORS.keys()
-					or (peek2.isWord() and (word2.isNoun() or word2.isAdjective()) and word2.form == "olento"))):
+				and (peek2.isWord() and (word2.isNoun() or word2.isAdjective()) and word2.form == "olento")):
 				if tokens.next().token == ",":
 					require_ja = True
 				else: # ja
@@ -819,7 +835,10 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		pp = tokens.next().token.lower()
 		tokens.setStyle("keyword")
 		return expr, pp
-	
+	elif case == "omanto" and tokens.peek().isWord() and isPartitiveIntransitiveParticiple(tokens.peek().toWord(cls=ADJ,forms=["osanto"])):
+		pp = tokens.next().token.lower()
+		tokens.setStyle("keyword")
+		return expr, pp
 	else:
 		return expr, case
 

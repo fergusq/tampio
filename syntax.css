@@ -20,6 +20,16 @@ span.function {
 	font-style: italic;
 }
 
+span.operator {
+	text-decoration: underline dotted;
+	font-weight: bold;
+}
+
+span.conditional-operator {
+	text-decoration: underline dotted;
+	color: #622;
+}
+
 span.literal {
 	color: #622;
 }

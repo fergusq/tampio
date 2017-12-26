@@ -39,6 +39,7 @@ Number.prototype.f_vastaluku = function() { return -this; };
 Number.prototype.f_käänteisluku = function() { return 1/this; };
 Number.prototype.f_seuraaja = function() { return this+1; };
 Number.prototype.f_edeltäjä = function() { return this-1; };
+Number.prototype.f_kertoma = function() { return this<=1 ? 1 : this*(this-1).f_kertoma(); }
 Number.prototype.f_tekijä = function() { var l=[]; for (var i=1; i<=this; i++) if (this%i===0) l.push(i); return l; }
 Number.prototype.f_alkutekijä = function() { var l=[]; for (var i=2; i<this; i++) if (this%i===0&&!l.some(j=>i%j===0)) l.push(i); return l; }
 Number.prototype.f_pyöristetty_E = function() { return Math.round(this); };

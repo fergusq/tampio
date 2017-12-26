@@ -319,6 +319,17 @@ class VariableExpr:
 	def compile(self):
 		return escapeIdentifier(self.name)
 
+ARI_OPERATORS = {
+	"lisätty_E": ("sisatulento", "+"),
+	"ynnätty_E": ("sisatulento", "+"),
+	"kasvatettu_E": ("ulkoolento", "+"),
+	"yhdistetty_E": ("sisatulento", ".concat"),
+	"liitetty_E": ("sisatulento", ".prepend"),
+	"vähennetty_E": ("ulkoolento", "-"),
+	"kerrottu_E": ("ulkoolento", "*"),
+	"jaettu_E": ("ulkoolento", "/")
+}
+
 class FieldExpr:
 	def __init__(self, obj, field, arg_case=None, arg=None):
 		self.obj = obj
@@ -328,6 +339,8 @@ class FieldExpr:
 	def __str__(self):
 		return str(self.obj) + "." + self.field
 	def compile(self):
+		if self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]:
+			return self.compileArithmetic()
 		ans = self.obj.compile() + ".f_" + escapeIdentifier(self.field)
 		if self.arg_case:
 			ans += "_" + formAbrv(self.arg_case)
@@ -335,6 +348,12 @@ class FieldExpr:
 		if self.arg:
 			ans += self.arg.compile()
 		return ans + ")"
+	def compileArithmetic(self):
+		operator = ARI_OPERATORS[self.field][1]
+		if operator[0] == ".":
+			return self.obj.compile() + operator + "(" + self.arg.compile() + ")"
+		else:
+			return "(" + self.obj.compile() + operator + self.arg.compile() + ")"
 
 class SubscriptExpr:
 	def __init__(self, obj, index, is_end_index=False):
@@ -409,19 +428,6 @@ class LambdaExpr:
 		return "() => { " + "; ".join(map(str, body)) + " }"
 	def compile(self):
 		return "() => { " + "; ".join([s.compile(semicolon=False) for s in self.body]) + "; }"
-
-class ArithmeticExpr:
-	def __init__(self, operator, left, right):
-		self.operator = operator
-		self.left = left
-		self.right = right
-	def __str__(self):
-		return "(" + str(self.left) + " " + self.operator + " " + str(self.right) + ")"
-	def compile(self):
-		if self.operator[0] == ".":
-			return self.left.compile() + self.operator + "(" + self.right.compile() + ")"
-		else:
-			return "(" + self.left.compile() + self.operator + self.right.compile() + ")"
 
 class TernaryExpr:
 	def __init__(self, conditions, then, otherwise):
