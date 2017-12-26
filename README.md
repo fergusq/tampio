@@ -506,6 +506,7 @@ that perform the basic mathematical operations of addition, subtraction, multipl
 |`vähennettynä`  |adessive            |`-`                  |
 |`kerrottuna`    |adessive            |`*`                  |
 |`jaettuna`      |adessive            |`/`                  |
+|`rajattuna`     |illative            |`%`                  |
 |`yhdistettynä`  |illative            |`.concat`            |
 |`liitettynä`    |illative            |`.prepend`           |
 
@@ -764,7 +765,7 @@ Pseudodeclaration:
 |`potenssit` |Function|An infinite array of the powers of this number.
 |`tekijät`   |Function|The factors of this number.
 |`alkutekijät`|Function|The prime factors of this number.
-|`kokonaislukuna`|Function|Rounds this number (`Math.round(this)`).
+|`kokonaislukuna`|Function|Rounds this number (`Math.floor(this)`).
 |`pyöristettynä`|Function|Rounds this number (`Math.round(this)`).
 |`merkkijonona`|Function|Converts this number to string (`this.toString()`).
 

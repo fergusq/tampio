@@ -96,6 +96,7 @@ class TokenList:
 	def __init__(self, tokens):
 		self.tokens = tokens
 		self.styles = [""]*len(tokens)
+		self.style_spans = [(False, False)]*len(tokens)
 		self.newlines = [False]*len(tokens)
 		self.indent_levels = [0]*len(tokens)
 		self.i = -1
@@ -142,8 +143,15 @@ class TokenList:
 		return None
 	def eof(self):
 		return not self.peek()
-	def setStyle(self, style):
+	def setStyle(self, style, continued=False):
 		self.styles[self.i] = style
+		if continued:
+			self.style_spans[self.i] = (True, False)
+			j = self.i-1
+			while self.styles[j] == "":
+				self.style_spans[j] = (True, True)
+				j -= 1
+			self.style_spans[j] = (self.style_spans[j][0], True)
 	def increaseIndentLevel(self):
 		self.indent_level += 1
 	def decreaseIndentLevel(self):
@@ -225,7 +233,11 @@ class AltWords:
 		return False
 	def toWord(self, cls=[], forms=[], numbers=[]):
 		def score(w):
-			return cls.count(w.word_class) + forms.count(w.form) + numbers.count(w.number) + (-2 if w.form == "keinonto" and "nimisana" in cls else 0)
+			return (cls.count(w.word_class)
+				+ forms.count(w.form)
+				+ forms.count(w.comparison)
+				+ numbers.count(w.number)
+				+ (-2 if w.form == "keinonto" and "nimisana" in cls else 0))
 		return sorted(self.alternatives, key=score)[-1]
 	def __str__(self):
 		return self.token

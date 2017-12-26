@@ -214,11 +214,20 @@ def parseVariable(tokens, word=None, case="nimento"):
 def parseFieldName(tokens, form="omanto"):
 	expected_form = "nimento" if form == "omanto" else "olento"
 	checkEof(tokens)
-	word = tokens.next().toWord(cls=NOUN,forms=[expected_form])
+	word = tokens.next().toWord(cls=NOUN,forms=[expected_form,"superlative"])
 	if word.form != expected_form:
 		syntaxError("malformed member name, expected a noun " + formToEnglish(expected_form, article=False), tokens)
 	tokens.setStyle("field")
 	field = word.baseform
+	if word.isAdjective() and word.comparison == "superlative":
+		word2 = tokens.next().toWord(cls=NOUN,forms=[expected_form])
+		if word2.form != expected_form:
+			syntaxError("malformed member name, expected a noun " + formToEnglish(expected_form, article=False), tokens)
+		if word2.number != word.number:
+			syntaxError("malformed member name, the adjective and the noun do not agree in number", tokens)
+		tokens.setStyle("field", continued=True)
+		field += "_" + word2.baseform
+		word = word2
 	if word.form == "olento":
 		field += "_E"
 		if tokens.peek() and tokens.peek().toWord(cls=VERB).isAdjective():
@@ -232,14 +241,14 @@ def parseWheres(tokens):
 		tokens.next()
 		tokens.next()
 		tokens.setStyle("keyword")
-		wheres = parseList(parseAssignment, tokens)
+		wheres = parseList(parseAssignment, tokens, do_format=True)
 		eatComma(tokens)
 	elif token and token.token.lower() == "missä":
 		if tokens.current().token != ",":
 			syntaxError("there must be a comma before \"missä\"", tokens)
 		tokens.next()
 		tokens.setStyle("keyword")
-		wheres = parseList(parseAssignment, tokens)
+		wheres = parseList(parseAssignment, tokens, do_format=True)
 		eatComma(tokens)
 	else:
 		wheres = []
@@ -347,7 +356,7 @@ def parseSentence(tokens):
 			eatComma(tokens)
 			stmt = MethodAssignmentStatement(subject, subject_case, method, params, body)
 			
-			for for_var in for_vars:
+			for for_var in reversed(for_vars):
 				stmt = ForStatement(for_var.name, for_var.expr, stmt)
 			return stmt
 		
@@ -416,7 +425,7 @@ def parseSentence(tokens):
 		else:
 			stmt = MethodCallStatement(subject, subject_case, predicate, args, output_var)
 		
-		for for_var in for_vars:
+		for for_var in reversed(for_vars):
 			stmt = ForStatement(for_var.name, for_var.expr, stmt)
 		
 		stmts.append(stmt)
@@ -509,11 +518,13 @@ def parseCondition(tokens, prefix=False):
 			syntaxError("predicative is " +formToEnglish(case) + " (should be in the nominative case)", tokens)
 	else:
 		operand2 = None
+	wheres = parseWheres(tokens)
 	eatComma(tokens)
 	for_vars = popFor()
 	expr = CondExpr(negation, operator, operand1, operand2)
-	for for_var in for_vars:
+	for for_var in reversed(for_vars):
 		expr = QuantifierCondExpr(for_var.type, for_var.name, for_var.expr, expr)
+	expr.wheres = wheres
 	return expr
 
 def parseOperator(tokens):
@@ -727,7 +738,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			token = tokens.peek()
 			if not token.isWord() or token.token.lower() in POSTPOSITIONS["omanto"]:
 				break
-			word = token.toWord(cls=2*NOUN+2*NUMERAL+PRONOUN, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"])
+			word = token.toWord(cls=2*NOUN+2*NUMERAL+PRONOUN, forms=["omanto", "E-infinitive_sisaolento", "E-infinitive_sisaolento"]+4*["superlative"])
 			if must_be_in_genitive and word.form != "omanto":
 				break
 			peek2 = tokens.peek(2)
@@ -781,6 +792,20 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				tokens.setStyle("field")
 				case = word.form
 				field = word.baseform
+				
+				expr = FieldExpr(expr, field)
+				cont = True
+			elif word.isAdjective() and word.comparison == "superlative":
+				tokens.next()
+				tokens.setStyle("field")
+				
+				word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
+				if word2.form != word.form or word2.number != word2.number:
+					syntaxError("malformed member name, the adjective and the noun do not agree", tokens)
+				tokens.setStyle("field", continued=True)
+				
+				case = word.form
+				field = word.baseform + "_" + word2.baseform
 				
 				expr = FieldExpr(expr, field)
 				cont = True

@@ -19,6 +19,12 @@ import html, json
 def prettyPrint(tokens, lang):
 	return HIGHLIGHTERS[lang](tokens)
 
+def markupSpan(token, code, span):
+	a = "" if span[0] else code[0]
+	a += token
+	a += "" if span[1] else code[1]
+	return a
+
 def highlight(tl, pre,
 	pre_begin, pre_end,
 	document_begin, document_end,
@@ -36,7 +42,7 @@ def highlight(tl, pre,
 	skip = 0
 	i = 0
 	while i < len(tl.tokens):
-		token, style, newline, inle = [x[i] for x in [tl.tokens, tl.styles, tl.newlines, tl.indent_levels]]
+		token, style, span, newline, inle = [x[i] for x in [tl.tokens, tl.styles, tl.style_spans, tl.newlines, tl.indent_levels]]
 		# sisennys toteutetaan listana
 		if not pre and inle < prev_inle:
 			if skip == 0:
@@ -68,7 +74,7 @@ def highlight(tl, pre,
 		
 		# tulostetaan token
 		if skip == 0:
-			out += markup(style, token.token)
+			out += markup(style, span, token.token)
 		else:
 			skip -= 1
 		
@@ -117,7 +123,7 @@ def highlightHtml(tl, pre=False):
 		item_end="</li>",
 		markup=htmlMarkup)
 
-def htmlMarkup(style, token):
+def htmlMarkup(style, span, token):
 	if style == "":
 		return html.escape(token)
 	style_span = "<span class=\"" + style + "\">"
@@ -125,7 +131,7 @@ def htmlMarkup(style, token):
 		paragraphs = token.split("\n\n")
 		return "\n".join(["<p>" + style_span + html.escape(paragraph) + "</span></p>" for paragraph in paragraphs])
 	else:
-		return style_span + html.escape(token) + "</span>"
+		return markupSpan(html.escape(token), (style_span, "</span>"), span)
 
 def highlightLatex(tl, use_lists=False):
 	return highlight(tl, use_lists,
@@ -141,11 +147,11 @@ def highlightLatex(tl, use_lists=False):
 		item_end="",
 		markup=latexMarkup)
 
-def latexMarkup(style, token):
+def latexMarkup(style, span, token):
 	if style == "comment-global":
 		token = token[1:] # poistetaan risuaita edestä
 	if style in LATEX_STYLES:
-		return LATEX_STYLES[style] + "{" + escapeLatex(token) + "}"
+		return markupSpan(escapeLatex(token), (LATEX_STYLES[style] + "{", "}"), span)
 	else:
 		return escapeLatex(token)
 
@@ -180,7 +186,7 @@ def highlightIndent(tl, nl, indent, item_start, global_sep, markup):
 	skip = 0
 	i = 0
 	while i < len(tl.tokens):
-		token, style, newline, inle = [x[i] for x in [tl.tokens, tl.styles, tl.newlines, tl.indent_levels]]
+		token, style, span, newline, inle = [x[i] for x in [tl.tokens, tl.styles, tl.style_spans, tl.newlines, tl.indent_levels]]
 		# sisennys muuttuu
 		if inle != prev_inle:
 			if skip == 0:
@@ -214,7 +220,7 @@ def highlightIndent(tl, nl, indent, item_start, global_sep, markup):
 				if not prev_is_space: out += " "
 				prev_is_space = True
 			else:
-				out += markup(style, token.token)
+				out += markup(style, span, token.token)
 				prev_is_space = False
 		else:
 			skip -= 1
@@ -235,16 +241,16 @@ def highlightIndent(tl, nl, indent, item_start, global_sep, markup):
 
 def highlightMarkdown(tl):
 	out = ""
-	for style, token in zip(tl.styles, tl.tokens):
-		out += markupMarkdown(style, token.token)
+	for style, span, token in zip(tl.styles, tl.style_spans, tl.tokens):
+		out += markupMarkdown(style, span, token.token)
 	return out
 
 def highlightMarkdownIndent(tl):
 	return highlightIndent(tl, "\n", "  ", "- ", "\n", markupMarkdown)
 
-def markupMarkdown(s, t):
+def markupMarkdown(s, c, t):
 	code = MARKDOWN_STYLES.get(s, "")
-	return code + t + code
+	return markupSpan(t, (code, code), c)
 
 MARKDOWN_STYLES = {
 	"keyword": "**",
@@ -253,10 +259,10 @@ MARKDOWN_STYLES = {
 }
 
 def highlightTxt(tl):
-	return highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t)
+	return highlightIndent(tl, "\n", "    ", "", "", lambda s,c,t: t)
 
 def highlightTxtWithKeywords(tl):
-	return highlightIndent(tl, "\n", "    ", "", "", lambda s,t: t.upper() if s == "keyword" else t)
+	return highlightIndent(tl, "\n", "    ", "", "", lambda s,c,t: t.upper() if s == "keyword" else t)
 
 def highlightJson(tl):
 	tokens = []

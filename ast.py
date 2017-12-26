@@ -92,10 +92,14 @@ class ClassDecl:
 			ans += "\n" + escapeIdentifier(self.name) + ".prototype.constructor = " + escapeIdentifier(self.name) + ";"
 		ans += "\n" + typeToJs(self.name) + ".prototype.assign = function(n, v) { this[n] = v; };"
 		for name, number, _, _ in self.fields:
-			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + name + " = function() { return this." + name + "; };"
+			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + escapeIdentifier(name) + " = function() { return this." + escapeIdentifier(name) + "; };"
 		return ans
 
-class FunctionDecl:
+class Whereable:
+	def compileWheres(self, indent=1):
+		return "".join([" "*indent + "var "+escapeIdentifier(where[0])+" = "+where[1].compile()+";\n" for where in self.wheres])
+
+class FunctionDecl(Whereable):
 	def __init__(self, vtype, field, self_param, param, param_case, body, wheres, memoize):
 		self.type = vtype
 		self.field = field
@@ -107,8 +111,6 @@ class FunctionDecl:
 		self.memoize = memoize
 	def __str__(self):
 		return self.type + "." + self.field + " := " + self.self_param + (", " + self.param if self.param else "") + " => " + str(self.body)
-	def compileWheres(self):
-		return "".join([" var "+escapeIdentifier(where[0])+" = "+where[1].compile()+";\n" for where in self.wheres])
 	def compile(self):
 		ans = typeToJs(self.type) + ".prototype.f_" + self.field
 		if self.param_case:
@@ -129,7 +131,7 @@ class FunctionDecl:
 			ans += " return " + self.body.compile() + ";\n};"
 		return ans
 
-class CondFunctionDecl:
+class CondFunctionDecl(Whereable):
 	def __init__(self, vtype, name, self_param, param, conditions, wheres):
 		assert name[0] == "."
 		self.type = vtype
@@ -143,8 +145,6 @@ class CondFunctionDecl:
 		if self.param:
 			ans += "(" + self.param + ")"
 		return ans + " := " + self.self_param + " => " + " and ".join(map(str, self.conditions))
-	def compileWheres(self):
-		return "".join([" var "+escapeIdentifier(where[0])+" = "+where[1].compile()+";\n" for where in self.wheres])
 	def compile(self):
 		ans = typeToJs(self.type) + ".prototype" + self.name + " = function("
 		if self.param != "":
@@ -177,28 +177,33 @@ class IfStatement:
 	def __str__(self):
 		return "if (" + " and ".join([str(c) for c in self.conditions]) + ") { " + " ".join([str(s) for s in self.block]) + " }"
 	def compile(self, indent=0):
-		return (" "*indent
+		ans = ""
+		for c in self.conditions:
+			ans += c.compileWheres()
+		return ans + (" "*indent
 			+ "if ((" + ") && (".join([c.compile() for c in self.conditions]) + ")) {\n"
 			+ "".join([s.compile(indent=indent+1) for s in self.block])
 			+ " "*indent + "}\n")
 
-class QuantifierCondExpr:
-	def __init__(self, quant, var, expr, cond):
+class QuantifierCondExpr(Whereable):
+	def __init__(self, quant, var, expr, cond, wheres=[]):
 		self.quantifier = quant
 		self.var = var
 		self.expr = expr
 		self.cond = cond
+		self.wheres = wheres
 	def __str__(self):
 		return ("for all" if self.quantifier == "jokainen" else "exists") + " " + self.var + " in " + str(self.expr) + ": " + str(self.cond)
 	def compile(self):
 		return self.expr.compile() + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile() + ")"
 
-class CondExpr:
-	def __init__(self, negation, operator, left, right):
+class CondExpr(Whereable):
+	def __init__(self, negation, operator, left, right, wheres=[]):
 		self.negation = negation
 		self.operator = operator
 		self.left = left
 		self.right = right
+		self.wheres = wheres
 	def __str__(self):
 		return str(self.left) + self.operator + str(self.right)
 	def compile(self):
@@ -214,16 +219,14 @@ class CondExpr:
 		else:
 			return ans
 
-class BlockStatement:
+class BlockStatement(Whereable):
 	def __init__(self, stmts, wheres):
 		self.stmts = stmts
 		self.wheres = wheres
 	def __str__(self):
 		return "; ".join(map(str, self.stmts))
-	def compileWheres(self):
-		return "".join(["var "+escapeIdentifier(where[0])+" = "+where[1].compile()+"; " for where in self.wheres])
 	def compile(self, semicolon=True, indent=0):
-		return " "*indent + self.compileWheres() + "\n" + " "*indent + ("\n"+" "*indent).join([s.compile(indent=indent) for s in self.stmts])
+		return self.compileWheres(indent) + " "*indent + ("\n"+" "*indent).join([s.compile(indent=indent) for s in self.stmts])
 
 class CallStatement:
 	def __init__(self, name, args, output_var):
@@ -264,15 +267,22 @@ class MethodCallStatement(CallStatement):
 		return super(MethodCallStatement, self).compileName() + "_" + formAbrv(self.obj_case)
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
-		if ((isinstance(self.obj, VariableExpr) or isinstance(self.obj, SubscriptExpr) or isinstance(self.obj, FieldExpr))
+		is_lval = isinstance(self.obj, VariableExpr) or isinstance(self.obj, SubscriptExpr) or isinstance(self.obj, FieldExpr)
+		def compileLval():
+			if isinstance(self.obj, FieldExpr):
+				return self.obj.obj.compile() + "." + escapeIdentifier(self.obj.field)
+			else:
+				return self.obj.compile()
+		if (is_lval
 			and self.name == "asettaa_P"
 			and self.obj_case == "tulento"
 			and list(self.args.keys()) == ["nimento"]):
-			if isinstance(self.obj, FieldExpr):
-				ans += self.obj.obj.compile() + "." + escapeIdentifier(self.obj.field)
-			else:
-				ans += self.obj.compile()
-			ans += " = " + self.args["nimento"].compile()
+			ans += compileLval() + " = " + self.args["nimento"].compile()
+		elif (is_lval
+			and self.name == "kasvattaa_P"
+			and self.obj_case == "osanto"
+			and list(self.args.keys()) == ["ulkoolento"]):
+			ans += compileLval() + " += " + self.args["ulkoolento"].compile()
 		elif self.name == "palauttaa_P" and self.obj_case == "nimento" and len(self.args) == 0:
 			ans += "return " + self.obj.compile()
 		else:
@@ -327,7 +337,8 @@ ARI_OPERATORS = {
 	"liitetty_E": ("sisatulento", ".prepend"),
 	"vähennetty_E": ("ulkoolento", "-"),
 	"kerrottu_E": ("ulkoolento", "*"),
-	"jaettu_E": ("ulkoolento", "/")
+	"jaettu_E": ("ulkoolento", "/"),
+	"rajattu_E": ("sisatulento", "%")
 }
 
 class FieldExpr:

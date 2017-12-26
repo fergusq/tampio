@@ -26,6 +26,8 @@ Function.prototype.suorittaa_P__N = function() { this(); }
 // Number/luku
 const power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};
 Number.prototype.f_potenssi = function() { return new Proxy(this, power_handler); };
+Number.prototype.f_neliö = function() { return this*this; };
+Number.prototype.f_kuutio = function() { return this*this*this; };
 Number.prototype.f_neliöjuuri = function() { return Math.sqrt(this); };
 Number.prototype.f_kuutiojuuri = function() { return Math.cbrt(this); };
 Number.prototype.f_sini = function() { return Math.sin(this); };
@@ -44,7 +46,7 @@ Number.prototype.f_tekijä = function() { var l=[]; for (var i=1; i<=this; i++) 
 Number.prototype.f_alkutekijä = function() { var l=[]; for (var i=2; i<this; i++) if (this%i===0&&!l.some(j=>i%j===0)) l.push(i); return l; }
 Number.prototype.f_pyöristetty_E = function() { return Math.round(this); };
 Number.prototype.f_pyöristetty_E_St = function(e) { e = Math.pow(10, e); return Math.round(this*e)/e; };
-Number.prototype.f_kokonaisluku_E = Number.prototype.f_pyöristetty_E;
+Number.prototype.f_kokonaisluku_E = function() { return Math.floor(this); };
 Number.prototype.f_merkkijono_E = Number.prototype.toString;
 
 // String/merkkijono

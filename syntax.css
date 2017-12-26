@@ -43,10 +43,14 @@ ul:not(.syntax-root) {
 	list-style: disc;
 }
 
-ul.syntax-root > li > span.comment-global {
+span.comment-global {
 	color: black;
 	font-size: 1.5em;
 	border-bottom: 1px solid black;
+}
+
+span.block-comment-global {
+	color: #226;
 }
 
 ul.syntax-root > li {
