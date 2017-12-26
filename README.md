@@ -394,6 +394,15 @@ For example:
 
     kivan kaverin kuvaukseksi asetetaan teksti "Hän on kiva"
 
+A special type of assignment is the increment statement, which adds a value to a variable.
+
+    [lval/partitive] kasvatetaan [expression/adessive]
+
+For example:
+
+    loistavaa laskuria kasvatetaan yhdellä
+    nykyisen pelaajan pisteitä kasvatetaan 100:lla
+
 There is also a special syntax to add a new item to a list, implemented as a method of the array class.
 It is similar to the assignment syntax, but the verb is `lisätään` instead of `asetetaan`.
 
@@ -714,6 +723,10 @@ Declaration:
 
 Pseudodeclaration:
 
+    Luvun potenssit ovat ...
+    Luvun neliö on ...
+    Luvun kuutio on ...
+    
     Luvun neliöjuuri on ...
     Luvun kuutiojuuri on ...
     
@@ -738,8 +751,6 @@ Pseudodeclaration:
     Luvun tekijät ovat ...
     Luvun alkutekijät ovat ...
     
-    Luvun potenssit ovat ...
-    
     Luku kokonaislukuna on ...
     Luku pyöristettynä on ...
     Luku pyöristettynä annettuun tarkkuuteen on ...
@@ -748,6 +759,9 @@ Pseudodeclaration:
 
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
+|`potenssit` |Function|An infinite array of the powers of this number.
+|`neliö`     |Function|The square of this number (`this*this`).
+|`kuutio`    |Function|The cube of this number (`this*this*this`).
 |`neliöjuuri`|Function|The square root of this number (`Math.sqrt(this)`).
 |`kuutiojuuri`|Function|The cube root of this number (`Math.cbrt(this)`).
 |`vastaluku` |Function|The opposite of this number (`-this`).
@@ -762,7 +776,6 @@ Pseudodeclaration:
 |`logaritmi` |Function|The natural logarithm (`Math.log(this)`).
 |`vastalogaritmi`|Function|The natural antilogarithm (`Math.exp(this)`).
 |`kertoma`   |Function|The factorial of this number.
-|`potenssit` |Function|An infinite array of the powers of this number.
 |`tekijät`   |Function|The factors of this number.
 |`alkutekijät`|Function|The prime factors of this number.
 |`kokonaislukuna`|Function|Rounds this number (`Math.floor(this)`).
