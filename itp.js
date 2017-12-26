@@ -41,9 +41,9 @@ Number.prototype.f_seuraaja = function() { return this+1; };
 Number.prototype.f_edeltäjä = function() { return this-1; };
 Number.prototype.f_tekijä = function() { var l=[]; for (var i=1; i<=this; i++) if (this%i===0) l.push(i); return l; }
 Number.prototype.f_alkutekijä = function() { var l=[]; for (var i=2; i<this; i++) if (this%i===0&&!l.some(j=>i%j===0)) l.push(i); return l; }
-Number.prototype.f_pyöristetty_E = Math.round;
+Number.prototype.f_pyöristetty_E = function() { return Math.round(this); };
 Number.prototype.f_pyöristetty_E_St = function(e) { e = Math.pow(10, e); return Math.round(this*e)/e; };
-Number.prototype.f_kokonaisluku_E
+Number.prototype.f_kokonaisluku_E = Number.prototype.f_pyöristetty_E;
 Number.prototype.f_merkkijono_E = Number.prototype.toString;
 
 // String/merkkijono

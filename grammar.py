@@ -140,13 +140,19 @@ def parseDeclaration(tokens):
 				else:
 					accept(["on"], tokens)
 				tokens.setStyle("keyword")
+				if tokens.peek().token.lower() == "pysyvästi":
+					tokens.next()
+					tokens.setStyle("keyword")
+					memoize = True
+				else:
+					memoize = False
 				body, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 				if case != "nimento":
 					syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
 				wheres = parseWheres(tokens)
 				eatPeriod(tokens)
 				tokens.addNewline()
-				return FunctionDecl(typeword.baseform, field, varname, param, param_case, body, wheres)
+				return FunctionDecl(typeword.baseform, field, varname, param, param_case, body, wheres, memoize)
 	tokens.next()
 	syntaxError("unexpected token \"" + token.token + "\"", tokens)
 
@@ -211,6 +217,8 @@ def pushFor(*allowed_types):
 	FOR_STACK.append((allowed_types, []))
 
 def addForVar(i_name, expr, var_type, tokens):
+	if var_type == "mikään":
+		var_type = "jokainen"
 	if len(FOR_STACK) == 0 or var_type not in FOR_STACK[-1][0]:
 		syntaxError("\"" + var_type + "\" can't be used in this context", tokens)
 	name = i_name
@@ -279,7 +287,7 @@ def parseSentence(tokens):
 			if word.form[-1] == "3" and case != "omanto":
 				syntaxError("subject is not in the genitive case", tokens, place)
 			
-			subject_case = case
+			subject_case = "nimento" if word.form[-1] == "3" else case
 			
 			params = {}
 			while not tokens.eof():
@@ -523,7 +531,8 @@ def canStartNominalPhrase(word, tokens):
 		or word.isOrdinal()
 		or word.isCardinal()
 		or re.fullmatch(r'\d+', word.baseform)
-		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).isString()))
+		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).isString())
+		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).token == "," and tokens.peek(3) and tokens.peek(3).token.lower() == "jonka"))
 
 def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	checkEof(tokens)
@@ -552,7 +561,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	elif word.isNoun() and word.possessive == "" and word.form == "olento" and word.word != "tuloksena":
 		tokens.setStyle("field")
 		expr, case = parseNominalPhrase(tokens)
-	elif word.baseform in ["jokainen", "jokin"]:
+	elif word.baseform in ["jokainen", "jokin", "mikään"]:
 		tokens.setStyle("keyword")
 		case = word.form
 		expr, case2 = parseNominalPhrase(tokens, case == "omanto")
@@ -589,7 +598,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	elif word.isNoun() and tokens.peek() and tokens.peek().isString():
 		tokens.setStyle("keyword")
 		case = word.form
-		expr = StrExpr(tokens.next().token[1:-1])
+		expr = StrExpr(tokens.next().token[1:-1].replace("\\l", "\"").replace("\\u", "\n").replace("\\s", "\t").replace("\\\\", "\\"))
 		tokens.setStyle("literal")
 	elif word.isName():
 		tokens.setStyle("variable")
@@ -610,14 +619,17 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			tokens.setStyle("variable")
 			case = word.form
 			expr = VariableExpr("this")
-	elif word.isAdjective() and word.baseform == "uusi":
-		tokens.setStyle("keyword")
-		checkEof(tokens)
-		word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
-		if not word2.isNoun():
-			syntaxError("a type must be a noun", tokens)
-		if word.form != word2.form:
-			syntaxError("the adjective and the noun of a constructor call must be in the same case", tokens)
+	elif (word.isAdjective() and word.baseform == "uusi") or (word.isNoun() and tokens.peek(1).token == "," and tokens.peek(2).token.lower() == "jonka"):
+		if word.baseform == "uusi":
+			tokens.setStyle("keyword")
+			checkEof(tokens)
+			word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
+			if not word2.isNoun():
+				syntaxError("a type must be a noun", tokens)
+			if word.form != word2.form:
+				syntaxError("the adjective and the noun of a constructor call must be in the same case", tokens)
+		else:
+			word2 = word
 		
 		tokens.setStyle("type")
 		case = word.form
@@ -692,7 +704,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			if must_be_in_genitive and word.form != "omanto":
 				break
 			peek2 = tokens.peek(2)
-			if word.baseform in ["jokainen", "jokin"] and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun():
+			if word.baseform in ["jokainen", "jokin", "mikään"] and peek2 and peek2.toWord(cls=NOUN, forms=[word.form]).isNoun():
 				tokens.next()
 				tokens.setStyle("keyword")
 				checkEof(tokens)
@@ -753,6 +765,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		# esim. <luku> pyöristettynä ja merkkijonona
 		
 		require_ja = False
+		chain_end = False
 		while not tokens.eof() and tokens.peek().isWord():
 			word = tokens.peek().toWord(cls=NOUN, forms="olento")
 			if word.word.lower() in ARI_OPERATORS.keys():
@@ -781,6 +794,8 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 				cont = True
 			else:
 				break
+			if chain_end:
+				break
 			peek1 = tokens.peek(1)
 			peek2 = tokens.peek(2)
 			word2 = peek2.toWord(cls=NOUN, forms="olento") if peek2 and peek2.isWord() else None
@@ -791,6 +806,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 					require_ja = True
 				else: # ja
 					require_ja = False
+					chain_end = True
 					tokens.setStyle("keyword")
 				continue
 			else:

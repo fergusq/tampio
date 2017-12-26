@@ -96,7 +96,7 @@ class ClassDecl:
 		return ans
 
 class FunctionDecl:
-	def __init__(self, vtype, field, self_param, param, param_case, body, wheres):
+	def __init__(self, vtype, field, self_param, param, param_case, body, wheres, memoize):
 		self.type = vtype
 		self.field = field
 		self.self_param = self_param
@@ -104,6 +104,7 @@ class FunctionDecl:
 		self.param_case = param_case
 		self.body = body
 		self.wheres = wheres
+		self.memoize = memoize
 	def __str__(self):
 		return self.type + "." + self.field + " := " + self.self_param + (", " + self.param if self.param else "") + " => " + str(self.body)
 	def compileWheres(self):
@@ -116,10 +117,16 @@ class FunctionDecl:
 		if self.param:
 			ans += self.param
 		ans += ") {\n"
+		if self.memoize:
+			ans += " if (this." + escapeIdentifier(self.field) + " !== undefined) return this." + escapeIdentifier(self.field) + ";\n"
 		if self.self_param != "":
 			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
 		ans += self.compileWheres()
-		ans += " return " + self.body.compile() + ";\n};"
+		if self.memoize:
+			ans += " this." + escapeIdentifier(self.field) + " = " + self.body.compile() + ";\n"
+			ans += " return this." + escapeIdentifier(self.field) + ";\n};"
+		else:
+			ans += " return " + self.body.compile() + ";\n};"
 		return ans
 
 class CondFunctionDecl:
