@@ -105,6 +105,11 @@ muuttuja.prototype.f_arvo = function() { return this.arvo; };
 muuttuja.prototype.lukea_luku_P__St = function() { this.arvo = Number.parseInt(prompt("Syötä luku")); };
 muuttuja.prototype.lukea_luku_P_Uo_St = function(p) { this.arvo = Number.parseInt(prompt(p)); };
 
+// Promise
+Promise.prototype.a_jälkeen = Promise.prototype.then;
+Promise.prototype.a_onnistuessa = Promise.prototype.then;
+Promise.prototype.a_epäonnistuessa = Promise.prototype.catch;
+
 // toistetaan
 function toistaa_KertaaN(n, tehokas_toiminto) { for (var i = 0; i < n; i++) tehokas_toiminto(); };
 
