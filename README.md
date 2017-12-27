@@ -7,7 +7,7 @@ It is named after a famous Finnish programmer.
 To see this language in action, see the [Tic-Tac-Toe example](http://iikka.kapsi.fi/tampio/ristiruutu.html).
 (For technical reasons, it's named "ristiruutu" instead of "ristinolla", which is the proper Finnish translation.)
 
-This branch currently contains a new iteration of the language that is not functional. The functional language is in the [`functional`](https://github.com/fergusq/tampio/tree/functional) branch.
+This branch currently contains a new iteration of the language that is imperative instead of functional. The functional language is in the [`functional`](https://github.com/fergusq/tampio/tree/functional) branch.
 
 ## Dependencies
 
