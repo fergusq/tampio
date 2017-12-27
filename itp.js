@@ -56,7 +56,7 @@ String.prototype.f_sana = function() { return this.split(/\s+/); };
 String.prototype.f_kenttä = function() { return this.split(/,/); };
 String.prototype.f_siistitty_E = String.prototype.trim;
 String.prototype.näyttää_käyttäjälle_P__N = function() { alert(this); };
-String.prototype.merkitä_lokiin_P__N = function() { console.log(this); };
+String.prototype.kirjata_lokiin_P__N = function() { console.log(this); };
 String.prototype.jakaa_P_SeT_N = function(sep, list) { for (var s of this.split(sep)) list.push(s); };
 
 // HTMLDocument/sivu

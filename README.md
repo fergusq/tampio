@@ -318,6 +318,24 @@ However, it is may be clearer to use a `missä` clause to create a temporary var
     nykyinen sivu näyttää villin vektorin n:nnen komponentin,
         missä n on villin vektorin dimensio vähennettynä kahdella,
 
+#### Async calls
+
+If the method returns a JavaScript Promise (or any similar object),
+the `then` and `catch` methods can be called using a special syntax.
+
+    , minkä [method name] [lambda parameter name] [method call],
+
+The lambda parameter name will be the subject of the following method call.
+
+    vaikea laskutoimitus tehdään, minkä jälkeen saatu tulos kirjataan lokiin,
+    # vaikea_laskutoimitus.tehdä_P__N().then(saatu_tulos => console.log(saatu_tulos))
+
+`minkä` -clauses can be chained using the list syntax, but `eikä muuta` cannot be used.
+
+    älykäs komponentti aloittaa toimenpiteen,                # älykäs_komponentti.aloittaa_toimenpide_P__N()
+    minkä onnistuessa saatu tulos kirjataan lokiin           #     .then(saatu_tulos => console.log(saatu_tulos))
+    ja minkä epäonnistuessa syntynyt virhe kirjataan lokiin, #     .catch(saatu_tulos => console.log(saatu_tulos))
+
 ### Return statements
 
 A method can return a value using the return statement.
@@ -809,7 +827,7 @@ Pseudodeclaration:
 |`jaetaan`   |Method  |Splits this string and stores it to the given array. (`for (var s of this.split(sep)) list.push(s)`).
 |`siistittynä`|Function|This string trimmed (`this.trim()`).
 |`näytetään käyttäjälle`|Method|Displays this string to the user (`alert(this)`).
-|`tulostetaan lokiin`|Method|Prints this string (`console.log(this)`).
+|`kirjataan lokiin`|Method|Prints this string (`console.log(this)`).
 
 ### `muuttuja` class
 
