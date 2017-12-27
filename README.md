@@ -12,7 +12,7 @@ This branch currently contains a new iteration of the language that is imperativ
 ## Dependencies
 
 * Python 3
-* Libvoikko (package `libvoikko` in Ubuntu and Fedora)
+* Libvoikko (package `libvoikko` in Ubuntu and Fedora). It seems that some versions of Voikko are not compatible. I have tested that the program works with 3.8 and 4.1.1.
 * Finnish morphological dictionary (Eg. [this](http://www.puimula.org/htp/testing/voikko-snapshot/dict-morpho.zip) or [this](https://www.puimula.org/htp/testing/voikko-snapshot-v5/dict-morpho.zip). The latter may work better with newer versions of libvoikko, but the former is confirmed to work with libvoikko 3.8.)
 
 The morphological dictionary must be unzipped to `~/.voikko/`.
