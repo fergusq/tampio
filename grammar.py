@@ -360,15 +360,7 @@ def parseSentence(tokens):
 				stmt = ForStatement(for_var.name, for_var.expr, stmt)
 			return stmt
 		
-		if not word.isVerb() or word.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
-			syntaxError("predicate is not in indicative simple present", tokens)
-		tokens.setStyle("function")
-		
-		passive = word.form[-1] == "4"
-		predicate = word.baseform + readVerbModifiers(tokens) + ("_P" if passive else "_A")
-		
-		if case != "nimento" and not passive:
-			syntaxError("subject must be in nominative case", tokens, place)
+		predicate, passive = parsePredicate(word, tokens, case)
 		
 		subjectless = False
 		subject_case = case
@@ -380,29 +372,12 @@ def parseSentence(tokens):
 	prev_args = {}
 	while True:
 		pushFor("jokainen")
-		args = {}
-		while not tokens.eof():
-			if tokens.peek().token.lower() in ["sekä", ",", ".", "eikä", "ja", "tuloksenaan"]:
-				break
-			arg, case = parseNominalPhrase(tokens)
-			if case in args:
-				syntaxError(formToEnglish(case, short=True) + " argument repeated twice", tokens)
-			args[case] = arg
-			if isinstance(arg, LambdaExpr): # että-lohkot ovat lauseissa aina viimeisenä
-				break
+		args, ov = parseArgs(tokens, passive)
+		
 		args_list.append({**prev_args, **args})
 		prev_args = args
 		
-		if (not tokens.eof() and (
-				(tokens.peek().token.lower() == "tuloksenaan" and not passive)
-				or (tokens.peek().token.lower() == "tuloksena" and passive)
-				)):
-			tokens.next()
-			tokens.setStyle("keyword")
-			w1, w2 = parseVariable(tokens)
-			output_vars.append(w1.baseform + "_" + w2.baseform)
-		else:
-			output_vars.append(None)
+		output_vars.append(ov)
 		
 		for_var_list.append(for_vars+popFor())
 		
@@ -413,6 +388,11 @@ def parseSentence(tokens):
 		else:
 			break
 	
+	if len(args_list) == 1:
+		async_block = parseAsyncBlock(tokens)
+	else:
+		async_block = []
+	
 	eatComma(tokens)
 	
 	wheres = parseWheres(tokens)
@@ -421,9 +401,9 @@ def parseSentence(tokens):
 	
 	for args, output_var, for_vars in zip(args_list, output_vars, for_var_list):
 		if subjectless:
-			stmt = ProcedureCallStatement(predicate, args, output_var)
+			stmt = ProcedureCallStatement(predicate, args, output_var, async_block)
 		else:
-			stmt = MethodCallStatement(subject, subject_case, predicate, args, output_var)
+			stmt = MethodCallStatement(subject, subject_case, predicate, args, output_var, async_block)
 		
 		for for_var in reversed(for_vars):
 			stmt = ForStatement(for_var.name, for_var.expr, stmt)
@@ -434,6 +414,18 @@ def parseSentence(tokens):
 		return stmts[0]
 	else:
 		return BlockStatement(stmts, wheres)
+
+def parsePredicate(word, tokens, subject_case):
+	if not word.isVerb() or word.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
+		syntaxError("predicate is not in indicative simple present", tokens)
+	tokens.setStyle("function")
+	
+	passive = word.form[-1] == "4"
+	predicate = word.baseform + readVerbModifiers(tokens) + ("_P" if passive else "_A")
+	
+	if subject_case != "nimento" and not passive:
+		syntaxError("subject must be in nominative case", tokens, place)
+	return predicate, passive
 
 def nextIsValidVerbModifier(tokens, allow_adverbs=True):
 	token = tokens.peek()
@@ -454,6 +446,52 @@ def readVerbModifiers(tokens):
 			ans += "_" + token.token.lower()
 		else:
 			break
+	return ans
+
+def parseArgs(tokens, passive):
+	args = {}
+	while not tokens.eof():
+		if tokens.peek().token.lower() in ["sekä", ",", ".", "eikä", "ja", "tuloksenaan"]:
+			break
+		arg, case = parseNominalPhrase(tokens)
+		if case in args:
+			syntaxError(formToEnglish(case, short=True) + " argument repeated twice", tokens)
+		args[case] = arg
+		if isinstance(arg, LambdaExpr): # että-lohkot ovat lauseissa aina viimeisenä
+			break
+	if (not tokens.eof() and (
+			(tokens.peek().token.lower() == "tuloksenaan" and not passive)
+			or (tokens.peek().token.lower() == "tuloksena" and passive)
+			)):
+		tokens.next()
+		tokens.setStyle("keyword")
+		w1, w2 = parseVariable(tokens)
+		return args, w1.baseform + "_" + w2.baseform
+	else:
+		return args, None
+
+def parseAsyncBlock(tokens):
+	ans = []
+	last = False
+	while not last and tokens.peek() and tokens.peek().token.lower() in [",", "ja"] and tokens.peek(2) and tokens.peek(2).token.lower() == "minkä":
+		if tokens.next().token.lower() == "ja":
+			tokens.setStyle("keyword")
+			last = True
+		place = tokens.place()
+		tokens.next() # minkä
+		tokens.setStyle("keyword")
+		method_name = "a_" + tokens.next().token.lower()
+		tokens.setStyle("field")
+		w1, w2 = parseVariable(tokens, case="")
+		parameter = w1.baseform + "_" + w2.baseform
+		word = tokens.next().toWord(cls=VERB,forms=["indicative_present_simple3", "indicative_present_simple4"])
+		predicate, passive = parsePredicate(word, tokens, w1.form)
+		args, ov = parseArgs(tokens, passive)
+		eatComma(tokens)
+		ans.append((method_name, parameter, MethodCallStatement(VariableExpr(parameter), w1.form, predicate, args, ov, [])))
+	if len(ans) > 1 and not last:
+		tokens.setPlace(place)
+		syntaxError("the last sentence in this list must be separated from the others by \"ja\"", tokens)
 	return ans
 
 CMP_OPERATORS = {

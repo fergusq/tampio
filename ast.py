@@ -229,10 +229,11 @@ class BlockStatement(Whereable):
 		return self.compileWheres(indent) + " "*indent + ("\n"+" "*indent).join([s.compile(indent=indent) for s in self.stmts])
 
 class CallStatement:
-	def __init__(self, name, args, output_var):
+	def __init__(self, name, args, output_var, async_block):
 		self.name = name
 		self.args = args
 		self.output_var = output_var
+		self.async_block = async_block
 	def compileName(self):
 		keys = sorted(self.args.keys())
 		return escapeIdentifier(self.name) + "_" + "".join([formAbrv(form) for form in keys])
@@ -244,8 +245,17 @@ class CallStatement:
 			return "var " + self.output_var + " = "
 		else:
 			return ""
+	def compileAsync(self, indent):
+		ans = ""
+		for ab in self.async_block:
+			ans += ("." + ab[0]
+				+ "(" + ab[1] + " => {\n"
+				+ ab[2].compile(indent=indent+1)
+				+ " "*indent + "})")
+		return ans
+			
 	def compile(self, semicolon=True, indent=0):
-		ans = " "*indent + self.compileAssignment() + self.compileName() + self.compileArgs()
+		ans = " "*indent + self.compileAssignment() + self.compileName() + self.compileArgs() + self.compileAsync(indent)
 		if semicolon:
 			ans += ";\n"
 		return ans
@@ -255,12 +265,13 @@ class ProcedureCallStatement(CallStatement):
 		return self.name + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 
 class MethodCallStatement(CallStatement):
-	def __init__(self, obj, obj_case, name, args, output_var):
+	def __init__(self, obj, obj_case, name, args, output_var, async_block):
 		self.obj = obj
 		self.obj_case = obj_case
 		self.name = name
 		self.args = args
 		self.output_var = output_var
+		self.async_block = async_block
 	def __str__(self):
 		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 	def compileName(self):
@@ -286,7 +297,7 @@ class MethodCallStatement(CallStatement):
 		elif self.name == "palauttaa_P" and self.obj_case == "nimento" and len(self.args) == 0:
 			ans += "return " + self.obj.compile()
 		else:
-			ans += self.compileAssignment() + self.obj.compile() + "." + self.compileName() + self.compileArgs()
+			ans += self.compileAssignment() + self.obj.compile() + "." + self.compileName() + self.compileArgs() + self.compileAsync(indent)
 		if semicolon:
 			ans += ";\n"
 		return ans
