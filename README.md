@@ -838,6 +838,16 @@ Pseudodeclaration:
 |:-----------|:------:|:----------|
 |`luetaan`   |Method  |Prompts a number and stores it in this variable.
 
+### Promise class
+
+The promise class does not have a name in Tampio, and is the JavaScript class `Promise`.
+
+|Member name   |Type        |Description|
+|:-------------|:----------:|:----------|
+|jälkeen       |Async method|An alias to `.then`
+|onnistuessa   |Async method|An alias to `.then`
+|epäonnistuessa|Async method|An alias to `.catch`
+
 ### `sivu` class
 
 `sivu` is an alias to the JavaScript class `HTMLDocument`.
