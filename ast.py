@@ -45,7 +45,7 @@ class VariableDecl:
 	def __str__(self):
 		return self.var + " := " + str(self.value)
 	def compile(self):
-		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile() + ";"
+		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile(0) + ";"
 
 class ProcedureDecl:
 	def __init__(self, signature, body):
@@ -62,7 +62,7 @@ class ProcedureDecl:
 			return (
 				typeToJs(self.signature.obj.type) + ".prototype."
 				+ self.signature.compileName()
-				+ " = function" + self.signature.compileArgs() + " {\n"
+				+ " = function" + self.signature.compileArgs(indent=0) + " {\n"
 				+ " var " + escapeIdentifier(self.signature.obj.name) + " = this;\n"
 				+ "".join([s.compile(indent=1) for s in self.body])
 				+ "};")
@@ -97,7 +97,7 @@ class ClassDecl:
 
 class Whereable:
 	def compileWheres(self, indent=1):
-		return "".join([" "*indent + "var "+escapeIdentifier(where[0])+" = "+where[1].compile()+";\n" for where in self.wheres])
+		return "".join([" "*indent + "var "+escapeIdentifier(where[0])+" = "+where[1].compile(indent)+";\n" for where in self.wheres])
 
 class FunctionDecl(Whereable):
 	def __init__(self, vtype, field, self_param, param, param_case, body, wheres, memoize):
@@ -125,10 +125,10 @@ class FunctionDecl(Whereable):
 			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
 		ans += self.compileWheres()
 		if self.memoize:
-			ans += " this." + escapeIdentifier(self.field) + " = " + self.body.compile() + ";\n"
+			ans += " this." + escapeIdentifier(self.field) + " = " + self.body.compile(0) + ";\n"
 			ans += " return this." + escapeIdentifier(self.field) + ";\n};"
 		else:
-			ans += " return " + self.body.compile() + ";\n};"
+			ans += " return " + self.body.compile(0) + ";\n};"
 		return ans
 
 class CondFunctionDecl(Whereable):
@@ -153,7 +153,7 @@ class CondFunctionDecl(Whereable):
 		if self.self_param != "":
 			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
 		ans += self.compileWheres()
-		ans += " return (" + ") && (".join([c.compile() for c in self.conditions]) + ");\n};"
+		ans += " return (" + ") && (".join([c.compile(0) for c in self.conditions]) + ");\n};"
 		return ans
 
 class ForStatement:
@@ -166,7 +166,7 @@ class ForStatement:
 	def compile(self, indent=0):
 		return (" "*indent
 			+ "for (const " + escapeIdentifier(self.var)
-			+ " of " + self.expr.compile()
+			+ " of " + self.expr.compile(indent)
 			+ ") {\n" + self.stmt.compile(indent=indent+1)
 			+ " "*indent + "}\n")
 
@@ -181,7 +181,7 @@ class IfStatement:
 		for c in self.conditions:
 			ans += c.compileWheres()
 		return ans + (" "*indent
-			+ "if ((" + ") && (".join([c.compile() for c in self.conditions]) + ")) {\n"
+			+ "if ((" + ") && (".join([c.compile(indent) for c in self.conditions]) + ")) {\n"
 			+ "".join([s.compile(indent=indent+1) for s in self.block])
 			+ " "*indent + "}\n")
 
@@ -194,8 +194,8 @@ class QuantifierCondExpr(Whereable):
 		self.wheres = wheres
 	def __str__(self):
 		return ("for all" if self.quantifier == "jokainen" else "exists") + " " + self.var + " in " + str(self.expr) + ": " + str(self.cond)
-	def compile(self):
-		return self.expr.compile() + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile() + ")"
+	def compile(self, indent):
+		return self.expr.compile(indent) + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile(indent) + ")"
 
 class CondExpr(Whereable):
 	def __init__(self, negation, operator, left, right, wheres=[]):
@@ -206,12 +206,12 @@ class CondExpr(Whereable):
 		self.wheres = wheres
 	def __str__(self):
 		return str(self.left) + self.operator + str(self.right)
-	def compile(self):
-		ans = self.left.compile() + self.operator
+	def compile(self, indent):
+		ans = self.left.compile(indent) + self.operator
 		if self.operator[0] == ".":
 			ans += "("
 		if self.right:
-			ans += self.right.compile()
+			ans += self.right.compile(indent)
 		if self.operator[0] == ".":
 			ans += ")"
 		if self.negation:
@@ -226,7 +226,7 @@ class BlockStatement(Whereable):
 	def __str__(self):
 		return "; ".join(map(str, self.stmts))
 	def compile(self, semicolon=True, indent=0):
-		return self.compileWheres(indent) + " "*indent + ("\n"+" "*indent).join([s.compile(indent=indent) for s in self.stmts])
+		return self.compileWheres(indent) + "".join([s.compile(indent=indent) for s in self.stmts])
 
 class CallStatement:
 	def __init__(self, name, args, output_var, async_block):
@@ -237,9 +237,9 @@ class CallStatement:
 	def compileName(self):
 		keys = sorted(self.args.keys())
 		return escapeIdentifier(self.name) + "_" + "".join([formAbrv(form) for form in keys])
-	def compileArgs(self):
+	def compileArgs(self, indent):
 		keys = sorted(self.args.keys())
-		return "(" + ", ".join([self.args[key].compile() for key in keys]) + ")"
+		return "(" + ", ".join([self.args[key].compile(indent) for key in keys]) + ")"
 	def compileAssignment(self):
 		if self.output_var:
 			return "var " + self.output_var + " = "
@@ -255,7 +255,7 @@ class CallStatement:
 		return ans
 			
 	def compile(self, semicolon=True, indent=0):
-		ans = " "*indent + self.compileAssignment() + self.compileName() + self.compileArgs() + self.compileAsync(indent)
+		ans = " "*indent + self.compileAssignment() + self.compileName() + self.compileArgs(indent) + self.compileAsync(indent)
 		if semicolon:
 			ans += ";\n"
 		return ans
@@ -281,23 +281,23 @@ class MethodCallStatement(CallStatement):
 		is_lval = isinstance(self.obj, VariableExpr) or isinstance(self.obj, SubscriptExpr) or isinstance(self.obj, FieldExpr)
 		def compileLval():
 			if isinstance(self.obj, FieldExpr):
-				return self.obj.obj.compile() + "." + escapeIdentifier(self.obj.field)
+				return self.obj.obj.compile(indent) + "." + escapeIdentifier(self.obj.field)
 			else:
-				return self.obj.compile()
+				return self.obj.compile(indent)
 		if (is_lval
 			and self.name == "asettaa_P"
 			and self.obj_case == "tulento"
 			and list(self.args.keys()) == ["nimento"]):
-			ans += compileLval() + " = " + self.args["nimento"].compile()
+			ans += compileLval() + " = " + self.args["nimento"].compile(indent)
 		elif (is_lval
 			and self.name == "kasvattaa_P"
 			and self.obj_case == "osanto"
 			and list(self.args.keys()) == ["ulkoolento"]):
-			ans += compileLval() + " += " + self.args["ulkoolento"].compile()
+			ans += compileLval() + " += " + self.args["ulkoolento"].compile(indent)
 		elif self.name == "palauttaa_P" and self.obj_case == "nimento" and len(self.args) == 0:
-			ans += "return " + self.obj.compile()
+			ans += "return " + self.obj.compile(indent)
 		else:
-			ans += self.compileAssignment() + self.obj.compile() + "." + self.compileName() + self.compileArgs() + self.compileAsync(indent)
+			ans += self.compileAssignment() + self.obj.compile(indent) + "." + self.compileName() + self.compileArgs(indent) + self.compileAsync(indent)
 		if semicolon:
 			ans += ";\n"
 		return ans
@@ -315,15 +315,15 @@ class MethodAssignmentStatement:
 	def compileName(self):
 		keys = sorted(self.params.keys())
 		return escapeIdentifier(self.method) + "_" + "".join([formAbrv(form) for form in keys]) + "_" + formAbrv(self.obj_case)
-	def compileParams(self):
+	def compileParams(self, indent):
 		keys = sorted(self.params.keys())
-		return "(" + ", ".join([self.params[key].compile() for key in keys]) + ")"
+		return "(" + ", ".join([self.params[key].compile(indent) for key in keys]) + ")"
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
-		ans += self.obj.compile()
+		ans += self.obj.compile(indent)
 		ans += ".assign(\"" + self.compileName()
 		ans += "\", "
-		ans += self.compileParams()
+		ans += self.compileParams(indent)
 		ans += " => {\n"
 		ans += "".join([s.compile(indent=indent+1) for s in self.body])
 		ans += " "*indent + "});"
@@ -337,7 +337,7 @@ class VariableExpr:
 		self.type = vtype
 	def __str__(self):
 		return self.name
-	def compile(self):
+	def compile(self, indent):
 		return escapeIdentifier(self.name)
 
 ARI_OPERATORS = {
@@ -360,22 +360,22 @@ class FieldExpr:
 		self.arg = arg
 	def __str__(self):
 		return str(self.obj) + "." + self.field
-	def compile(self):
+	def compile(self, indent):
 		if self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]:
-			return self.compileArithmetic()
-		ans = self.obj.compile() + ".f_" + escapeIdentifier(self.field)
+			return self.compileArithmetic(indent)
+		ans = self.obj.compile(indent) + ".f_" + escapeIdentifier(self.field)
 		if self.arg_case:
 			ans += "_" + formAbrv(self.arg_case)
 		ans += "("
 		if self.arg:
-			ans += self.arg.compile()
+			ans += self.arg.compile(indent)
 		return ans + ")"
-	def compileArithmetic(self):
+	def compileArithmetic(self, indent):
 		operator = ARI_OPERATORS[self.field][1]
 		if operator[0] == ".":
-			return self.obj.compile() + operator + "(" + self.arg.compile() + ")"
+			return self.obj.compile(indent) + operator + "(" + self.arg.compile(indent) + ")"
 		else:
-			return "(" + self.obj.compile() + operator + self.arg.compile() + ")"
+			return "(" + self.obj.compile(indent) + operator + self.arg.compile(indent) + ")"
 
 class SubscriptExpr:
 	def __init__(self, obj, index, is_end_index=False):
@@ -384,11 +384,11 @@ class SubscriptExpr:
 		self.is_end_index = is_end_index
 	def __str__(self):
 		return str(self.obj) + "[" + str(self.index) + "]"
-	def compile(self):
+	def compile(self, indent):
 		if self.is_end_index:
-			return self.obj.compile() + ".nth_last(" + self.index.compile() + ")"
+			return self.obj.compile(indent) + ".nth_last(" + self.index.compile(indent) + ")"
 		else:
-			return self.obj.compile() + "[" + self.index.compile() + "-1]"
+			return self.obj.compile(indent) + "[" + self.index.compile(indent) + "-1]"
 
 class SliceExpr:
 	def __init__(self, obj, start, end):
@@ -397,11 +397,11 @@ class SliceExpr:
 		self.end = end
 	def __str__(self):
 		return str(self.obj) + "[" + str(self.start) + ":" + str(self.end if self.end else "") + "]"
-	def compile(self):
-		ans = self.obj.compile() + ".slice("
-		ans += self.start.compile() + "-1"
+	def compile(self, indent):
+		ans = self.obj.compile(indent) + ".slice("
+		ans += self.start.compile(indent) + "-1"
 		if self.end:
-			ans += ", " + self.end.compile()
+			ans += ", " + self.end.compile(indent)
 		ans += ")"
 		return ans
 
@@ -410,7 +410,7 @@ class NumExpr:
 		self.num = num
 	def __str__(self):
 		return str(self.num)
-	def compile(self):
+	def compile(self, indent):
 		return "(" + str(self.num) + ")"
 
 class StrExpr:
@@ -418,7 +418,7 @@ class StrExpr:
 		self.str = string
 	def __str__(self):
 		return repr(self.str)
-	def compile(self):
+	def compile(self, indent):
 		return repr(self.str)
 
 class NewExpr:
@@ -427,8 +427,8 @@ class NewExpr:
 		self.args = args
 	def __str__(self):
 		return "new " + typeToJs(self.type) + "(" + ", ".join([arg.field + "=" + str(arg.value) for arg in self.args]) + ")"
-	def compile(self):
-		return "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile() for arg in self.args]) + "})"
+	def compile(self, indent):
+		return "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile(indent) for arg in self.args]) + "})"
 
 class CtorArgExpr:
 	def __init__(self, field, value):
@@ -440,16 +440,16 @@ class ListExpr:
 		self.values = values
 	def __str__(self):
 		return "[" + ", ".join(map(str, self.values)) + "]"
-	def compile(self):
-		return "[" + ", ".join([value.compile() for value in self.values]) + "]"
+	def compile(self, indent):
+		return "[" + ", ".join([value.compile(indent) for value in self.values]) + "]"
 
 class LambdaExpr:
 	def __init__(self, body):
 		self.body = body
 	def __str__(self):
 		return "() => { " + "; ".join(map(str, body)) + " }"
-	def compile(self):
-		return "() => { " + "; ".join([s.compile(semicolon=False) for s in self.body]) + "; }"
+	def compile(self, indent):
+		return "() => {\n" + "".join([s.compile(indent=indent+1) for s in self.body]) + " }"
 
 class TernaryExpr:
 	def __init__(self, conditions, then, otherwise):
@@ -458,5 +458,7 @@ class TernaryExpr:
 		self.otherwise = otherwise
 	def __str__(self):
 		return str(self.then) + " if (" + " and ".join([str(c) for c in self.conditions]) + ") else " + str(self.otherwise)
-	def compile(self):
-		return "((" + ") && (".join([c.compile() for c in self.conditions]) + ") ? (" + self.then.compile() + ") : (" + self.otherwise.compile() + "))"
+	def compile(self, indent):
+		return ("((" + ") && (".join([c.compile(indent) for c in self.conditions])
+			+ ") ? (" + self.then.compile(indent)
+			+ ") : (" + self.otherwise.compile(indent) + "))")
