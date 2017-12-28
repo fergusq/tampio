@@ -672,16 +672,16 @@ Pseudodeclaration:
     Ajankohta päivämäärämerkkijonona on ...
     Ajankohta kellonaikamerkkijonona on ...
 
-|Member name |Type    |Description|
-|:-----------|:------:|:----------|
-|`vuosi`     |Field   |The year (`this.getFullYear()`).
-|`kuukausi`  |Field   |The month (0-11, `this.getMonth()`).
-|`päivä`     |Field   |The day (`this.getHours()`).
-|`tunti`     |Field   |The hour (0-23, `this.getHours()`).
-|`minuutti`  |Field   |The hour (0-59, `this.getMinutes()`).
-|`sekunti`   |Field   |The second (0-59, `this.getMinutes()`).
-|`millisekunteina`|Function|Milliseconds since 1970-01-01 00:00:00 UTC (`this.getTime()`).
-|`merkkijonona`|Function|String representation (`this.toLocaleString()`).
+|Member name             |Type    |Description|
+|:-----------------------|:------:|:----------|
+|`vuosi`                 |Field   |The year (`this.getFullYear()`).
+|`kuukausi`              |Field   |The month (0-11, `this.getMonth()`).
+|`päivä`                 |Field   |The day (`this.getHours()`).
+|`tunti`                 |Field   |The hour (0-23, `this.getHours()`).
+|`minuutti`              |Field   |The hour (0-59, `this.getMinutes()`).
+|`sekunti`               |Field   |The second (0-59, `this.getMinutes()`).
+|`millisekunteina`       |Function|Milliseconds since 1970-01-01 00:00:00 UTC (`this.getTime()`).
+|`merkkijonona`          |Function|String representation (`this.toLocaleString()`).
 |`päivämäärämerkkijonona`|Function|String representation (`this.toLocaleDateString()`).
 |`kellonaikamerkkijonona`|Function|String representation (`this.toLocaleTimeString()`).
 
@@ -694,10 +694,10 @@ Pseudodeclaration:
     Kun kivalle "elementille" kirjoitetaan annettu teksti, ...
     Kun kiva "elementti" pyyhitään, ...
 
-|Member name |Type    |Description|
-|:-----------|:------:|:----------|
-|`kirjoitetaan`|Method|Appends the given text to the innerHTML field (`this.innerHTML += arg`).
-|`pyyhitään` |Method  |Clears the innerHTML field (`this.innerHTML = ""`).
+|Member name   |Type        |Description|
+|:-------------|:----------:|:----------|
+|`kirjoitetaan`|Method      |Appends the given text to the innerHTML field (`this.innerHTML += arg`).
+|`pyyhitään`   |Method      |Clears the innerHTML field (`this.innerHTML = ""`).
 |`painettaessa`|Method field|This method is called when a `click` event is fired.
 
 ### Function class
@@ -708,9 +708,9 @@ Pseudodeclaration:
 
     Kun kiva "funktio" suoritetaan, ...
 
-|Member name |Type    |Description|
-|:-----------|:------:|:----------|
-|`suoritetaan`|Method |Executes this function with zero arguments (`this()`).
+|Member name  |Type    |Description|
+|:------------|:------:|:----------|
+|`suoritetaan`|Method  |Executes this function with zero arguments (`this()`).
 
 ### `lista` class
 
@@ -726,14 +726,14 @@ Declaration:
     Kun lyhyt lista etsii indeksin ihanalle alkiolle, ...
     Kun lyhyeen listaan lisätään ihana alkio, ...
 
-|Member name |Type    |Description|
-|:-----------|:------:|:----------|
-|`alkiot`    |Field   |The items in this list.
-|`koko`      |Function|The number of items in this list (`this.alkio.length`).
-|`häntä`     |Function|The tail of this list (`this.alkio.slice(1)`).
-|`tyhjä`     |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
-|`etsii indeksin`|Method|Returns the index of the given element (`this.alkio.indexOf(item)`).
-|`lisätään`  |Method  |Appends a new element to this list (`this.alkio.push(item)`).
+|Member name     |Type               |Description|
+|:---------------|:-----------------:|:----------|
+|`alkiot`        |Field              |The items in this list.
+|`koko`          |Function           |The number of items in this list (`this.alkio.length`).
+|`häntä`         |Function           |The tail of this list (`this.alkio.slice(1)`).
+|`tyhjä`         |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
+|`etsii indeksin`|Method             |Returns the index of the given element (`this.alkio.indexOf(item)`).
+|`lisätään`      |Method             |Appends a new element to this list (`this.alkio.push(item)`).
 
 ### `luku` class
 
@@ -775,30 +775,30 @@ Pseudodeclaration:
     
     Luku merkkijonona on ...
 
-|Member name |Type    |Description|
-|:-----------|:------:|:----------|
-|`potenssit` |Function|An infinite array of the powers of this number.
-|`neliö`     |Function|The square of this number (`this*this`).
-|`kuutio`    |Function|The cube of this number (`this*this*this`).
-|`neliöjuuri`|Function|The square root of this number (`Math.sqrt(this)`).
-|`kuutiojuuri`|Function|The cube root of this number (`Math.cbrt(this)`).
-|`vastaluku` |Function|The opposite of this number (`-this`).
-|`käänteisluku`|Function|The inverse of this number (`1/this`).
-|`edeltäjä`  |Function|The predecessor of this number (`this-1`).
-|`seuraaja`  |Function|The successor of this number (`this+1`).
-|`itseisarvo`|Function|The absolute value of this number (`Math.abs(this)`).
-|`merkki`    |Function|The sign of this number (`Math.sign(this)`).
-|`sini`      |Function|The sine (`Math.sin(this)`).
-|`kosini`    |Function|The cosine (`Math.cos(this)`).
-|`tangentti` |Function|The tangent (`Math.tan(this)`).
-|`logaritmi` |Function|The natural logarithm (`Math.log(this)`).
+|Member name     |Type    |Description|
+|:---------------|:------:|:----------|
+|`potenssit`     |Function|An infinite array of the powers of this number.
+|`neliö`         |Function|The square of this number (`this*this`).
+|`kuutio`        |Function|The cube of this number (`this*this*this`).
+|`neliöjuuri`    |Function|The square root of this number (`Math.sqrt(this)`).
+|`kuutiojuuri`   |Function|The cube root of this number (`Math.cbrt(this)`).
+|`vastaluku`     |Function|The opposite of this number (`-this`).
+|`käänteisluku`  |Function|The inverse of this number (`1/this`).
+|`edeltäjä`      |Function|The predecessor of this number (`this-1`).
+|`seuraaja`      |Function|The successor of this number (`this+1`).
+|`itseisarvo`    |Function|The absolute value of this number (`Math.abs(this)`).
+|`merkki`        |Function|The sign of this number (`Math.sign(this)`).
+|`sini`          |Function|The sine (`Math.sin(this)`).
+|`kosini`        |Function|The cosine (`Math.cos(this)`).
+|`tangentti`     |Function|The tangent (`Math.tan(this)`).
+|`logaritmi`     |Function|The natural logarithm (`Math.log(this)`).
 |`vastalogaritmi`|Function|The natural antilogarithm (`Math.exp(this)`).
-|`kertoma`   |Function|The factorial of this number.
-|`tekijät`   |Function|The factors of this number.
-|`alkutekijät`|Function|The prime factors of this number.
+|`kertoma`       |Function|The factorial of this number.
+|`tekijät`       |Function|The factors of this number.
+|`alkutekijät`   |Function|The prime factors of this number.
 |`kokonaislukuna`|Function|Rounds this number (`Math.floor(this)`).
-|`pyöristettynä`|Function|Rounds this number (`Math.round(this)`).
-|`merkkijonona`|Function|Converts this number to string (`this.toString()`).
+|`pyöristettynä` |Function|Rounds this number (`Math.round(this)`).
+|`merkkijonona`  |Function|Converts this number to string (`this.toString()`).
 
 ### `merkkijono` class
 
@@ -818,16 +818,16 @@ Pseudodeclaration:
     Kun mukava merkkijono näytetään käyttäjälle, ...
     Kun mukava merkkijono tulostetaan lokiin, ...
 
-|Member name |Type    |Description|
-|:-----------|:------:|:----------|
-|`pituus`    |Function|The length of this string (`this.length`).
-|`merkit`    |Function|The characters of this string (`Array.from(this)`).
-|`sanat`     |Function|The words in this string (`this.split(/\s+/)`).
-|`kentät`    |Function|The fields in this string (`this.split(/,/)`).
-|`jaetaan`   |Method  |Splits this string and stores it to the given array. (`for (var s of this.split(sep)) list.push(s)`).
-|`siistittynä`|Function|This string trimmed (`this.trim()`).
-|`näytetään käyttäjälle`|Method|Displays this string to the user (`alert(this)`).
-|`kirjataan lokiin`|Method|Prints this string (`console.log(this)`).
+|Member name            |Type    |Description|
+|:----------------------|:------:|:----------|
+|`pituus`               |Function|The length of this string (`this.length`).
+|`merkit`               |Function|The characters of this string (`Array.from(this)`).
+|`sanat`                |Function|The words in this string (`this.split(/\s+/)`).
+|`kentät`               |Function|The fields in this string (`this.split(/,/)`).
+|`jaetaan`              |Method  |Splits this string and stores it to the given array. (`for (var s of this.split(sep)) list.push(s)`).
+|`siistittynä`          |Function|This string trimmed (`this.trim()`).
+|`näytetään käyttäjälle`|Method  |Displays this string to the user (`alert(this)`).
+|`kirjataan lokiin`     |Method  |Prints this string (`console.log(this)`).
 
 ### `muuttuja` class
 
@@ -857,10 +857,10 @@ Pseudodeclaration:
     Kun nykyinen sivu näyttää mielenkiintoisen tekstin, ...
     Kun nykyinen sivu etsii elementin annetulla nimellä, ...
 
-|Member name |Type    |Description|
-|:-----------|:------:|:----------|
-|`etsii elementin`|Method|Returns the element with the given id (`this.getElementById(arg)`).
-|`näyttää`   |Method  |Writes the given HTML code to the document (`this.write(arg)`).
+|Member name      |Type    |Description|
+|:----------------|:------:|:----------|
+|`etsii elementin`|Method  |Returns the element with the given id (`this.getElementById(arg)`).
+|`näyttää`        |Method  |Writes the given HTML code to the document (`this.write(arg)`).
 
 ## Finnish-English mini dictionary
 
