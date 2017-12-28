@@ -400,6 +400,21 @@ Below is a table of available comparison operators.
 
 It is possible to define custom comparison operators for classes.
 
+It is possible to use `jokainen`, `mikään` and `jokin` quantifiers in conditions.
+They correspond to JavaScript methods `.every` and `.some`.
+
+|Quantifier|JavaScript equivalent|Notes|
+|:---------|:--------------------|:----|
+|`jokainen`|`.every`             |In positive conditions (`on`)
+|`mikään`  |`.every`             |In negative conditions (`ei ole`)
+|`jokin`   |`.some`              |
+
+For example:
+
+    pitkän listan jokin alkio on tyhjä      # pitkä_lista.some(jokin_alkio => jokin_alkio.c_tyhjä())
+    pitkän listan jokainen alkio on tyhjä   # pitkä_lista.every(jokainen_alkio => jokainen_alkio.c_tyhjä())
+    pitkän listan mikään alkio ei ole tyhjä # pitkä_lista.every(mikään_alkio => !mikään_alkio.c_tyhjä())
+
 ### Assignments
 
 There are three ways to create variables in Tampio: `missä` clauses, return value assignments and assignment statements.
