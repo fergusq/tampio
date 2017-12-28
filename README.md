@@ -265,7 +265,7 @@ They can only be used inside other comparison operators, if statements and condi
 Comparison operators can have either zero or one parameters.
 
     [parameter/nominative] on [adjective/positive nominative], jos [condition list].
-    [parameter/nominative] on [adjective/positive comparative] kuin [parameter/nominative], jos [condition list].
+    [parameter/nominative] on [adjective/comparative nominative] kuin [parameter/nominative], jos [condition list].
 
 For example:
 
@@ -568,6 +568,7 @@ It is possible to optionally specify the initial values of the fields of the obj
 
     uusi [type]
     uusi [type], jonka [field assignment list],
+    [type], jonka [field assignment list],
 
 Each field assignment has a field name and a value.
 The `on` keyword is used when the field name is singular and `ovat` when it is plural.
@@ -580,8 +581,8 @@ In this case, the field name must be in plural partitive case.
 Examples:
 
     uusi vektori
-    uusi vektori, jonka komponentit ovat villin vektorin komponentit eikä muuta
-    uusi vektori, jonka komponentteja ovat pieni luku, suuri luku ja nolla eikä muuta
+    uusi vektori, jonka komponentit ovat villin vektorin komponentit eikä muuta,
+    vektori, jonka komponentteja ovat pieni luku, suuri luku ja nolla eikä muuta,
 
 ### Array subscript
 
