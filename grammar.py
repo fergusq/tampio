@@ -167,12 +167,12 @@ def parseDeclaration(tokens):
 					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres)
 			elif word.form in ["omanto", "nimento"]:
 				place = tokens.place()
-				field, field_number, param, param_case = parseFieldName(tokens, word.form)
+				field, field_case, field_number, param, param_case = parseFieldName(tokens, word.form)
 				if field in ARI_OPERATORS:
 					tokens.setPlace(place)
 					tokens.next()
 					syntaxError("redefinition of builtin", tokens)
-				if field_number == "plural":
+				if (field_case == "nimento" and field_number == "plural") or (field_case == "olento" and word.number == "plural"):
 					accept(["ovat"], tokens)
 				else:
 					accept(["on"], tokens)
@@ -219,6 +219,7 @@ def parseFieldName(tokens, form="omanto"):
 		syntaxError("malformed member name, expected a noun " + formToEnglish(expected_form, article=False), tokens)
 	tokens.setStyle("field")
 	field = word.baseform
+	# jäsennetään superlatiiviattribuutti
 	if word.isAdjective() and word.comparison == "superlative":
 		word2 = tokens.next().toWord(cls=NOUN,forms=[expected_form])
 		if word2.form != expected_form:
@@ -230,10 +231,11 @@ def parseFieldName(tokens, form="omanto"):
 		word = word2
 	if word.form == "olento":
 		field += "_E"
+		# jäsennetään parametri
 		if tokens.peek() and tokens.peek().toWord(cls=VERB).isAdjective():
 			w1, w2 = parseVariable(tokens, case="")
-			return field, word.number, w1.baseform + "_" + w2.baseform, w1.form
-	return field, word.number, None, None
+			return field, word.form, word.number, w1.baseform + "_" + w2.baseform, w1.form
+	return field, word.form, word.number, None, None
 
 def parseWheres(tokens):
 	token = tokens.peek()

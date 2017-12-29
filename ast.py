@@ -80,7 +80,7 @@ class ClassDecl:
 		ans = "function " + escapeIdentifier(self.name) + "(vals) {\n"
 		if self.super:
 			ans += " " + escapeIdentifier(self.super) + ".call(this, vals);\n"
-		for name, number, _, _ in self.fields:
+		for name, _, number, _, _ in self.fields:
 			ans += " this." + escapeIdentifier(name) + " = (\"" + name + "\" in vals) ? vals[\"" + name + "\"] : "
 			if number == "plural":
 				ans += "[];\n"
@@ -91,7 +91,7 @@ class ClassDecl:
 			ans += "\n" + escapeIdentifier(self.name) + ".prototype = Object.create(" + escapeIdentifier(self.super) + ".prototype);"
 			ans += "\n" + escapeIdentifier(self.name) + ".prototype.constructor = " + escapeIdentifier(self.name) + ";"
 		ans += "\n" + typeToJs(self.name) + ".prototype.assign = function(n, v) { this[n] = v; };"
-		for name, number, _, _ in self.fields:
+		for name, _, _, _, _ in self.fields:
 			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + escapeIdentifier(name) + " = function() { return this." + escapeIdentifier(name) + "; };"
 		return ans
 
@@ -249,9 +249,9 @@ class CallStatement:
 		ans = ""
 		for ab in self.async_block:
 			ans += ("." + ab[0]
-				+ "(" + ab[1] + " => {\n"
-				+ ab[2].compile(indent=indent+1)
-				+ " "*indent + "})")
+				+ "(" + ab[1] + " =>\n"
+				+ ab[2].compile(indent=indent+1, semicolon=False)
+				+ " "*indent + ")")
 		return ans
 			
 	def compile(self, semicolon=True, indent=0):

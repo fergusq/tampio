@@ -648,6 +648,19 @@ The operators are as in if statements, see the table in the If statements chapte
 
 ## Standard library
 
+### Object class
+
+The object class does not have a name in Tampio, and is the JavaScript class `Object`.
+It is the super class of other classes.
+
+Pseudodeclaration:
+
+    Kun "object" kirjataan lokiin, ...
+
+|Member name       |Type  |Description|
+|:-----------------|:----:|:----------|
+|`kirjataan lokiin`|Method|Prints this string (`console.log(this)`).
+
 ### Array class
 
 The array class does not have a name in Tampio, and is the JavaScript class `Array`.
@@ -843,7 +856,6 @@ Pseudodeclaration:
 |`jaetaan`              |Method  |Splits this string and stores it to the given array. (`for (var s of this.split(sep)) list.push(s)`).
 |`siistittynä`          |Function|This string trimmed (`this.trim()`).
 |`näytetään käyttäjälle`|Method  |Displays this string to the user (`alert(this)`).
-|`kirjataan lokiin`     |Method  |Prints this string (`console.log(this)`).
 
 ### `muuttuja` class
 
@@ -853,6 +865,10 @@ Pseudodeclaration:
 |Member name |Type    |Description|
 |:-----------|:------:|:----------|
 |`luetaan`   |Method  |Prompts a number and stores it in this variable.
+
+### `määrä` class
+
+`määrä` is an alias to `luku`, which in turn is an alias to JavaScript class `Number`.
 
 ### Promise class
 

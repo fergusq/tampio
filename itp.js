@@ -1,5 +1,6 @@
 // Object
 Object.prototype.prepend = function(x) { return [this].concat(x); };
+Object.prototype.kirjata_lokiin_P__N = function() { console.log(this); };
 
 // Array
 Array.prototype.lisätä_P_N_T = function(kiva_arvo) { this.push(kiva_arvo); };
@@ -48,6 +49,7 @@ Number.prototype.f_pyöristetty_E = function() { return Math.round(this); };
 Number.prototype.f_pyöristetty_E_St = function(e) { e = Math.pow(10, e); return Math.round(this*e)/e; };
 Number.prototype.f_kokonaisluku_E = function() { return Math.floor(this); };
 Number.prototype.f_merkkijono_E = Number.prototype.toString;
+var määrä = Number;
 
 // String/merkkijono
 String.prototype.f_pituus = function() { return this.length; };
@@ -56,7 +58,6 @@ String.prototype.f_sana = function() { return this.split(/\s+/); };
 String.prototype.f_kenttä = function() { return this.split(/,/); };
 String.prototype.f_siistitty_E = String.prototype.trim;
 String.prototype.näyttää_käyttäjälle_P__N = function() { alert(this); };
-String.prototype.kirjata_lokiin_P__N = function() { console.log(this); };
 String.prototype.jakaa_P_SeT_N = function(sep, list) { for (var s of this.split(sep)) list.push(s); };
 
 // HTMLDocument/sivu
