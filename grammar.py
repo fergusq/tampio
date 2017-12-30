@@ -31,7 +31,8 @@ POSTPOSITIONS = {
 		"edessä", "edestä", "eteen",
 		"takana", "takaa", "taakse",
 		"mukaisesti", "mukaan",
-		"kanssa"
+		"kanssa",
+		"varten"
 	]
 }
 
@@ -89,30 +90,33 @@ def parseDeclaration(tokens):
 		tokens.setStyle("keyword")
 		signature = parseSentence(tokens)
 		body = parseList(parseSentence, tokens, do_format=True)
+		stmts = parseAdditionalStatements(tokens)
 		eatPeriod(tokens)
 		tokens.addNewline()
-		return ProcedureDecl(signature, body)
+		return ProcedureDecl(signature, body, stmts)
 	elif token.token.lower() == "olkoon":
 		tokens.next()
 		tokens.setStyle("keyword")
 		word1, word2 = parseVariable(tokens, case="nimento")
-		value, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
+		value, case = parsePredicative(tokens)
 		if case != "nimento":
 			syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
+		stmts = parseAdditionalStatements(tokens)
 		eatPeriod(tokens)
 		tokens.addNewline()
-		return VariableDecl(word1.baseform + "_" + word2.baseform, value)
+		return VariableDecl(word1.baseform + "_" + word2.baseform, value, stmts)
 	else:
-		word = token.toWord(cls=NOUN+ADJ,forms=["ulkoolento", "omanto"])
+		word = token.toWord(cls=NOUN+ADJ,forms=["ulkoolento", "omanto", "nimento"])
 		if word.isNoun() and word.form == "ulkoolento":
 			tokens.next()
 			tokens.setStyle("type")
 			accept(["on"], tokens)
 			tokens.setStyle("keyword")
 			fields = parseList(parseFieldName, tokens)
+			stmts = parseAdditionalStatements(tokens)
 			eatPeriod(tokens)
 			tokens.addNewline()
-			return ClassDecl(word.baseform, fields)
+			return ClassDecl(word.baseform, fields, stmts)
 		elif word.isNoun() or word.isAdjective():
 			if word.isAdjective():
 				tokens.next()
@@ -135,15 +139,19 @@ def parseDeclaration(tokens):
 					super_type = tokens.next().toWord(cls=NOUN,forms=["nimento"])
 					if not super_type.isNoun() or super_type.form != "nimento":
 						syntaxError("super type must be a noun in the nominative case", tokens)
-					accept([","], tokens)
-					accept(["jolla"], tokens)
-					tokens.setStyle("keyword")
-					accept(["on"], tokens)
-					tokens.setStyle("keyword")
-					fields = parseList(parseFieldName, tokens)
+					if tokens.peek() and tokens.peek().token == ",":
+						tokens.next()
+						accept(["jolla"], tokens)
+						tokens.setStyle("keyword")
+						accept(["on"], tokens)
+						tokens.setStyle("keyword")
+						fields = parseList(parseFieldName, tokens)
+					else:
+						fields = []
+					stmts = parseAdditionalStatements(tokens)
 					eatPeriod(tokens)
 					tokens.addNewline()
-					return ClassDecl(word.baseform, fields, super_type=super_type.baseform)
+					return ClassDecl(word.baseform, fields, stmts, super_type=super_type.baseform)
 				elif peek and peek.isWord() and peek.toWord(forms=["nimento"]).isAdjective():
 					if word.form != "nimento":
 						syntaxError("self parameter not in the nominative case", tokens)
@@ -162,9 +170,10 @@ def parseDeclaration(tokens):
 					accept(["jos"], tokens)
 					conditions = parseList(parseCondition, tokens)
 					wheres = parseWheres(tokens)
+					stmts = parseAdditionalStatements(tokens)
 					eatPeriod(tokens)
 					tokens.addNewline()
-					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres)
+					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres, stmts)
 			elif word.form in ["omanto", "nimento"]:
 				place = tokens.place()
 				field, field_case, field_number, param, param_case = parseFieldName(tokens, word.form)
@@ -187,9 +196,10 @@ def parseDeclaration(tokens):
 				if case != "nimento":
 					syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
 				wheres = parseWheres(tokens)
+				stmts = parseAdditionalStatements(tokens)
 				eatPeriod(tokens)
 				tokens.addNewline()
-				return FunctionDecl(typeword.baseform, field, varname, param, param_case, body, wheres, memoize)
+				return FunctionDecl(typeword.baseform, field, varname, param, param_case, body, wheres, memoize, stmts)
 	tokens.next()
 	syntaxError("unexpected token \"" + token.token + "\"", tokens)
 
@@ -210,6 +220,21 @@ def parseVariable(tokens, word=None, case="nimento"):
 		syntaxError("variable words do not accept in number", tokens)
 	tokens.setStyle("type")
 	return word, word2
+
+# predikatiivi voi olla joko nominaalilauseke tai yksi substantiivi (=new-lauseke)
+def parsePredicative(tokens):
+	word = tokens.peek().toWord(cls=NOMINAL_PHRASE_CLASS,forms=["nimento"])
+	word2 = tokens.peek().toWord(cls=NOUN,forms=["nimento"])
+	if word.isNoun() and not canStartNominalPhrase(word, tokens):
+		tokens.next()
+		tokens.setStyle("type")
+		return NewExpr(word.baseform, []), word.form
+	#elif (word2.isNoun() and tokens.peek(2)
+	#	and (tokens.peek(2).token in [".", ";"]
+	#		or (tokens.peek(2) == "," and (not tokens.peek(3) or tokens.peek(3).token.lower() != "jonka")))):
+	#	return NewExpr(word2.baseform, []), word2.case
+	else:
+		return parseNominalPhrase(tokens, promoted_cases=["nimento"])
 
 def parseFieldName(tokens, form="omanto"):
 	expected_form = "nimento" if form == "omanto" else "olento"
@@ -255,6 +280,13 @@ def parseWheres(tokens):
 	else:
 		wheres = []
 	return wheres
+
+def parseAdditionalStatements(tokens):
+	ans = []
+	while not tokens.eof() and tokens.peek().token == ";":
+		tokens.next()
+		ans += parseList(parseSentence, tokens, do_format=True)
+	return ans
 
 # pino jokainen-lausekkeiden tallentamista varten (siis for-silmukoiden, vrt. rödan _)
 FOR_STACK = []
@@ -340,7 +372,7 @@ def parseSentence(tokens):
 			params = {}
 			while not tokens.eof():
 				peek = tokens.peek()
-				if peek.token.lower() in [",", ".", "eikä", "ja"]:
+				if peek.token.lower() in [",", ";", ".", "eikä", "ja"]:
 					break
 				if not peek.isWord() or not peek.toWord(cls=ADJ).isAdjective():
 					break
@@ -374,7 +406,7 @@ def parseSentence(tokens):
 	prev_args = {}
 	while True:
 		pushFor("jokainen")
-		args, ov = parseArgs(tokens, passive)
+		args, ov = parseArgs(tokens, passive, predicate=="olla_A")
 		
 		args_list.append({**prev_args, **args})
 		prev_args = args
@@ -423,26 +455,26 @@ def parsePredicate(word, tokens, subject_case):
 	tokens.setStyle("function")
 	
 	passive = word.form[-1] == "4"
-	predicate = word.baseform + readVerbModifiers(tokens) + ("_P" if passive else "_A")
+	predicate = word.baseform + readVerbModifiers(tokens, word.baseform=="olla") + ("_P" if passive else "_A")
 	
-	if subject_case != "nimento" and not passive:
-		syntaxError("subject must be in nominative case", tokens, place)
 	return predicate, passive
 
-def nextIsValidVerbModifier(tokens, allow_adverbs=True):
+def nextIsValidVerbModifier(tokens, allow_adverbs=True, allow_verbs=True, disallow_nominative_noun=False):
 	token = tokens.peek()
 	if not token or not token.isWord():
 		return False
-	word = token.toWord(cls=2*ADJ+2*NUMERAL+2*CONJ+2*PRONOUN+NOUN)
+	word = token.toWord(cls=NOMINAL_PHRASE_CLASS)
 	return ((word.isNoun()
+		and (not disallow_nominative_noun or word.form != "nimento")
 		and not canStartNominalPhrase(word, tokens)
 		and word.form != "olento")
-		or (allow_adverbs and word.isAdverb()))
+		or (allow_adverbs and word.isAdverb())
+		or (allow_verbs and word.isVerb() and "E-infinitive" not in word.form and "infinitive" in word.form))
 
-def readVerbModifiers(tokens):
+def readVerbModifiers(tokens, is_be_verb=False):
 	ans = ""
 	while not tokens.eof():
-		if nextIsValidVerbModifier(tokens):
+		if nextIsValidVerbModifier(tokens, disallow_nominative_noun=is_be_verb):
 			token = tokens.next()
 			tokens.setStyle("function")
 			ans += "_" + token.token.lower()
@@ -450,12 +482,12 @@ def readVerbModifiers(tokens):
 			break
 	return ans
 
-def parseArgs(tokens, passive):
+def parseArgs(tokens, passive, allow_predicatives):
 	args = {}
 	while not tokens.eof():
-		if tokens.peek().token.lower() in ["sekä", ",", ".", "eikä", "ja", "tuloksenaan"]:
+		if tokens.peek().token.lower() in ["sekä", ",", ";", ".", "eikä", "ja", "tuloksenaan"]:
 			break
-		arg, case = parseNominalPhrase(tokens)
+		arg, case = parsePredicative(tokens) if allow_predicatives else parseNominalPhrase(tokens)
 		if case in args:
 			syntaxError(formToEnglish(case, short=True) + " argument repeated twice", tokens)
 		args[case] = arg
@@ -488,7 +520,7 @@ def parseAsyncBlock(tokens):
 		parameter = w1.baseform + "_" + w2.baseform
 		word = tokens.next().toWord(cls=VERB,forms=["indicative_present_simple3", "indicative_present_simple4"])
 		predicate, passive = parsePredicate(word, tokens, w1.form)
-		args, ov = parseArgs(tokens, passive)
+		args, ov = parseArgs(tokens, passive, predicate=="olla_A")
 		eatComma(tokens)
 		ans.append((method_name, parameter, MethodCallStatement(VariableExpr(parameter), w1.form, predicate, args, ov, [])))
 	if len(ans) > 1 and not last:
@@ -593,13 +625,15 @@ def parseOperator(tokens):
 	else:
 		return "==", True
 
+NOMINAL_PHRASE_CLASS = 2*ADJ+2*NUMERAL+2*CONJ+2*PRONOUN+NOUN
+
 def nextStartsNominalPhrase(tokens):
 	if tokens.eof():
 		return False
 	peek = tokens.peek()
 	if not peek.isWord():
 		return False
-	word = peek.toWord(cls=2*ADJ+2*NUMERAL+2*CONJ+2*PRONOUN+NOUN)
+	word = peek.toWord(cls=NOMINAL_PHRASE_CLASS)
 	return canStartNominalPhrase(word, tokens)
 
 def canStartNominalPhrase(word, tokens):
@@ -661,7 +695,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		expr = NumExpr(CARDINALS.index(word.baseform))
 	elif re.fullmatch(r'\d+', word.baseform):
 		tokens.setStyle("literal")
-		if word.form in ["nimento", "osanto"] and nextIsValidVerbModifier(tokens, allow_adverbs=False):
+		if word.form in ["nimento", "osanto"] and nextIsValidVerbModifier(tokens, allow_adverbs=False, allow_verbs=False):
 			word2 = tokens.next().toWord(cls=NOUN)
 			tokens.setStyle("keyword")
 			if word.form == "nimento":
@@ -693,9 +727,37 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			eatComma(tokens)
 			case = word.form
 			expr = LambdaExpr(body)
+		elif (word.form != "omanto" and
+			nextIsValidVerbModifier(tokens, allow_adverbs=False, allow_verbs=False)
+			and tokens.peek().toWord(cls=NOUN,forms=word.form).form == word.form
+			and tokens.peek().toWord(cls=NOUN,forms=word.form).number == word.number): # takaisinviittaus edelliseen lausekkeeseen esim. "se olio"
+			tokens.setStyle("variable")
+			word2 = tokens.next().toWord(cls=NOUN,forms=word.form)
+			tokens.setStyle("variable", continued=True)
+			case = word.form
+			expr = BackreferenceExpr(word2.baseform)
 		else:
 			tokens.setStyle("variable")
 			case = word.form
+			expr = VariableExpr("this")
+	elif word.baseform == "siellä":
+		tokens.setStyle("variable")
+		if word.word.lower() == "siellä":
+			case = "sisaolento"
+		elif word.word.lower() == "sinne":
+			case = "sisatulento"
+		elif word.word.lower() == "sieltä":
+			case = "sisaeronto"
+		else:
+			syntaxError("unexpected word", tokens)
+		# takaisinviittaus
+		if (nextIsValidVerbModifier(tokens, allow_adverbs=False, allow_verbs=False)
+			and tokens.peek().toWord(cls=NOUN,forms=word.form).form == word.form
+			and tokens.peek().toWord(cls=NOUN,forms=word.form).number == word.number):
+			word2 = tokens.next().toWord(cls=NOUN,forms=word.form)
+			tokens.setStyle("variable", continued=True)
+			expr = BackreferenceExpr(word2.baseform)
+		else:
 			expr = VariableExpr("this")
 	elif (word.isAdjective() and word.baseform == "uusi") or (word.isNoun() and tokens.peek(1).token == "," and tokens.peek(2).token.lower() == "jonka"):
 		if word.baseform == "uusi":
@@ -954,7 +1016,7 @@ def parseList(parseChild, tokens, custom_endings=[], do_format=False):
 		tokens.increaseIndentLevel()
 	ans = []
 	force = False
-	while force or (not tokens.eof() and not tokens.peek().token.lower() in [".", "ja", "eikä"] + custom_endings):
+	while force or (not tokens.eof() and not tokens.peek().token.lower() in [";", ".", "ja", "eikä"] + custom_endings):
 		if do_format and len(ans) > 0:
 			tokens.addNewline()
 		ans += [parseChild(tokens)]
@@ -964,7 +1026,7 @@ def parseList(parseChild, tokens, custom_endings=[], do_format=False):
 		else:
 			force = False
 	checkEof(tokens)
-	if len(ans) == 1 and tokens.peek().token == ".":
+	if len(ans) == 1 and tokens.peek().token in [".", ";"]:
 		if do_format:
 			tokens.decreaseIndentLevel()
 		return ans

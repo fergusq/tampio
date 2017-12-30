@@ -26,10 +26,10 @@ voikko = Voikko(LANGUAGE)
 
 def lexCode(code):
 	output = []
-	for word in re.split(r'(\s|\.|,|"[^"]*"|#[^\n]*\n|\([^()]*\))', code):
+	for word in re.split(r'(\s|\.|,|;|"[^"]*"|#[^\n]*\n|\([^()]*\))', code):
 		if word == "":
 			continue
-		if re.fullmatch(r'\s|\.|,|"[^"]*"|#[^\n]*\n|\([^()]*\)', word):
+		if re.fullmatch(r'\s|\.|,|;|"[^"]*"|#[^\n]*\n|\([^()]*\)', word):
 			output += [Punctuation(word)]
 			continue
 		
@@ -59,11 +59,15 @@ def lexCode(code):
 			cl = analysis["CLASS"]
 			if bf in ORDINALS+CARDINALS or re.fullmatch(r'\d+', bf):
 				cl = "lukusana"
+			elif "PARTICIPLE" in analysis and analysis["PARTICIPLE"] == "agent":
+				cl = "laatusana"
 			number = analysis.get("NUMBER", "")
 			person = analysis.get("PERSON", "")
 			comparison = analysis.get("COMPARISON", "")
 			possessive = analysis.get("POSSESSIVE", "")
-			if "SIJAMUOTO" in analysis:
+			if "MOOD" in analysis and "SIJAMUOTO" in analysis:
+				form = analysis["MOOD"] + "_" + analysis["SIJAMUOTO"]
+			elif "SIJAMUOTO" in analysis:
 				form = analysis["SIJAMUOTO"]
 			elif "MOOD" in analysis and "TENSE" in analysis:
 				form = analysis["MOOD"] + "_" + analysis["TENSE"]

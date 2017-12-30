@@ -205,9 +205,6 @@ A method is a procedure that can take multiple arguments.
 The method name consists of a verb and optionally some noun modifiers.
 
 Each parameter must be in a different case or have a postposition.
-The case of the self parameter is restricted by the verb form chosen.
-If the verb is expressed in active voice, the self parameter must be in the nominative case.
-The passive voice does not restrict cases.
 
 The order of parameters does not have any significance (other than that the self parameter must come before the verb).
 The parameters are identified by their case or postposition.
@@ -243,6 +240,7 @@ These rules are the same in both method definitions and method calls.
 |`takana`    |genitive     |
 |`takaa`     |genitive     |
 |`taakse`    |genitive     |
+|`varten`    |genitive     |
 
 The passive past participles of intransitive verbs ending in `-uttu`/`-ytty` work similarly to postpositions.
 
@@ -325,7 +323,7 @@ the `then` and `catch` methods can be called using a special syntax.
 
     , minkä [method name] [lambda parameter name] [method call],
 
-The lambda parameter name will be the subject of the following method call.
+The lambda parameter name will be the self argument of the following method call.
 
     vaikea laskutoimitus tehdään, minkä jälkeen saatu tulos kirjataan lokiin,
     # vaikea_laskutoimitus.tehdä_P__N().then(saatu_tulos => console.log(saatu_tulos))
@@ -501,13 +499,21 @@ the case of the expression will be nominative unless the number is also in parti
 ### Literal strings
 
 Literal strings are written inside `"quotation marks"`.
-There is currently no escape code, so there must be no quotation marks inside strings.
 
 Before a string literal there must be a noun that is inflected in the case that is the case of the string literal expression.
 The noun can be anything.
 
     nykyinen sivu näyttää tekstin "Hello world!"
     Olkoon kiva merkkijono lause "Hei maailma!".
+
+The following escape codes are supported:
+
+|Escape code|Meaning|
+|:---------:|:-----:|
+|`\\`       |`\`    |
+|`\l`       |`"`    |
+|`\s`       |tab    |
+|`\u`       |newline|
 
 ### Function calls
 
@@ -550,7 +556,7 @@ that perform the basic mathematical operations of addition, subtraction, multipl
 |`jaettuna`      |adessive            |`/`                  |
 |`rajattuna`     |illative            |`%`                  |
 |`yhdistettynä`  |illative            |`.concat`            |
-|`liitettynä`    |illative            |`.prepend`           |
+|`liitettynä`    |illative            |`.t_prepend`         |
 
 There are no parentheses in Tampio, so the operator precedence is defined using the list syntax.
 Two or more essive function calls can form an essive chain.

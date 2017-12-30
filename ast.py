@@ -38,24 +38,57 @@ def typeToJs(typename):
 def escapeIdentifier(identifier):
 	return identifier.replace("-", "_")
 
-class VariableDecl:
-	def __init__(self, var, value):
+BACKREFERENCE_STACK = []
+
+def compileBlock(statements, indent):
+	bcs = []
+	for stmt in statements:
+		bcs += stmt.backreferences()
+	BACKREFERENCE_STACK.append(bcs)
+	ans = ""
+	for bc in set(bcs):
+		ans += " "*indent + "var se_" + escapeIdentifier(bc) + " = null;\n"
+	for stmt in statements:
+		ans += stmt.compile(indent=indent)
+	del BACKREFERENCE_STACK[-1]
+	return ans
+
+def currentBackreferences():
+	if len(BACKREFERENCE_STACK) >= 1:
+		return BACKREFERENCE_STACK[-1]
+	else:
+		return []
+
+class Decl:
+	def __init__(self, statements):
+		self.statements = statements
+	def compile(self):
+		return self.compileDecl() + "\n" + self.compileAdditionalStatements()
+	def compileAdditionalStatements(self):
+		return compileBlock(self.statements, 0)
+
+class VariableDecl(Decl):
+	def __init__(self, var, value, stmts):
+		Decl.__init__(self, stmts)
 		self.var = var
 		self.value = value
 	def __str__(self):
 		return self.var + " := " + str(self.value)
-	def compile(self):
+	def compileDecl(self):
 		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile(0) + ";"
+	def compileAdditionalStatements(self):
+		return ";(function() {\n" + compileBlock(self.statements, 1) + "}).call(" + escapeIdentifier(self.var) + ");"
 
-class ProcedureDecl:
-	def __init__(self, signature, body):
+class ProcedureDecl(Decl):
+	def __init__(self, signature, body, stmts):
+		Decl.__init__(self, stmts)
 		self.signature = signature
 		self.body = body
 	def __str__(self):
 		return "prodecure " + str(self.signature) + " { " + " ".join([str(s) for s in self.body]) + " }"
-	def compile(self):
+	def compileDecl(self):
 		if isinstance(self.signature, ProcedureCallStatement):
-			return "function " + self.signature.compile(semicolon=False) + " {\n" + "".join([s.compile(indent=1) for s in self.body]) + "};"
+			return "function " + self.signature.compile(semicolon=False) + " {\n" + compileBlock(self.body, 1) + "};"
 		elif isinstance(self.signature, MethodCallStatement):
 			if not isinstance(self.signature.obj, VariableExpr):
 				fatalError("Illegal method declaration: subject is not a variable (in \"" + str(self.signature) + "\")")
@@ -64,43 +97,50 @@ class ProcedureDecl:
 				+ self.signature.compileName()
 				+ " = function" + self.signature.compileArgs(indent=0) + " {\n"
 				+ " var " + escapeIdentifier(self.signature.obj.name) + " = this;\n"
-				+ "".join([s.compile(indent=1) for s in self.body])
+				+ compileBlock(self.body, 1)
 				+ "};")
 		else:
 			fatalError("TODO")
 
-class ClassDecl:
-	def __init__(self, name, fields, super_type=None):
+class ClassDecl(Decl):
+	def __init__(self, name, fields, stmts, super_type=None):
+		Decl.__init__(self, stmts)
 		self.name = name
 		self.fields = fields
 		self.super = super_type
 	def __str__(self):
 		return self.name + " := class { " + ", ".join(self.fields) + "};"
 	def compile(self):
-		ans = "function " + escapeIdentifier(self.name) + "(vals) {\n"
+		class_name = escapeIdentifier(self.name)
+		ans = "function " + class_name + "(vals) {\n"
 		if self.super:
 			ans += " " + escapeIdentifier(self.super) + ".call(this, vals);\n"
+		ans += " if (" + class_name + ".prototype.syntyä_A__N) " + class_name + ".prototype.syntyä_A__N.call(this);\n"
 		for name, _, number, _, _ in self.fields:
-			ans += " this." + escapeIdentifier(name) + " = (\"" + name + "\" in vals) ? vals[\"" + name + "\"] : "
+			field = "this." + escapeIdentifier(name)
+			ans += " if (\"" + name + "\" in vals) " + field + " = vals[\"" + name + "\"];\n"
 			if number == "plural":
-				ans += "[];\n"
-			else:
-				ans += "undefined;\n"
+				ans += " else if (" + field + " === undefined) " + field + " = [];\n"
 		ans += "};"
 		if self.super:
-			ans += "\n" + escapeIdentifier(self.name) + ".prototype = Object.create(" + escapeIdentifier(self.super) + ".prototype);"
-			ans += "\n" + escapeIdentifier(self.name) + ".prototype.constructor = " + escapeIdentifier(self.name) + ";"
-		ans += "\n" + typeToJs(self.name) + ".prototype.assign = function(n, v) { this[n] = v; };"
+			ans += "\n" + class_name + ".prototype = Object.create(" + escapeIdentifier(self.super) + ".prototype);"
+			ans += "\n" + class_name + ".prototype.constructor = " + class_name + ";"
 		for name, _, _, _, _ in self.fields:
-			ans += "\n" + typeToJs(self.name) + ".prototype.f_" + escapeIdentifier(name) + " = function() { return this." + escapeIdentifier(name) + "; };"
+			ans += "\n" + class_name + ".prototype.f_" + escapeIdentifier(name) + " = function() { return this." + escapeIdentifier(name) + "; };"
 		return ans
 
 class Whereable:
 	def compileWheres(self, indent=1):
 		return "".join([" "*indent + "var "+escapeIdentifier(where[0])+" = "+where[1].compile(indent)+";\n" for where in self.wheres])
+	def whereBackreferences(self):
+		ans = []
+		for _, val in self.wheres:
+			ans += val.backreferences()
+		return ans
 
-class FunctionDecl(Whereable):
-	def __init__(self, vtype, field, self_param, param, param_case, body, wheres, memoize):
+class FunctionDecl(Whereable,Decl):
+	def __init__(self, vtype, field, self_param, param, param_case, body, wheres, memoize, stmts):
+		Decl.__init__(self, stmts)
 		self.type = vtype
 		self.field = field
 		self.self_param = self_param
@@ -131,8 +171,9 @@ class FunctionDecl(Whereable):
 			ans += " return " + self.body.compile(0) + ";\n};"
 		return ans
 
-class CondFunctionDecl(Whereable):
-	def __init__(self, vtype, name, self_param, param, conditions, wheres):
+class CondFunctionDecl(Whereable,Decl):
+	def __init__(self, vtype, name, self_param, param, conditions, wheres, stmts):
+		Decl.__init__(self, stmts)
 		assert name[0] == "."
 		self.type = vtype
 		self.name = name
@@ -145,7 +186,7 @@ class CondFunctionDecl(Whereable):
 		if self.param:
 			ans += "(" + self.param + ")"
 		return ans + " := " + self.self_param + " => " + " and ".join(map(str, self.conditions))
-	def compile(self):
+	def compileDecl(self):
 		ans = typeToJs(self.type) + ".prototype" + self.name + " = function("
 		if self.param != "":
 			ans += self.param
@@ -161,6 +202,8 @@ class ForStatement:
 		self.var = var
 		self.expr = expr
 		self.stmt = stmt
+	def backreferences(self):
+		return self.expr.backreferences() + self.stmt.backreferences()
 	def __str__(self):
 		return "for (" + self.var + " in " + str(self.expr) + ") " + str(self.stmt)
 	def compile(self, indent=0):
@@ -174,6 +217,13 @@ class IfStatement:
 	def __init__(self, conditions, block):
 		self.conditions = conditions
 		self.block = block
+	def backreferences(self):
+		ans = []
+		for c in self.conditions:
+			ans += c.backreferences()
+		for s in self.block:
+			ans += s.backreferences()
+		return ans
 	def __str__(self):
 		return "if (" + " and ".join([str(c) for c in self.conditions]) + ") { " + " ".join([str(s) for s in self.block]) + " }"
 	def compile(self, indent=0):
@@ -192,6 +242,8 @@ class QuantifierCondExpr(Whereable):
 		self.expr = expr
 		self.cond = cond
 		self.wheres = wheres
+	def backreferences(self):
+		return self.expr.backreferences() + self.cond.backreferences() + self.whereBackreferences()
 	def __str__(self):
 		return ("for all" if self.quantifier == "jokainen" else "exists") + " " + self.var + " in " + str(self.expr) + ": " + str(self.cond)
 	def compile(self, indent):
@@ -204,6 +256,8 @@ class CondExpr(Whereable):
 		self.left = left
 		self.right = right
 		self.wheres = wheres
+	def backreferences(self):
+		return self.left.backreferences() + (self.right.backreferences() if self.right else []) + self.whereBackreferences()
 	def __str__(self):
 		return str(self.left) + self.operator + str(self.right)
 	def compile(self, indent):
@@ -223,6 +277,11 @@ class BlockStatement(Whereable):
 	def __init__(self, stmts, wheres):
 		self.stmts = stmts
 		self.wheres = wheres
+	def backreferences(self):
+		ans = []
+		for s in self.stmts:
+			ans += s.backreferences()
+		return ans + self.whereBackreferences()
 	def __str__(self):
 		return "; ".join(map(str, self.stmts))
 	def compile(self, semicolon=True, indent=0):
@@ -234,6 +293,13 @@ class CallStatement:
 		self.args = args
 		self.output_var = output_var
 		self.async_block = async_block
+	def backreferences(self):
+		ans = []
+		for v in self.args.values():
+			ans += v.backreferences()
+		if self.async_block:
+			ans += self.async_block.backreferences()
+		return ans
 	def compileName(self):
 		keys = sorted(self.args.keys())
 		return escapeIdentifier(self.name) + "_" + "".join([formAbrv(form) for form in keys])
@@ -272,6 +338,8 @@ class MethodCallStatement(CallStatement):
 		self.args = args
 		self.output_var = output_var
 		self.async_block = async_block
+	def backreferences(self):
+		return super().backreferences() + self.obj.backreferences()
 	def __str__(self):
 		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 	def compileName(self):
@@ -287,6 +355,11 @@ class MethodCallStatement(CallStatement):
 		if (is_lval
 			and self.name == "asettaa_P"
 			and self.obj_case == "tulento"
+			and list(self.args.keys()) == ["nimento"]):
+			ans += compileLval() + " = " + self.args["nimento"].compile(indent)
+		elif (is_lval
+			and self.name == "olla_A"
+			and self.obj_case == "nimento"
 			and list(self.args.keys()) == ["nimento"]):
 			ans += compileLval() + " = " + self.args["nimento"].compile(indent)
 		elif (is_lval
@@ -309,6 +382,8 @@ class MethodAssignmentStatement:
 		self.method = method
 		self.params = params
 		self.body = body
+	def backreferences(self):
+		return self.obj.backreferences() # ei palauta vartalon sisältämiä takaisinviittauksia
 	def __str__(self):
 		return (str(self.obj) + "." + self.method + " := ("
 			+ ", ".join([key + ": " + str(self.args[key]) for key in self.params]) + ") => { " + "; ".join(map(str, self.body)) + " }")
@@ -321,43 +396,60 @@ class MethodAssignmentStatement:
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
 		ans += self.obj.compile(indent)
-		ans += ".assign(\"" + self.compileName()
+		ans += ".t_assign(\"" + self.compileName()
 		ans += "\", "
 		ans += self.compileParams(indent)
 		ans += " => {\n"
-		ans += "".join([s.compile(indent=indent+1) for s in self.body])
+		ans += compileBlock(self.body, indent+1)
 		ans += " "*indent + "});"
 		if semicolon:
 			ans += ";\n"
 		return ans
 
-class VariableExpr:
+class Expr:
+	def backreferences(self):
+		return []
+
+class VariableExpr(Expr):
 	def __init__(self, name, vtype="any"):
 		self.name = name
 		self.type = vtype
 	def __str__(self):
 		return self.name
 	def compile(self, indent):
-		return escapeIdentifier(self.name)
+		ans = escapeIdentifier(self.name)
+		if self.type in currentBackreferences():
+			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
+		return ans
+
+class BackreferenceExpr(Expr):
+	def __init__(self, name):
+		self.name = name
+	def backreferences(self):
+		return [self.name]
+	def compile(self, indent):
+		return "se_" + escapeIdentifier(self.name)
 
 ARI_OPERATORS = {
 	"lisätty_E": ("sisatulento", "+"),
 	"ynnätty_E": ("sisatulento", "+"),
 	"kasvatettu_E": ("ulkoolento", "+"),
 	"yhdistetty_E": ("sisatulento", ".concat"),
-	"liitetty_E": ("sisatulento", ".prepend"),
+	"liitetty_E": ("sisatulento", ".t_prepend"),
 	"vähennetty_E": ("ulkoolento", "-"),
 	"kerrottu_E": ("ulkoolento", "*"),
 	"jaettu_E": ("ulkoolento", "/"),
 	"rajattu_E": ("sisatulento", "%")
 }
 
-class FieldExpr:
+class FieldExpr(Expr):
 	def __init__(self, obj, field, arg_case=None, arg=None):
 		self.obj = obj
 		self.field = field
 		self.arg_case = arg_case
 		self.arg = arg
+	def backreferences(self):
+		return self.obj.backreferences() + (self.arg.backreferences() if self.arg else [])
 	def __str__(self):
 		return str(self.obj) + "." + self.field
 	def compile(self, indent):
@@ -377,11 +469,13 @@ class FieldExpr:
 		else:
 			return "(" + self.obj.compile(indent) + operator + self.arg.compile(indent) + ")"
 
-class SubscriptExpr:
+class SubscriptExpr(Expr):
 	def __init__(self, obj, index, is_end_index=False):
 		self.obj = obj
 		self.index = index
 		self.is_end_index = is_end_index
+	def backreferences(self):
+		return self.obj.backreferences()
 	def __str__(self):
 		return str(self.obj) + "[" + str(self.index) + "]"
 	def compile(self, indent):
@@ -390,11 +484,13 @@ class SubscriptExpr:
 		else:
 			return self.obj.compile(indent) + "[" + self.index.compile(indent) + "-1]"
 
-class SliceExpr:
+class SliceExpr(Expr):
 	def __init__(self, obj, start, end):
 		self.obj = obj
 		self.start = start
 		self.end = end
+	def backreferences(self):
+		return self.obj.backreferences()
 	def __str__(self):
 		return str(self.obj) + "[" + str(self.start) + ":" + str(self.end if self.end else "") + "]"
 	def compile(self, indent):
@@ -405,7 +501,7 @@ class SliceExpr:
 		ans += ")"
 		return ans
 
-class NumExpr:
+class NumExpr(Expr):
 	def __init__(self, num):
 		self.num = num
 	def __str__(self):
@@ -413,7 +509,7 @@ class NumExpr:
 	def compile(self, indent):
 		return "(" + str(self.num) + ")"
 
-class StrExpr:
+class StrExpr(Expr):
 	def __init__(self, string):
 		self.str = string
 	def __str__(self):
@@ -421,29 +517,42 @@ class StrExpr:
 	def compile(self, indent):
 		return repr(self.str)
 
-class NewExpr:
+class NewExpr(Expr):
 	def __init__(self, typename, args):
 		self.type = typename
 		self.args = args
+	def backreferences(self):
+		ans = []
+		for arg in self.args:
+			ans += arg.value.backreferences()
+		return ans
 	def __str__(self):
 		return "new " + typeToJs(self.type) + "(" + ", ".join([arg.field + "=" + str(arg.value) for arg in self.args]) + ")"
 	def compile(self, indent):
-		return "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile(indent) for arg in self.args]) + "})"
+		ans = "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile(indent) for arg in self.args]) + "})"
+		if self.type in currentBackreferences():
+			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
+		return ans
 
 class CtorArgExpr:
 	def __init__(self, field, value):
 		self.field = field
 		self.value = value
 
-class ListExpr:
+class ListExpr(Expr):
 	def __init__(self, values):
 		self.values = values
+	def backreferences(self):
+		ans = []
+		for val in self.values:
+			ans += val.backreferences()
+		return ans
 	def __str__(self):
 		return "[" + ", ".join(map(str, self.values)) + "]"
 	def compile(self, indent):
 		return "[" + ", ".join([value.compile(indent) for value in self.values]) + "]"
 
-class LambdaExpr:
+class LambdaExpr(Expr):
 	def __init__(self, body):
 		self.body = body
 	def __str__(self):
@@ -451,11 +560,16 @@ class LambdaExpr:
 	def compile(self, indent):
 		return "() => {\n" + "".join([s.compile(indent=indent+1) for s in self.body]) + " }"
 
-class TernaryExpr:
+class TernaryExpr(Expr):
 	def __init__(self, conditions, then, otherwise):
 		self.conditions = conditions
 		self.then = then
 		self.otherwise = otherwise
+	def backreferences(self):
+		ans = []
+		for c in self.conditions:
+			ans += c.backreferences()
+		return ans + self.then.backreferences() + self.otherwise.backreferences()
 	def __str__(self):
 		return str(self.then) + " if (" + " and ".join([str(c) for c in self.conditions]) + ") else " + str(self.otherwise)
 	def compile(self, indent):

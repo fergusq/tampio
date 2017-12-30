@@ -1,5 +1,6 @@
 // Object
-Object.prototype.prepend = function(x) { return [this].concat(x); };
+Object.prototype.t_prepend = function(x) { return [this].concat(x); };
+Object.prototype.t_assign = function(n, v) { this[n] = v; };
 Object.prototype.kirjata_lokiin_P__N = function() { console.log(this); };
 
 // Array
@@ -12,7 +13,6 @@ Array.prototype.nth_last = function(n) { return this[this.length-n]; };
 function lista(vals) {
  this.alkio = ("alkio" in vals) ? vals["alkio"] : [];
 };
-lista.prototype.assign = function(n, v) { this[n] = v; };
 lista.prototype.f_alkio = function() { return this.alkio; };
 lista.prototype.f_koko = function() { return this.alkio.length; };
 lista.prototype.f_häntä = function() { return new lista({"alkio": this.alkio.slice(1)}); };
@@ -71,7 +71,7 @@ if (typeof HTMLDocument !== 'undefined') {
 
 // HTMLElement/elementti
 if (typeof HTMLElement !== 'undefined') {
- HTMLElement.prototype.assign = function(n, v) {
+ HTMLElement.prototype.t_assign = function(n, v) {
   switch (n) {
    case "painaa_P__P":
     this.addEventListener("click", v);
@@ -101,7 +101,6 @@ var nykyinen_aika = new Date();
 function muuttuja(vals) {
  this.arvo = ("arvo" in vals) ? vals["arvo"] : undefined;
 };
-muuttuja.prototype.assign = function(n, v) { this[n] = v; };
 muuttuja.prototype.f_arvo = function() { return this.arvo; };
 muuttuja.prototype.lukea_luku_P__St = function() { this.arvo = Number.parseInt(prompt("Syötä luku")); };
 muuttuja.prototype.lukea_luku_P_Uo_St = function(p) { this.arvo = Number.parseInt(prompt(p)); };
