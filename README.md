@@ -241,6 +241,12 @@ These rules are the same in both method definitions and method calls.
 |`takaa`     |genitive     |
 |`taakse`    |genitive     |
 |`varten`    |genitive     |
+|`vierellä`  |genitive     |
+|`viereltä`  |genitive     |
+|`vierelle`  |genitive     |
+|`vieressä`  |genitive     |
+|`vierestä`  |genitive     |
+|`viereen`   |genitive     |
 
 The passive past participles of intransitive verbs ending in `-uttu`/`-ytty` work similarly to postpositions.
 

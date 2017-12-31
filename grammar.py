@@ -30,6 +30,8 @@ POSTPOSITIONS = {
 		"keskellä", "keskeltä", "keskelle",
 		"edessä", "edestä", "eteen",
 		"takana", "takaa", "taakse",
+		"vieressä", "vierestä", "viereen",
+		"vierellä", "viereltä", "vierelle",
 		"mukaisesti", "mukaan",
 		"kanssa",
 		"varten"
@@ -89,7 +91,8 @@ def parseDeclaration(tokens):
 		tokens.next()
 		tokens.setStyle("keyword")
 		signature = parseSentence(tokens)
-		body = parseList(parseSentence, tokens, do_format=True)
+		with AllowBackreferences():
+			body = parseList(parseSentence, tokens, do_format=True)
 		stmts = parseAdditionalStatements(tokens)
 		eatPeriod(tokens)
 		tokens.addNewline()
@@ -283,10 +286,24 @@ def parseWheres(tokens):
 
 def parseAdditionalStatements(tokens):
 	ans = []
-	while not tokens.eof() and tokens.peek().token == ";":
-		tokens.next()
-		ans += parseList(parseSentence, tokens, do_format=True)
+	with AllowBackreferences():
+		while not tokens.eof() and tokens.peek().token == ";":
+			tokens.next()
+			ans += parseList(parseSentence, tokens, do_format=True)
 	return ans
+
+# takaisinviittauksien sallija
+
+class AllowBackreferences:
+	def __enter__(self):
+		global allow_backreferences
+		self.prev = allow_backreferences
+		allow_backreferences = True
+	def __exit__(self, *args):
+		global allow_backreferences
+		allow_backreferences = self.prev
+
+allow_backreferences = False
 
 # pino jokainen-lausekkeiden tallentamista varten (siis for-silmukoiden, vrt. rödan _)
 FOR_STACK = []
@@ -723,19 +740,25 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 			accept([","], tokens)
 			accept(["että"], tokens)
 			tokens.setStyle("keyword")
-			body = parseList(parseSentence, tokens, do_format=True)
+			with AllowBackreferences():
+				body = parseList(parseSentence, tokens, do_format=True)
 			eatComma(tokens)
 			case = word.form
 			expr = LambdaExpr(body)
-		elif (word.form != "omanto" and
+		elif (allow_backreferences and
 			nextIsValidVerbModifier(tokens, allow_adverbs=False, allow_verbs=False)
 			and tokens.peek().toWord(cls=NOUN,forms=word.form).form == word.form
 			and tokens.peek().toWord(cls=NOUN,forms=word.form).number == word.number): # takaisinviittaus edelliseen lausekkeeseen esim. "se olio"
 			tokens.setStyle("variable")
 			word2 = tokens.next().toWord(cls=NOUN,forms=word.form)
-			tokens.setStyle("variable", continued=True)
-			case = word.form
-			expr = BackreferenceExpr(word2.baseform)
+			if word2.form == "omanto":
+				tokens.setStyle("variable-or-field")
+				case = "omanto"
+				expr = BackreferenceExpr(word2.baseform, may_be_field=True)
+			else:
+				tokens.setStyle("variable", continued=True)
+				case = word.form
+				expr = BackreferenceExpr(word2.baseform)
 		else:
 			tokens.setStyle("variable")
 			case = word.form

@@ -16,6 +16,12 @@ span.variable {
 	font-size: large;
 }
 
+span.variable-or-field {
+	text-decoration: underline dotted;
+	font-variant: small-caps;
+	font-size: large;
+}
+
 span.function {
 	font-style: italic;
 }

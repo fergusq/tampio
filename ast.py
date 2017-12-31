@@ -423,12 +423,17 @@ class VariableExpr(Expr):
 		return ans
 
 class BackreferenceExpr(Expr):
-	def __init__(self, name):
+	def __init__(self, name, may_be_field=False):
 		self.name = name
+		self.may_be_field = may_be_field
 	def backreferences(self):
 		return [self.name]
 	def compile(self, indent):
-		return "se_" + escapeIdentifier(self.name)
+		name = escapeIdentifier(self.name)
+		if self.may_be_field:
+			return "(this.f_" + name + "!==undefined ? this.f_" + name + " : se_" + name + ")"
+		else:
+			return "se_" + name
 
 ARI_OPERATORS = {
 	"lisätty_E": ("sisatulento", "+"),
