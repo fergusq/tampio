@@ -16,7 +16,9 @@ function lista(vals) {
 lista.prototype.f_alkio = function() { return this.alkio; };
 lista.prototype.f_koko = function() { return this.alkio.length; };
 lista.prototype.f_häntä = function() { return new lista({"alkio": this.alkio.slice(1)}); };
+lista.prototype.f_järjestetty_E = function() { return new lista({"alkio": Array.from(this.alkio).sort()}); }
 lista.prototype.etsiä_indeksin_A_Ut_N = function(item) { return this.alkio.indexOf(item); };
+lista.prototype.järjestää_P__N  = function() { this.alkio.sort(); }
 lista.prototype.lisätä_P_N_St = function(item) { this.alkio.push(item); }
 lista.prototype.p_tyhjä = function() { return this.f_alkio().f_määrä() === 0; };
 const tyhjä_lista = new lista({});

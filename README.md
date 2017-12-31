@@ -762,6 +762,9 @@ Declaration:
     Listan koko on sen alkioiden määrä.
     Listan häntä on uusi lista, jonka alkiot ovat sen alkiot toisesta alkaen.
     
+    Lista järjestettynä on ...
+    Kun lyhyt lista järjestetään, ...
+    
     Lista on tyhjä, jos sen alkioiden määrä on nolla.
     
     Kun lyhyt lista etsii indeksin ihanalle alkiolle, ...
@@ -772,6 +775,8 @@ Declaration:
 |`alkiot`        |Field              |The items in this list.
 |`koko`          |Function           |The number of items in this list (`this.alkio.length`).
 |`häntä`         |Function           |The tail of this list (`this.alkio.slice(1)`).
+|`järjestettynä` |Function           |Returns a copy of this list that is sorted.
+|`järjestetään`  |Method             |Sorts this list in place (`this.alkio.sort()`).
 |`tyhjä`         |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
 |`etsii indeksin`|Method             |Returns the index of the given element (`this.alkio.indexOf(item)`).
 |`lisätään`      |Method             |Appends a new element to this list (`this.alkio.push(item)`).
