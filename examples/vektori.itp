@@ -1,5 +1,3 @@
-Monikolla on alkiot.
-
 Vektorilla on komponentit.
 
 Vektorin dimensio on sen komponenttien määrä.
@@ -16,16 +14,12 @@ Vektorin pituus on
 			lisättynä sen hännän pituuden toiseen potenssiin
 		neliöjuuri.
 
-Mahtavan monikon pistetulo on
-	riippuen siitä, onko sen ensimmäisen alkion dimensio nolla,
+Veikeä vektori pistekerrottuna mahtavalla vektorilla on
+	riippuen siitä, onko veikeän vektorin dimensio nolla,
 	joko	nolla
-	tai	sen ensimmäisen alkion pää
-		kerrottuna sen toisen alkion päällä
-		ja lisättynä uuden monikon, jonka
-			alkioita ovat
-				mahtavan monikon ensimmäisen alkion häntä
-			ja	mahtavan monikon toisen alkion häntä
-		eikä muuta, pistetuloon.
+	tai	veikeän vektorin pää
+		kerrottuna mahtavan vektorin päällä
+		ja lisättynä veikeän vektorin häntään pistekerrottuna mahtavan vektorin hännällä.
 
 Kun lyhyeen vektoriin lisätään kiva komponentti,
 	lyhyen vektorin komponentiksi lisätään kiva komponentti.
@@ -53,4 +47,4 @@ Kun nykyinen sivu avautuu,
 	nykyinen sivu näyttää tekstin "<br/>Pituus: ",
 	nykyinen sivu näyttää villin vektorin pituuden,
 	nykyinen sivu näyttää tekstin "<br/>Pistetulo: "
-ja	nykyinen sivu näyttää uuden monikon, jonka alkioita ovat villi vektori ja villi vektori eikä muuta, pistetulon.
+ja	nykyinen sivu näyttää villin vektorin pistekerrottuna villillä vektorilla.
