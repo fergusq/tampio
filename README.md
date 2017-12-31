@@ -159,6 +159,24 @@ There is a special syntax that is used to declare a subclass:
 
     [name/nominative] on [super type/nominative], jolla on [field list/nominative].
 
+### Fields
+
+Each field is simply either a singular or plural noun.
+Plural nouns are arrays, singular nouns objects.
+
+A field can have a default value that can be set using one of the following alternative syntaxes:
+
+    [field name/nominative], joka on [predicative/nominative],
+    [field name/nominative], joka on aluksi [predicative/nominative],
+    [field name/nominative], joka on alussa [predicative/nominative],
+    [field name/nominative], joka on yleensä [predicative/nominative],
+    [field name/nominative] [[predicative/nominative]]
+    [field name/nominative] [aluksi [predicative/nominative]]
+    [field name/nominative] [alussa [predicative/nominative]]
+    [field name/nominative] [yleensä [predicative/nominative]]
+
+Please note that some syntaxes contain the literal `[]` characters.
+
 ## Functions
 
 In Tampio, a function is always defined for one class and is polymorphic to that class.
@@ -167,9 +185,9 @@ This means that it is possible to define the same function differently for multi
 A function normally has one parameter and one expression that is the return value.
 Certain essive functions can have two parameters.
 
-    [parameter/genitive] [function name] on [expression/nominative].
-    [parameter/nominative] [function name/essive] on [expression/nominative]
-    [parameter/nominative] [function name/past passive participle essive] [parameter] on [expression/nominative]
+    [parameter/genitive] [function name] on [predicative/nominative].
+    [parameter/nominative] [function name/essive] on [predicative/nominative]
+    [parameter/nominative] [function name/past passive participle essive] [parameter] on [predicative/nominative]
 
 The name of the parameter must have two words: an adjective and the name of the class.
 For example, to define a function called `dimensio` for the `vektori` class,
@@ -587,8 +605,8 @@ The `on` keyword is used when the field name is singular and `ovat` when it is p
 If the field is an array, it is possible to initialize it using multiple values.
 In this case, the field name must be in plural partitive case.
 
-    [field name/nominative] on [value]
-    [field name/partitive] ovat [value list]
+    [field name/nominative] on [predicative]
+    [field name/partitive] ovat [predicative list]
 
 Examples:
 

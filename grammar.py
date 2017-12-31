@@ -193,9 +193,7 @@ def parseDeclaration(tokens):
 					memoize = True
 				else:
 					memoize = False
-				body, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
-				if case != "nimento":
-					syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
+				body = parseNominativePredicative(tokens)
 				wheres = parseWheres(tokens)
 				stmts = parseAdditionalStatements(tokens)
 				eatPeriod(tokens)
@@ -428,7 +426,7 @@ def parseSentence(tokens):
 			params = {}
 			while not tokens.eof():
 				peek = tokens.peek()
-				if peek.token.lower() in [",", ";", ".", "eikä", "ja"]:
+				if peek.token.lower() == "käyköön":
 					break
 				if not peek.isWord() or not peek.toWord(cls=ADJ).isAdjective():
 					break
@@ -541,7 +539,7 @@ def readVerbModifiers(tokens, is_be_verb=False):
 def parseArgs(tokens, passive, allow_predicatives):
 	args = {}
 	while not tokens.eof():
-		if tokens.peek().token.lower() in ["sekä", ",", ";", ".", "eikä", "ja", "tuloksenaan"]:
+		if tokens.peek().token.lower() in ["sekä", ",", ";", ".", "]", "eikä", "ja", "tuloksenaan"]:
 			break
 		arg, case = parsePredicative(tokens) if allow_predicatives else parseNominalPhrase(tokens)
 		if case in args:
@@ -1079,7 +1077,7 @@ def parseList(parseChild, tokens, custom_endings=[], do_format=False):
 		tokens.increaseIndentLevel()
 	ans = []
 	force = False
-	while force or (not tokens.eof() and not tokens.peek().token.lower() in [";", ".", "ja", "eikä"] + custom_endings):
+	while force or (not tokens.eof() and not tokens.peek().token.lower() in [";", ".", "]", "ja", "eikä"] + custom_endings):
 		if do_format and len(ans) > 0:
 			tokens.addNewline()
 		ans += [parseChild(tokens)]
@@ -1089,7 +1087,7 @@ def parseList(parseChild, tokens, custom_endings=[], do_format=False):
 		else:
 			force = False
 	checkEof(tokens)
-	if len(ans) == 1 and tokens.peek().token in [".", ";"]:
+	if len(ans) == 1 and tokens.peek().token in [".", ";", "]"]:
 		if do_format:
 			tokens.decreaseIndentLevel()
 		return ans
