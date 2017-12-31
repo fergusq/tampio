@@ -214,7 +214,7 @@ def parseVariable(tokens, word=None, case="nimento"):
 	if not word2.isNoun() or (case and word2.form != case):
 		syntaxError("this variable must end with a noun " + formToEnglish(case, article=False), tokens)
 	if word.form != word2.form:
-		syntaxError("variable words do not accept in case")
+		syntaxError("variable words do not accept in case", tokens)
 	if word.number != word2.number:
 		syntaxError("variable words do not accept in number", tokens)
 	tokens.setStyle("type")

@@ -111,8 +111,8 @@ def eatNonwords(i, out, tl, eat_comments, eat_spaces=True):
 
 def highlightHtml(tl, pre=False):
 	return highlight(tl, pre,
-		pre_begin="<pre>",
-		pre_end="</pre>",
+		pre_begin="",
+		pre_end="",
 		document_begin="<ul class=\"syntax-root\">",
 		document_end="</ul>",
 		document_item_begin="<li>",
