@@ -115,17 +115,19 @@ class ClassDecl(Decl):
 		ans = "function " + class_name + "(vals) {\n"
 		if self.super:
 			ans += " " + escapeIdentifier(self.super) + ".call(this, vals);\n"
-		ans += " if (" + class_name + ".prototype.syntyä_A__N) " + class_name + ".prototype.syntyä_A__N.call(this);\n"
-		for name, _, number, _, _ in self.fields:
+		for name, _, number, _, _, def_val in self.fields:
 			field = "this." + escapeIdentifier(name)
 			ans += " if (\"" + name + "\" in vals) " + field + " = vals[\"" + name + "\"];\n"
-			if number == "plural":
-				ans += " else if (" + field + " === undefined) " + field + " = [];\n"
+			if def_val:
+				ans += " else " + field + " = " + def_val.compile(0) + ";\n"
+			elif number == "plural":
+				ans += " else " + field + " = [];\n"
+		ans += " if (" + class_name + ".prototype.syntyä_A__N) " + class_name + ".prototype.syntyä_A__N.call(this);\n"
 		ans += "};"
 		if self.super:
 			ans += "\n" + class_name + ".prototype = Object.create(" + escapeIdentifier(self.super) + ".prototype);"
 			ans += "\n" + class_name + ".prototype.constructor = " + class_name + ";"
-		for name, _, _, _, _ in self.fields:
+		for name, _, _, _, _, _ in self.fields:
 			ans += "\n" + class_name + ".prototype.f_" + escapeIdentifier(name) + " = function() { return this." + escapeIdentifier(name) + "; };"
 		return ans
 

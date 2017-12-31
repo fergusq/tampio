@@ -21,7 +21,7 @@ from fatal_error import syntaxError
 from inflect import *
 
 from ast import *
-from lex import accept, checkEof, eatComma, eatPeriod, ADJ, NOUN, NAME, PRONOUN, NUMERAL, VERB, CONJ, CARDINALS, ORDINALS
+from lex import accept, checkEof, eat, eatComma, eatPeriod, ADJ, NOUN, NAME, PRONOUN, NUMERAL, VERB, CONJ, CARDINALS, ORDINALS
 
 POSTPOSITIONS = {
 	"nimento": ["kertaa"],
@@ -101,9 +101,7 @@ def parseDeclaration(tokens):
 		tokens.next()
 		tokens.setStyle("keyword")
 		word1, word2 = parseVariable(tokens, case="nimento")
-		value, case = parsePredicative(tokens)
-		if case != "nimento":
-			syntaxError("predicative is " + formToEnglish(case) + " (should be in the nominative case)", tokens)
+		value = parseNominativePredicative(tokens)
 		stmts = parseAdditionalStatements(tokens)
 		eatPeriod(tokens)
 		tokens.addNewline()
@@ -115,7 +113,7 @@ def parseDeclaration(tokens):
 			tokens.setStyle("type")
 			accept(["on"], tokens)
 			tokens.setStyle("keyword")
-			fields = parseList(parseFieldName, tokens)
+			fields = parseList(parseFieldDecl, tokens)
 			stmts = parseAdditionalStatements(tokens)
 			eatPeriod(tokens)
 			tokens.addNewline()
@@ -148,7 +146,7 @@ def parseDeclaration(tokens):
 						tokens.setStyle("keyword")
 						accept(["on"], tokens)
 						tokens.setStyle("keyword")
-						fields = parseList(parseFieldName, tokens)
+						fields = parseList(parseFieldDecl, tokens)
 					else:
 						fields = []
 					stmts = parseAdditionalStatements(tokens)
@@ -237,6 +235,48 @@ def parsePredicative(tokens):
 		return NewExpr(word.baseform, []), word.form
 	else:
 		return parseNominalPhrase(tokens, promoted_cases=["nimento"])
+
+def parseNominativePredicative(tokens, name="predicative"):
+	value, case = parsePredicative(tokens)
+	if case != "nimento":
+		syntaxError(name + " is " + formToEnglish(case) + " (should be in the nominative case)")
+	return value
+
+INITIAL_VALUE_KEYWORDS = ["aluksi", "alussa", "yleensä"]
+
+def parseFieldDecl(tokens):
+	field_name = parseFieldName(tokens)
+	if tokens.peek() and tokens.peek().token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == ("jotka" if field_name[2] == "plural" else "joka"):
+		tokens.next()
+		tokens.next()
+		tokens.setStyle("keyword")
+		accept(["ovat" if field_name[2] == "plural" else "on"], tokens)
+		tokens.setStyle("keyword")
+		if eat(INITIAL_VALUE_KEYWORDS, tokens):
+			tokens.setStyle("keyword")
+		value = parseNominativePredicative(tokens)
+		eatComma(tokens)
+		return field_name + (value,)
+	elif field_name[2] == "plural" and tokens.peek() and tokens.peek().token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "joita":
+		tokens.next()
+		tokens.next()
+		tokens.setStyle("keyword")
+		accept(["ovat"], tokens)
+		tokens.setStyle("keyword")
+		if eat(INITIAL_VALUE_KEYWORDS, tokens):
+			tokens.setStyle("keyword")
+		value = ListExpr(parseList(parseNominativePredicative, tokens))
+		eatComma(tokens)
+		return field_name + (value,)
+	elif tokens.peek() and tokens.peek().token == "[":
+		tokens.next()
+		if eat(INITIAL_VALUE_KEYWORDS, tokens):
+			tokens.setStyle("keyword")
+		value = parseNominativePredicative(tokens)
+		accept("]", tokens)
+		return field_name + (value,)
+	else:
+		return field_name + (None,)
 
 def parseFieldName(tokens, form="omanto"):
 	expected_form = "nimento" if form == "omanto" else "olento"
@@ -1020,9 +1060,7 @@ def parseCtorArg(tokens):
 		accept(["on"], tokens)
 	tokens.setStyle("keyword")
 	if token == "on" or word.form == "nimento": # (esim. alkio on x, alkiot ovat y:t)
-		value, case = parsePredicative(tokens)
-		if case != "nimento":
-			syntaxError("contructor argument value is not in nominative case", tokens)
+		value = parseNominativePredicative(tokens, name="constructor argument value")
 		return CtorArgExpr(word.baseform, value)
 	else: # partitiivi, ovat (esim. alkioita ovat x ja y)
 		values_cases = parseList(parseNominalPhrase, tokens)

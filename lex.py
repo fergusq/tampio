@@ -26,10 +26,10 @@ voikko = Voikko(LANGUAGE)
 
 def lexCode(code):
 	output = []
-	for word in re.split(r'(\s|\.|,|;|"[^"]*"|#[^\n]*\n|\([^()]*\))', code):
+	for word in re.split(r'(\s|\.|,|;|\[|\]|"[^"]*"|#[^\n]*\n|\([^()]*\))', code):
 		if word == "":
 			continue
-		if re.fullmatch(r'\s|\.|,|;|"[^"]*"|#[^\n]*\n|\([^()]*\)', word):
+		if re.fullmatch(r'\s|\.|,|;|\[|\]|"[^"]*"|#[^\n]*\n|\([^()]*\)', word):
 			output += [Punctuation(word)]
 			continue
 		
@@ -184,12 +184,16 @@ class TokenList:
 		out += "\n" + " "*column + "^" + "~"*(len(self.tokens[place].token)-1)
 		return out
 
-def eat(tokens, token):
-	if not tokens.eof() and tokens.peek().token.lower() == token:
-		tokens.next()
+def eat(token, tokens):
+	if not tokens.eof():
+		next_token = tokens.peek().token.lower()
+		if (isinstance(token, list) and next_token in token) or next_token == token:
+			tokens.next()
+			return True
+	return False
 
-eatComma = lambda tokens: eat(tokens, ",")
-eatPeriod = lambda tokens: eat(tokens, ".")
+eatComma = lambda tokens: eat(",", tokens)
+eatPeriod = lambda tokens: eat(".", tokens)
 
 def checkEof(tokens):
 	if tokens.eof():
