@@ -226,16 +226,15 @@ def parseVariable(tokens, word=None, case="nimento"):
 
 # predikatiivi voi olla joko nominaalilauseke tai yksi substantiivi (=new-lauseke)
 def parsePredicative(tokens):
+	if tokens.peek().isString():
+		ans = StrExpr(parseString(tokens.next().token))
+		tokens.setStyle("literal")
+		return ans, "nimento"
 	word = tokens.peek().toWord(cls=NOMINAL_PHRASE_CLASS,forms=["nimento"])
-	word2 = tokens.peek().toWord(cls=NOUN,forms=["nimento"])
 	if word.isNoun() and not canStartNominalPhrase(word, tokens):
 		tokens.next()
 		tokens.setStyle("type")
 		return NewExpr(word.baseform, []), word.form
-	#elif (word2.isNoun() and tokens.peek(2)
-	#	and (tokens.peek(2).token in [".", ";"]
-	#		or (tokens.peek(2) == "," and (not tokens.peek(3) or tokens.peek(3).token.lower() != "jonka")))):
-	#	return NewExpr(word2.baseform, []), word2.case
 	else:
 		return parseNominalPhrase(tokens, promoted_cases=["nimento"])
 
@@ -727,7 +726,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 	elif word.isNoun() and tokens.peek() and tokens.peek().isString():
 		tokens.setStyle("keyword")
 		case = word.form
-		expr = StrExpr(tokens.next().token[1:-1].replace("\\l", "\"").replace("\\u", "\n").replace("\\s", "\t").replace("\\\\", "\\"))
+		expr = StrExpr(parseString(tokens.next().token))
 		tokens.setStyle("literal")
 	elif word.isName():
 		tokens.setStyle("variable")
@@ -1021,7 +1020,7 @@ def parseCtorArg(tokens):
 		accept(["on"], tokens)
 	tokens.setStyle("keyword")
 	if token == "on" or word.form == "nimento": # (esim. alkio on x, alkiot ovat y:t)
-		value, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
+		value, case = parsePredicative(tokens)
 		if case != "nimento":
 			syntaxError("contructor argument value is not in nominative case", tokens)
 		return CtorArgExpr(word.baseform, value)
@@ -1033,6 +1032,9 @@ def parseCtorArg(tokens):
 			if case != "nimento":
 				syntaxError("contructor argument value is not in nominative case", tokens)
 		return CtorArgExpr(word.baseform, ListExpr(values))
+
+def parseString(string):
+	return string[1:-1].replace("\\l", "\"").replace("\\u", "\n").replace("\\s", "\t").replace("\\\\", "\\")
 
 def parseList(parseChild, tokens, custom_endings=[], do_format=False):
 	if do_format:
