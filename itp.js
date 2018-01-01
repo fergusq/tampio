@@ -20,6 +20,7 @@ lista.prototype.f_järjestetty_E = function() { return new lista({"alkio": Array
 lista.prototype.etsiä_indeksin_A_Ut_N = function(item) { return this.alkio.indexOf(item); };
 lista.prototype.järjestää_P__N  = function() { this.alkio.sort(); }
 lista.prototype.lisätä_P_N_St = function(item) { this.alkio.push(item); }
+lista.prototype.poistaa_P_N_Se = function(item) { var i = this.alkio.indexOf(item); if (i > -1) this.alkio.splice(i, 1); };
 lista.prototype.p_tyhjä = function() { return this.f_alkio().f_määrä() === 0; };
 const tyhjä_lista = new lista({});
 

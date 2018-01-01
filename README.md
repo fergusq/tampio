@@ -787,6 +787,7 @@ Declaration:
     
     Kun lyhyt lista etsii indeksin ihanalle alkiolle, ...
     Kun lyhyeen listaan lisätään ihana alkio, ...
+    Kun lyhyestä listasta poistetaan ihana alkio, ...
 
 |Member name     |Type               |Description|
 |:---------------|:-----------------:|:----------|
@@ -798,6 +799,7 @@ Declaration:
 |`tyhjä`         |Comparison operator|Returns true if the number of elements in this list is zero (`this.alkio.length === 0`).
 |`etsii indeksin`|Method             |Returns the index of the given element (`this.alkio.indexOf(item)`).
 |`lisätään`      |Method             |Appends a new element to this list (`this.alkio.push(item)`).
+|`poistetaan`    |Method             |The given element is removed from this list.
 
 ### `luku` class
 
