@@ -38,6 +38,14 @@ def typeToJs(typename):
 def escapeIdentifier(identifier):
 	return identifier.replace("-", "_")
 
+def compileModule(declarations):
+	ans = ""
+	additional_statements = ""
+	for decl in declarations:
+		ans += decl.compile() + "\n"
+		additional_statements += decl.compileAdditionalStatements()
+	return ans + additional_statements
+
 BACKREFERENCE_STACK = []
 
 def compileBlock(statements, indent):
@@ -63,9 +71,12 @@ class Decl:
 	def __init__(self, statements):
 		self.statements = statements
 	def compile(self):
-		return self.compileDecl() + "\n" + self.compileAdditionalStatements()
+		return self.compileDecl()
 	def compileAdditionalStatements(self):
-		return compileBlock(self.statements, 0)
+		if self.statements:
+			return ";(function() {\n" + compileBlock(self.statements, 0) + "})();\n"
+		else:
+			return ""
 
 class VariableDecl(Decl):
 	def __init__(self, var, value, stmts):
@@ -77,7 +88,10 @@ class VariableDecl(Decl):
 	def compileDecl(self):
 		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile(0) + ";"
 	def compileAdditionalStatements(self):
-		return ";(function() {\n" + compileBlock(self.statements, 1) + "}).call(" + escapeIdentifier(self.var) + ");"
+		if self.statements:
+			return ";(function() {\n" + compileBlock(self.statements, 1) + "}).call(" + escapeIdentifier(self.var) + ");\n"
+		else:
+			return ""
 
 class ProcedureDecl(Decl):
 	def __init__(self, signature, body, stmts):

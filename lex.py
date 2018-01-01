@@ -284,7 +284,7 @@ class Word:
 	def isPronoun(self):
 		return self.word_class in ["asemosana"]
 	def isAdjective(self):
-		return self.word_class in ["laatusana", "nimisana_laatusana"]
+		return self.word_class in ["laatusana", "nimisana_laatusana"] and not self.isAdverb()
 	def isOrdinal(self):
 		return self.baseform in ORDINALS
 	def isCardinal(self):
@@ -294,4 +294,4 @@ class Word:
 	def isConjunction(self):
 		return self.word_class in ["sidesana"]
 	def isAdverb(self):
-		return self.word_class in ["seikkasana"]
+		return self.word_class in ["seikkasana"] or self.form == "kerrontosti"

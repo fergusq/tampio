@@ -19,6 +19,7 @@ from fatal_error import TampioSyntaxError
 from lex import lexCode
 from grammar import parseDeclaration
 from highlighter import prettyPrint, HIGHLIGHTERS
+from ast import compileModule
 
 DEBUG = False
 
@@ -37,7 +38,7 @@ def compileCode(code):
 			while not tokens.eof() and tokens.next().token != ".":
 				pass
 			num_errors += 1
-	return tokens, "\n".join([d.compile() for d in decls]), num_errors
+	return tokens, compileModule(decls), num_errors
 
 def createHTML(code):
 	tokens, compiled, _ = compileCode(code)
@@ -60,8 +61,8 @@ def createLatex(code):
 	ans += "\\end{document}"
 	return ans
 
-TAMPIO_VERSION = "1.29"
-COMPILER_VERSION = "1.39.0"
+TAMPIO_VERSION = "1.30"
+COMPILER_VERSION = "1.40.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
