@@ -1,0 +1,398 @@
+# Esipuhe
+
+(
+Talo on Inform 7 -kielestä vaikutteita saanut kokeilu.
+Sen tarkoituksena on selvittää, voiko Tampiolla jäljitellä I7:n tapaa kuvata "huoneita".
+
+Samalla se on testi takaisinviittausten toimivuudesta.
+)
+
+# Kuinka lukea tätä ohjelmaa
+
+(
+Tässä ohjelmassa noudatetaan käytäntöä, jonka mukaan aktiivissa olevat sanat [tekee, avaa, on]
+kuvaavat tilaa ja niitä käytetään olioiden luomiseen ja alustamiseen.
+Passiivissa olevat sanat [tehdään, avataan] kuvaavat toimintoja, jotka muokkaavat tilaa.
+
+Avain avaa oven = toteamus siitä, että avaimella voi avata oven.
+Avaimella avataan ovi = konkreettinen tapahtuma, jossa ovi avataan.
+)
+
+# == Osa 1 – Määrittelyt ==
+
+# Luku 1 – Suomen kieli
+
+(
+Tässä luvussa on määritellään sanojen taivuttamiseen tarvittavia työkaluja.
+)
+
+(Vajanto, keinonto ja seuranto jätetty pois, koska niitä ei tarvita ja niitä ei kaikkia löydy edes morfologisesta sanakirjasta)
+
+Nominilla on perusmuoto, omanto, osanto, olento, tulento, sisäolento, sisätulento, sisäeronto, ulko-olento, ulkotulento ja ulkoeronto.
+
+(
+Se-pronominin nimi on vain "pronomini", sillä voikko ei tunnista sanaa "se-pronomini".
+)
+
+(Se-)Pronomini on nomini, jolla on
+	perusmuoto, joka on "se",
+	omanto, joka on "sen",
+	osanto, joka on "sitä",
+	olento, joka on "sinä",
+	tulento, joka on "siksi",
+	sisäolento, joka on "siinä",
+	sisätulento, joka on "siihen",
+	sisäeronto, joka on "siitä",
+	ulko-olento, joka on "sillä",
+	ulkotulento, joka on "sille",
+ja	ulkoeronto, joka on "siltä".
+
+# Luku 2 – Objekti ja esine
+
+(
+Objekti on jokin maailmassa oleva fyysinen olio.
+Se voi olla esine, huonekalu tai vaikka kokonainen huone.
+
+Objekti voi olla erilaisissa suhteissa toisiin objekteihin.
+Nämä suhteet kuvaavat objektin fyysistä sijaintia, eli
+se voi olla toisen objektin sisällä, päällä, alla, vieressä, edessä tai takana.
+)
+
+Objektilla on
+	yläsisältö [aluksi lista],
+	alasisältö [aluksi lista],
+	sisäsisältö [aluksi lista],
+	takasisältö [aluksi lista],
+	etusisältö [aluksi lista],
+	sijainti [aluksi lista],
+	nimi [yleensä ""]
+ja	kuvaus [yleensä ""].
+
+(Konstruoivat metodit)
+
+Kun ovela objekti syntyy,
+	sen sijaintiin lisätään se.
+
+Kun ovelalla objektilla on kiva esine,
+	kivan esineen sijainnista poistetaan kiva esine,
+	kivan esineen sijainniksi asetetaan ovelan objektin yläsisältö
+ja	sen yläsisältöön lisätään kiva esine.
+
+Kun ovelassa objektissa on kiva esine,
+	kivan esineen sijainnista poistetaan kiva esine,
+	kivan esineen sijainniksi asetetaan ovelan objektin sisäsisältö
+ja	sen sisäsisältöön lisätään kiva esine.
+
+Kun ovelan objektin alla on kiva esine,
+	kivan esineen sijainnista poistetaan kiva esine,
+	kivan esineen sijainniksi asetetaan ovelan objektin alasisältö
+ja	sen alasisältöön lisätään kiva esine.
+
+Kun ovelan objektin takana on kiva esine,
+	kivan esineen sijainnista poistetaan kiva esine,
+	kivan esineen sijainniksi asetetaan ovelan objektin takasisältö
+ja	sen takasisältöön lisätään kiva esine.
+
+Kun ovelan objektin edessä on kiva esine,
+	kivan esineen sijainnista poistetaan kiva esine,
+	kivan esineen sijainniksi asetetaan ovelan objektin etusisältö
+ja	sen etusisältöön lisätään kiva esine.
+
+(Toimintometodit, jotka vastaavat konstruoivia metodeja)
+
+Kun outo objekti pannaan ovelalle objektille,
+	(sen jälkeen) ovelalla objektilla on outo objekti.
+
+Kun outo objekti pannaan ovelaan objektiin,
+	(sen jälkeen) ovelassa objektissa on outo objekti.
+
+Kun outo objekti pannaan ovelan objektin alle,
+	(sen jälkeen) ovelan objektin alla on outo objekti.
+
+Kun outo objekti pannaan ovelan objektin taakse,
+	(sen jälkeen) ovelan objektin takana on outo objekti.
+
+Kun outo objekti pannaan ovelan objektin eteen,
+	(sen jälkeen) ovelan objektin edessä on outo objekti.
+
+(Funktiot)
+
+Objektin pronomini on (se-)pronomini.
+
+# Luku 3 – Huone, seinä ja ovi
+
+(
+Talon huone on objekti, mutta se on myös paikka.
+Huoneella on neljä seinää, joissa voi olla ovia.
+)
+
+Huone on objekti, jolla on
+	eteläseinä, joka on seinä, jonka nimi on "Eteläinen seinä" eikä muuta,
+	itäseinä, joka on seinä, jonka nimi on "Itäinen seinä" eikä muuta,
+	pohjoisseinä, joka on seinä, jonka nimi on "Pohjoinen seinä" eikä muuta,
+ja	länsiseinä, joka on seinä, jonka nimi on "Läntinen seinä" eikä muuta.
+
+Kun hieno huone syntyy,
+	sen eteläseinän omistajaksi asetetaan se,
+	sen itäseinän omistajaksi asetetaan se,
+	sen pohjoisseinän omistajaksi asetetaan se
+ja	sen länsiseinän omistajaksi asetetaan se.
+
+Huoneen pronomini on (se-)pronomini, jonka sisäolento on "siellä", sisätulento on "sinne" ja sisäeronto on "sieltä".
+
+Seinä on objekti, jolla on omistaja ja kuvaus, joka on yleensä "Tavallinen seinä.".
+
+(
+Ovi on joko auki tai kiinni.
+Se johtaa määränpäähänsä.
+)
+
+Ovi on objekti, jolla on tila [alussa "avoin"], avain ja määränpää.
+
+(Konstruoivat metodit)
+
+Kun turvallinen ovi on lukossa, sen tila on "lukossa".
+Kun turvallinen ovi on auki, sen tila on "avoin".
+
+Kun turvallinen ovi johtaa hienoon huoneeseen, sen määränpää on hieno huone.
+
+(Ehtometodit)
+
+Ovi on lukittu, jos sen tila on teksti "lukossa".
+
+(Toiminnot)
+
+Kun turvallinen ovi avataan kätevällä avaimella,
+	jos sen avain on kätevä avain, niin
+		sen tilaksi asetetaan teksti "avoin" eikä muuta.
+
+# Luku 4 – Huonekalut
+
+(
+Huonekalut ovat koristeita,
+ne eivät sisällä omaa tietoa.
+)
+
+Pöytä on objekti, jolla on nimi, joka on yleensä "Pöytä".
+Taulu on objekti, jolla on nimi, joka on yleensä "Maalaus".
+
+# Luku 5 – Esineet
+
+(
+Esine on objekti, jota pelaaja voi kantaa.
+)
+
+Esine on objekti.
+
+Esine on otettu, jos sen sijainti on Nykyisen Pelaajan repun sisäsisältö.
+
+(
+Lehti on koriste.
+)
+
+Lehti on esine.
+
+(
+Avaimen tarkoitus on avata ovia.
+Ovi–attribuutti sisältää sen oven, jonka avain avaa.
+)
+
+Avain on esine, jolla on ovi.
+
+Kun kätevä avain avaa oikean oven,
+	sen ovi on oikea ovi
+ja	oikean oven avain on kätevä avain.
+
+# Luku 6 – Pelaaja
+
+Pelaajalla on sijainti ja reppu, joka on objekti, jonka nimi on "Reppu".
+
+# == Osa 2 – Talo ==
+
+# Luku 1 – Suuri Sali
+
+Olkoon Messinkinen Avain avain;
+
+sen nimi on "Messinkinen Avain"
+ja sen kuvaus on "Vanha painava avain.".
+
+Olkoon Suuri Sali huone;
+
+sen nimi on "Suuri Sali",
+sen kuvaus on "Korkea sali, jonka katossa kimaltelee kattokruunu.",
+
+sen eteläseinällä on ovi,
+sen oven nimi on "Puinen ovi",
+sen oven kuvaus on "Vanha puinen ovi.",
+se ovi on lukossa,
+se ovi johtaa Kauheaan Keittiöön,
+Messinkinen Avain avaa sen oven,
+
+sen pohjoisseinällä on taulu
+ja sen taulun kuvaus on "Vanha maalaus.";
+
+Suuressa Salissa on pöytä,
+sen pöydän kuvaus on "Komea ruokapöytä.",
+
+sillä pöydällä on lehti,
+sen lehden nimi on "Iltamedia",
+sen lehden kuvaus on "Suosittu mutta huonolaatuinen iltapäivälehti."
+
+ja sillä pöydällä on Messinkinen Avain.
+
+# Luku 2 – Kauhea Keittiö
+
+Olkoon Kauhea Keittiö huone;
+
+sen nimi on "Kauhea Keittiö",
+sen kuvaus on "Likainen huone, jonka yhdellä seinällä on sotkuinen keittiösyvennys.",
+
+sen pohjoisseinällä on ovi,
+sen oven nimi on "Puinen ovi",
+sen oven kuvaus on "Vanha puinen ovi.",
+se ovi on lukossa,
+se ovi johtaa Suureen Saliin
+ja Messinkinen Avain avaa sen oven;
+
+Kauheassa Keittiössä on pöytä,
+sen pöydän nimi on "Keittiösyvennys",
+sen pöydän kuvaus on "Sotkuinen keittiösyvennys."
+
+ja sillä pöydällä on esine, jonka nimi on "Tiskit" ja kuvaus on "Likaiset tiskit.".
+
+# Luku 3 – Pelaaja
+
+Olkoon Nykyinen Pelaaja pelaaja, jonka sijainti on Suuri Sali.
+
+# == Osa 3 – Ohjelma ==
+
+# Luku 1 – Pääohjelma
+
+Olkoon Nykyinen Sivu muuttuja.
+Olkoon Upea Alue muuttuja.
+
+Kun kiva sivu avautuu,
+	Nykyiseksi Sivuksi asetetaan kiva sivu,
+	kiva sivu etsii elementin nimellä "output" tuloksenaan kiva alue,
+	Upeaksi Alueeksi asetetaan kiva alue
+ja	päivitetään sivu.
+
+# Luku 2 – Mekanismi
+
+(
+Muuttujat
+)
+
+Olkoon Näytettävä Koodi merkkijono "".
+Olkoon Lyhyt Toimintolista lista.
+Olkoon Loistava Laskuri nolla.
+
+(
+Päivittämisen aikana käytettävät metodit
+)
+
+Kun näytetään sievä teksti,
+	Näytettäväksi Koodiksi asetetaan Näytettävä Koodi yhdistettynä sievään tekstiin.
+
+Kun tehdään piirtämisen jälkeen tehokas toiminto,
+	Lyhyeen Toimintolistaan lisätään tehokas toiminto.
+
+Kun lisätään nappi ihanalla nimellä halutun toiminnon kanssa,
+	loistavaa laskuria kasvatetaan yhdellä,
+		näytetään koodi "<button id=\l"
+			yhdistettynä näppärään tunnisteeseen,
+			yhdistettynä koodiin "\l>",
+			yhdistettynä ihanaan nimeen
+			ja yhdistettynä koodiin "</button><br/>",
+			missä näppärä tunniste on teksti "nappi-" yhdistettynä loistavaan laskuriin eikä muuta,
+	ja	tehdään piirtämisen jälkeen se, että
+			Nykyinen Sivu etsii elementin näppärällä tunnisteella tuloksenaan napakka nappi
+		ja	napakkaa nappia painettaessa käyköön niin, että
+				haluttu toiminto suoritetaan.
+
+(
+Päivittämismetodi
+)
+
+Kun päivitetään sivu,
+	Upea Alue pyyhitään,
+	Näytettäväksi Koodiksi asetetaan merkkijono "",
+	Lyhyeksi Toimintolistaksi asetetaan uusi lista,
+	kerrotaan Nykyisen Pelaajan sijainnista sekä Nykyisen Pelaajan repusta,
+	Upealle Alueelle kirjoitetaan Näytettävä Koodi
+ja	Lyhyen Toimintolistan jokainen alkio suoritetaan.
+
+# Luku 3 – Yleinen kertominen
+
+Kun kerrotaan ovelasta objektista,
+	näytetään teksti "<div style=\lborder: 1px solid black; border-radius: 5px; padding: 5px; margin-bottom: 5px;\l>",
+	näytetään teksti "<em>" yhdistettynä ovelan objektin nimeen, yhdistettynä väliin "</em>: ", yhdistettynä ovelan objektin kuvaukseen ja yhdistettynä tekstiin "<br/>",
+	ovelasta objektista kerrotaan tarkasti,
+	kerrotaan ovelan objektin sisäsisällöstä ovelan objektin pronominin sisäolennolla,
+	kerrotaan ovelan objektin yläsisällöstä ovelan objektin pronominin ulko-olennolla,
+	kerrotaan ovelan objektin alasisällöstä tekstillä "sen alla",
+	kerrotaan ovelan objektin etusisällöstä tekstillä "sen edessä",
+	kerrotaan ovelan objektin takasisällöstä tekstillä "sen takana"
+ja	näytetään teksti "</div>".
+	
+Kun kerrotaan mielenkiintoisesta sisällöstä tietyllä sanalla,
+	jos mielenkiintoisen sisällön koko on suurempi kuin nolla, niin
+		näytetään teksti "Nähdäksesi "
+			yhdistettynä tiettyyn sanaan
+			ja yhdistettynä tekstiin " on:"
+			sekä teksti "<ul>",
+		kerrotaan alakohdassa mielenkiintoisen sisällön jokaisesta alkiosta
+	ja	näytetään teksti "</ul>".
+
+Kun kerrotaan alakohdassa ovelasta objektista,
+	näytetään teksti "<li>",
+	kerrotaan ovelasta objektista
+ja	näytetään teksti "</li>".
+
+# Luku 4 – Tarkka kertominen
+
+Olkoon loistava laskuri nolla.
+
+(
+Objekti-yläluokan metodi
+)
+
+Kun ovelasta objektista kerrotaan tarkasti, (mitään ei tapahdu) eikä muuta.
+
+(
+Huone
+)
+
+Kun hienosta huoneesta kerrotaan tarkasti,
+	näytetään koodi "<ul>",
+	kerrotaan alakohdassa sen eteläseinästä,
+	kerrotaan alakohdassa sen itäseinästä,
+	kerrotaan alakohdassa sen pohjoisseinästä,
+	kerrotaan alakohdassa sen länsiseinästä
+ja	näytetään koodi "</ul>".
+
+(
+Ovi
+)
+
+Kun oikeasta ovesta kerrotaan tarkasti,
+	jos oikea ovi on lukittu ja sen avain on otettu,
+		lisätään nappi tekstillä "Avaa" sen, että
+			oikean oven tilaksi asetetaan tila "avoin"
+		ja	päivitetään sivu, kanssa,
+	eikä	muuta
+ja,	jos oikea ovi ei ole lukittu, niin
+		lisätään nappi tekstillä "Mene" sen, että
+			Nykyisen Pelaajan sijainniksi asetetaan oikean oven määränpää
+		ja	päivitetään sivu, kanssa.
+
+(
+Esine
+)
+
+Kun pienestä esineestä kerrotaan tarkasti,
+	jos pieni esine ei ole otettu, niin
+		lisätään nappi tekstillä "Ota mukaan" sen, että
+			pieni esine pannaan Nykyisen Pelaajan reppuun
+		ja	päivitetään sivu, kanssa.
+
