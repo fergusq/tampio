@@ -184,7 +184,7 @@ Esine on objekti, jota pelaaja voi kantaa.
 
 Esine on objekti.
 
-Esine on otettu, jos sen sijainti on Nykyisen Pelaajan repun sisäsisältö.
+Esine on repussa, jos sen sijainti on Nykyisen Pelaajan repun sisäsisältö.
 
 (
 Lehti on koriste.
@@ -376,7 +376,7 @@ Ovi
 )
 
 Kun oikeasta ovesta kerrotaan tarkasti,
-	jos oikea ovi on lukittu ja sen avain on otettu,
+	jos oikea ovi on lukittu ja sen avain on repussa,
 		lisätään nappi tekstillä "Avaa" sen, että
 			oikean oven tilaksi asetetaan tila "avoin"
 		ja	päivitetään sivu, kanssa,
@@ -391,7 +391,7 @@ Esine
 )
 
 Kun pienestä esineestä kerrotaan tarkasti,
-	jos pieni esine ei ole otettu, niin
+	jos pieni esine ei ole repussa, niin
 		lisätään nappi tekstillä "Ota mukaan" sen, että
 			pieni esine pannaan Nykyisen Pelaajan reppuun
 		ja	päivitetään sivu, kanssa.

@@ -286,8 +286,12 @@ Comparison operators are functions that return boolean values.
 They can only be used inside other comparison operators, if statements and conditional expressions.
 Comparison operators can have either zero or one parameters.
 
-    [parameter/nominative] on [adjective/positive nominative], jos [condition list].
+    [parameter/nominative] on [operator name], jos [condition list].
     [parameter/nominative] on [adjective/comparative nominative] kuin [parameter/nominative], jos [condition list].
+
+If the name of the operator is a comparative adjective,
+it must also be nominative and be followed by the `kuin` keyword.
+Otherwise, it can be any word that doesn't start a nominal phrase expression.
 
 For example:
 

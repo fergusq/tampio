@@ -133,7 +133,12 @@ def parseDeclaration(tokens):
 				tokens.next()
 				tokens.setStyle("keyword")
 				peek = tokens.peek()
-				if varname == "" and peek and peek.isWord() and peek.toWord(forms=["nimento"]).isNoun():
+				peek2 = tokens.peek(2)
+				peek3 = tokens.peek(3)
+				if (varname == ""
+					and peek and peek.isWord() and peek.toWord(forms=["nimento"]).isNoun()
+					and (not (peek2 and peek3) or (peek2.token != "," or peek3.token.lower() != "jos"))
+					):
 					if word.form != "nimento":
 						syntaxError("class name not in the nominative case", tokens)
 					checkEof(tokens)
@@ -153,7 +158,7 @@ def parseDeclaration(tokens):
 					eatPeriod(tokens)
 					tokens.addNewline()
 					return ClassDecl(word.baseform, fields, stmts, super_type=super_type.baseform)
-				elif peek and peek.isWord() and peek.toWord(forms=["nimento"]).isAdjective():
+				elif peek and peek.isWord() and not nextStartsNominalPhrase(tokens):
 					if word.form != "nimento":
 						syntaxError("self parameter not in the nominative case", tokens)
 					place = tokens.place()
@@ -169,6 +174,7 @@ def parseDeclaration(tokens):
 						param = ""
 					accept([","], tokens)
 					accept(["jos"], tokens)
+					tokens.setStyle("keyword")
 					conditions = parseList(parseCondition, tokens)
 					wheres = parseWheres(tokens)
 					stmts = parseAdditionalStatements(tokens)
@@ -665,7 +671,10 @@ def parseOperator(tokens):
 			else:
 				syntaxError("unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in branch.keys()]), tokens)
 		return branch, True
-	elif tokens.peek(2) and tokens.peek().toWord(cls=ADJ).isAdjective() and (not tokens.peek(2).isWord() or not tokens.peek(2).toWord(cls=NOUN).isNoun()):
+	elif (tokens.peek().isWord()
+		and tokens.peek(2)
+		and tokens.peek().toWord(cls=ADJ).isAdjective()
+		and (not tokens.peek(2).isWord() or not tokens.peek(2).toWord(cls=NOUN).isNoun())):
 		word = tokens.next().toWord(cls=ADJ)
 		tokens.setStyle("conditional-operator")
 		if word.form != "nimento":
@@ -676,6 +685,10 @@ def parseOperator(tokens):
 			return ".c_" + word.baseform, True
 		else:
 			return ".p_" + word.baseform, False
+	elif tokens.peek().isWord() and not nextStartsNominalPhrase(tokens):
+		word = tokens.next().token.lower()
+		tokens.setStyle("conditional-operator")
+		return ".p_" + word, False
 	else:
 		return "==", True
 
@@ -691,7 +704,9 @@ def nextStartsNominalPhrase(tokens):
 	return canStartNominalPhrase(word, tokens)
 
 def canStartNominalPhrase(word, tokens):
-	return (word.isAdjective()
+	return ((word.isAdjective()
+			and tokens.peek(2) and tokens.peek(2).isWord()
+			and tokens.peek(2).toWord(cls=NOUN).isNoun() and tokens.peek(2).toWord(cls=NOUN,forms=word.form).form == word.form)
 		or word.isPronoun()
 		or word.isVariable()
 		or word.isOrdinal()
