@@ -1,0 +1,186 @@
+Salli kohdekoodi.
+
+# Object
+
+Sisällytä kohdekoodi "
+Object.prototype.t_prepend = function(x) { return [this].concat(x); };
+Object.prototype.t_assign = function(n, v) { this[n] = v; };
+var kohdekoodiolio = Object;
+".
+
+Kun kiva kohdekoodiolio kirjataan lokiin,
+	suorita kohdekoodi "console.log(this);".
+
+# Array
+
+Sisällytä kohdekoodi "
+Array.prototype.nth_last = function(n) { return this[this.length-n]; };
+var kohdekoodilista = Array;
+".
+
+Kohdekoodilistan määrä on "this.length" kohdekoodina.
+Kohdekoodilistan summa on "this.reduce((a,b) => a+b)" kohdekoodina.
+
+# Lista
+
+Listalla on alkiot.
+
+Listan koko on "this.alkio.length" kohdekoodina
+	(eli sen alkioiden määrä).
+Listan häntä on "new lista({alkio: this.alkio.slice(1)})" kohdekoodina
+	(eli uusi lista, jonka alkiot ovat sen alkiot toisesta alkaen).
+Lista järjestettynä on "new lista({alkio: Array.from(this.alkio).sort()})" kohdekoodina.
+
+Kun kiva lista etsii indeksin kivalle arvolle,
+	suorita kohdekoodi "return this.alkio.indexOf(kiva_arvo);".
+
+Kun kiva lista järjestetään,
+	suorita kohdekoodi "this.alkio.sort();".
+
+Kun kivaan listaan lisätään kiva arvo,
+	suorita kohdekoodi "this.alkio.push(kiva_arvo);".
+
+Kun kivasta listasta poistetaan kiva arvo,
+	suorita kohdekoodi "var i = this.alkio.indexOf(item); if (i > -1) this.alkio.splice(i, 1);".
+
+Kiva lista on tyhjä, jos sen alkioiden määrä on nolla.
+
+Sisällytä kohdekoodi "const tyhjä_lista = new lista({});".
+
+# Function
+
+Sisällytä kohdekoodi "var kohdekoodifunktio = Function;".
+
+Kun kiva kohdekoodifunktio suoritetaan,
+	suorita kohdekoodi "this();".
+
+# Number/luku
+
+Sisällytä kohdekoodi "
+const power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};
+var määrä = Number;
+".
+
+Luvun potenssit ovat "new Proxy(this, power_handler)" kohdekoodina.
+Luvun neliö on se kerrottuna sillä.
+Luvun kuutio on se kerrottuna sillä kerrottuna sillä.
+Luvun neliöjuuri on "Math.sqrt(this)" kohdekoodina.
+Luvun kuutiojuuri on "Math.cbrt(this)" kohdekoodina.
+Luvun sini on "Math.sin(this)" kohdekoodina.
+Luvun kosini on "Math.cos(this)" kohdekoodina.
+Luvun tangentti on "Math.tan(this)" kohdekoodina.
+Luvun logaritmi on "Math.log(this)" kohdekoodina.
+Luvun vastalogaritmi on "Math.exp(this)" kohdekoodina.
+Luvun merkki on "Math.sign(this)" kohdekoodina.
+Luvun itseisarvo on "Math.abs(this)" kohdekoodina.
+Luvun vastaluku on "-this" kohdekoodina.
+Luvun käänteisluku on "1/this" kohdekoodina.
+Luvun seuraaja on se kasvatettuna yhdellä.
+Luvun edeltäjä on se vähennettynä yhdellä.
+Luvun kertoma on "this<=1 ? 1 : this*(this-1).f_kertoma()" kohdekoodina.
+Luvun tekijät ovat "(()=>{var l=[]; for (var i=1; i<=this; i++) if (this%i===0) l.push(i); return l;})()" kohdekoodina.
+Luvun alkutekijät ovat "(()=>{var l=[]; for (var i=2; i<this; i++) if (this%i===0&&!l.some(j=>i%j===0)) l.push(i); return l;})()" kohdekoodina.
+Luku pyöristettynä on "Math.round(this)" kohdekoodina.
+Luku pyöristettynä kivaan tarkkuuteen on "Math.round(this*Math.pow(10, e))/Math.pow(10, e)" kohdekoodina.
+Luku kokonaislukuna on "Math.floor(this)" kohdekoodina.
+Luku merkkijonona on "this.toString()" kohdekoodina.
+
+# String/merkkijono
+
+Merkkijonon pituus on "this.length" kohdekoodina.
+Merkkijonon merkit ovat "Array.from(this)" kohdekoodina.
+Merkkijonon sanat ovat "this.split(/\\s+/)" kohdekoodina.
+Merkkijonon kentät ovat "this.split(/,/)" kohdekoodina.
+Merkkijono siistittynä on "this.trim()" kohdekoodina.
+
+Kun kiva merkkijono näytetään käyttäjälle,
+	suorita kohdekoodi "alert(this);".
+
+Kun kiva merkkijono jaetaan kivasta erottimesta kivoiksi alamerkkijonoiksi,
+	suorita kohdekoodi "for (var s of this.split(kiva_erotin)) kiva_alamerkkijono.push(s);".
+
+# HTMLDocument/sivu
+
+Sisällytä kohdekoodi "
+if (typeof HTMLDocument !== 'undefined') {
+".
+
+Kun kiva sivu näyttää kivan tekstin,
+	suorita kohdekoodi "this.write(kiva_teksti);".
+
+Kun kiva sivu etsii elementin kivalla nimellä mukavaan muuttujaan,
+	suorita kohdekoodi "mukava_muuttuja.arvo = this.getElementById(kiva_nimi);".
+
+Kun kiva sivu etsii elementin kivalla nimellä,
+	suorita kohdekoodi "return this.getElementById(kiva_nimi);".
+
+Sisällytä kohdekoodi "}\u".
+
+# HTMLElement/elementti
+
+Sisällytä kohdekoodi "if (typeof HTMLElement !== 'undefined') {
+ HTMLElement.prototype.t_assign = function(n, v) {
+  switch (n) {
+   case 'painaa_P__P':
+    this.addEventListener('click', v);
+    break;
+  }
+  this[n] = v;
+ };
+".
+
+Kun kivalle elementille kirjoitetaan kiva teksti,
+	suorita kohdekoodi "this.innerHTML += kiva_teksti;".
+
+Kun kivaan elementtiin kirjoitetaan kiva teksti,
+	suorita kohdekoodi "this.innerHTML += kiva_teksti;".
+
+Kun kiva elementti pyyhitään,
+	suorita kohdekoodi "this.innerHTML = '';".
+
+Sisällytä kohdekoodi "}\u".
+
+# Date/ajankohta
+
+Ajankohta päivämäärämerkkijonona on "this.getLocaleDateString()" kohdekoodina.
+Ajankohta kellonaikamerkkijonona on "this.getLocaleTimeString()" kohdekoodina.
+Ajankohta merkkijonona on "this.getLocaleString()" kohdekoodina.
+Ajankohta millisekunteina on "this.getTime()" kohdekoodina.
+Ajankohdan vuosi on "this.getFullYear()" kohdekoodina.
+Ajankohdan kuukausi on "this.getMonth()" kohdekoodina.
+Ajankohdan päivä on "this.getDay()" kohdekoodina.
+Ajankohdan tunti on "this.getHours()" kohdekoodina.
+Ajankohdan minuutti on "this.getMinutes()" kohdekoodina.
+Ajankohdan sekunti on "this.getSeconds()" kohdekoodina.
+
+Sisällytä kohdekoodi "
+const nykyinen_aika = new Date();
+".
+
+# Muuttuja
+
+Muuttujalla on arvo.
+
+Kun kivaan muuttujaan luetaan luku,
+	suorita kohdekoodi "this.arvo = Number.parseInt(prompt('Syötä luku'));".
+
+Kun kivaan muuttujaan luetaan luku kivalla viestillä,
+	suorita kohdekoodi "this.arvo = Number.parseInt(prompt(kiva_viesti));".
+
+# Promise
+
+Sisällytä kohdekoodi "
+Promise.prototype.a_jälkeen = Promise.prototype.then;
+Promise.prototype.a_onnistuessa = Promise.prototype.then;
+Promise.prototype.a_epäonnistuessa = Promise.prototype.catch;
+".
+
+# toistetaan
+
+Kun toistetaan n kertaa tehokas toiminto,
+	suorita kohdekoodi "for (var i = 0; i < n; i++) tehokas_toiminto();".
+
+# console
+
+Kun tulostetaan kiva viesti,
+	suorita kohdekoodi "console.log(kiva_viesti);".
