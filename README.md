@@ -689,7 +689,7 @@ It is the super class of other classes.
 
 Pseudodeclaration:
 
-    Kun "object" kirjataan lokiin, ...
+    Kun kiva "object" kirjataan lokiin, ...
 
 |Member name       |Type  |Description|
 |:-----------------|:----:|:----------|
@@ -723,7 +723,7 @@ Pseudodeclaration:
 
 ### `ajankohta` class
 
-`Ajankohta` is an alias to the JavaScript class `Date`.
+`ajankohta` is an alias to the JavaScript class `Date`.
 
 Pseudodeclaration:
 
@@ -748,9 +748,9 @@ Pseudodeclaration:
 |`päivämäärämerkkijonona`|Function|String representation (`this.toLocaleDateString()`).
 |`kellonaikamerkkijonona`|Function|String representation (`this.toLocaleTimeString()`).
 
-### Element class
+### `elementti` class
 
-The element class does not have a name in Tampio, and is the JavaScript class `HTMLElement`.
+`elementti` is the JavaScript class `HTMLElement`.
 
 Pseudodeclaration:
 

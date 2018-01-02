@@ -87,7 +87,7 @@ if (typeof HTMLElement !== 'undefined') {
  HTMLElement.prototype.pyyhkiä_P__N = function() { this.innerHTML = ""; };
 }
 
-// Date/aika
+// Date/ajankohta
 Date.prototype.f_päivämäärämerkkijono_E = function() { return this.getLocaleDateString(); };
 Date.prototype.f_kellonaikamerkkijono_E = function() { return this.getLocaleTimeString(); };
 Date.prototype.f_merkkijono_E = function() { return this.getLocaleString(); };

@@ -71,6 +71,8 @@ def lexCode(code):
 				form = analysis["SIJAMUOTO"]
 			elif "MOOD" in analysis and "TENSE" in analysis:
 				form = analysis["MOOD"] + "_" + analysis["TENSE"]
+				if "NEGATIVE" in analysis and analysis["NEGATIVE"] == "true":
+					form += "_negative"
 			elif "MOOD" in analysis and analysis["MOOD"] == "E-infinitive":
 				if re.fullmatch(r'.*taess[aä]', word.lower()):
 					form = "E-infinitive_sisaolento"

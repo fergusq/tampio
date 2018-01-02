@@ -106,6 +106,28 @@ def parseDeclaration(tokens):
 		eatPeriod(tokens)
 		tokens.addNewline()
 		return VariableDecl(word1.baseform + "_" + word2.baseform, value, stmts)
+	elif token.token.lower() == "sisällytä":
+		tokens.next()
+		tokens.setStyle("keyword")
+		if tokens.peek() and tokens.peek().token.lower() == "kohdekoodi":
+			tokens.next()
+			tokens.setStyle("keyword")
+			code = tokens.next()
+			if not code.isString():
+				syntaxError("target code is not a string token", tokens)
+			tokens.setStyle("literal")
+			stmts = parseAdditionalStatements(tokens)
+			eatPeriod(tokens)
+			tokens.addNewline()
+			return TargetCodeDecl(parseString(code.token), stmts)
+	elif token.token.lower() in ["salli", "kiellä"]:
+		positive = tokens.next().token.lower() == "salli"
+		tokens.setStyle("keyword")
+		if tokens.peek() and tokens.peek().isWord():
+			option = tokens.next().token.lower()
+			eatPeriod(tokens)
+			tokens.addNewline()
+			return SetOptionDecl(positive, option)
 	else:
 		word = token.toWord(cls=NOUN+ADJ,forms=["ulkoolento", "omanto", "nimento"])
 		if word.isNoun() and word.form == "ulkoolento":
@@ -227,18 +249,9 @@ def parseVariable(tokens, word=None, case="nimento"):
 	return word, word2
 
 # predikatiivi voi olla joko nominaalilauseke tai yksi substantiivi (=new-lauseke)
+# nominatiivisen merkkijonon edessä ei tarvitse olla substantiivia
 def parsePredicative(tokens):
-	if tokens.peek().isString():
-		ans = StrExpr(parseString(tokens.next().token))
-		tokens.setStyle("literal")
-		return ans, "nimento"
-	word = tokens.peek().toWord(cls=NOMINAL_PHRASE_CLASS,forms=["nimento"])
-	if word.isNoun() and not canStartNominalPhrase(word, tokens):
-		tokens.next()
-		tokens.setStyle("type")
-		return NewExpr(word.baseform, []), word.form
-	else:
-		return parseNominalPhrase(tokens, promoted_cases=["nimento"])
+	return parseNominalPhrase(tokens, promoted_cases=["nimento"], predicative=True)
 
 def parseNominativePredicative(tokens, name="predicative"):
 	value, case = parsePredicative(tokens)
@@ -715,7 +728,7 @@ def canStartNominalPhrase(word, tokens):
 		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).isString())
 		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).token == "," and tokens.peek(3) and tokens.peek(3).token.lower() == "jonka"))
 
-def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
+def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], predicative=False):
 	checkEof(tokens)
 	if tokens.peek().token.lower() == "riippuen":
 		accept(["riippuen"], tokens)
@@ -734,8 +747,17 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		if case1 != case2:
 			syntaxError("both operands of \"tai\" must be in the same case", tokens)
 		return TernaryExpr(conds, alt1, alt2), case1
-	word = tokens.next().toWord(cls=ADJ+NAME+NUMERAL+PRONOUN,forms=promoted_cases)
-	if word.isVariable():
+	if predicative and tokens.peek().isString():
+		expr = StrExpr(parseString(tokens.next().token))
+		tokens.setStyle("literal")
+		case = "nimento"
+	else:
+		expr = None
+		case = None
+		word = tokens.next().toWord(cls=ADJ+NAME+NUMERAL+PRONOUN,forms=promoted_cases)
+	if expr:
+		pass
+	elif word.isVariable():
 		tokens.setStyle("variable")
 		expr = VariableExpr(word.baseform)
 		case = word.form
@@ -859,6 +881,10 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[]):
 		else:
 			args = []
 		expr = NewExpr(word2.baseform, args)
+	elif predicative and word.isNoun():
+		tokens.setStyle("type")
+		expr = NewExpr(word.baseform, [])
+		case = word.form
 	else:
 		tokens.setStyle("variable")
 		if tokens.eof():

@@ -17,6 +17,14 @@
 from inflect import CASES_ABRV
 from fatal_error import fatalError
 
+# kääntäjän tila
+
+def initializeCompiler():
+	global option_allow_target_code
+	option_allow_target_code = False
+
+# apufunktiot
+
 def formAbrv(form):
 	if form in CASES_ABRV:
 		return CASES_ABRV[form]
@@ -30,6 +38,8 @@ def typeToJs(typename):
 		return "String"
 	elif typename == "sivu":
 		return "HTMLDocument"
+	elif typename == "elementti":
+		return "HTMLElement"
 	elif typename == "ajankohta":
 		return "Date"
 	else:
@@ -38,13 +48,18 @@ def typeToJs(typename):
 def escapeIdentifier(identifier):
 	return identifier.replace("-", "_")
 
+# moduulin käätäminen
+
 def compileModule(declarations):
+	initializeCompiler()
 	ans = ""
 	additional_statements = ""
 	for decl in declarations:
 		ans += decl.compile() + "\n"
 		additional_statements += decl.compileAdditionalStatements()
 	return ans + additional_statements
+
+# lohkon kääntäminen
 
 BACKREFERENCE_STACK = []
 
@@ -67,6 +82,8 @@ def currentBackreferences():
 	else:
 		return []
 
+# määrittelyjen kääntäminen
+
 class Decl:
 	def __init__(self, statements):
 		self.statements = statements
@@ -77,6 +94,24 @@ class Decl:
 			return ";(function() {\n" + compileBlock(self.statements, 0) + "})();\n"
 		else:
 			return ""
+
+class SetOptionDecl(Decl):
+	def __init__(self, positive, option):
+		self.positive = positive
+		self.option = option
+		self.statements = []
+	def compileDecl(self):
+		global option_allow_target_code
+		if self.option == "kohdekoodi":
+			option_allow_target_code = self.positive
+		return ""
+
+class TargetCodeDecl(Decl):
+	def __init__(self, code, stmts):
+		Decl.__init__(self, stmts)
+		self.code = code
+	def compileDecl(self):
+		return self.code
 
 class VariableDecl(Decl):
 	def __init__(self, var, value, stmts):
@@ -200,6 +235,8 @@ class CondFunctionDecl(Whereable,Decl):
 		ans += " return (" + ") && (".join([c.compile(0) for c in self.conditions]) + ");\n};"
 		return ans
 
+# lauseiden kääntäminen
+
 class ForStatement:
 	def __init__(self, var, expr, stmt):
 		self.var = var
@@ -320,7 +357,17 @@ class CallStatement:
 		return ans
 
 class ProcedureCallStatement(CallStatement):
-	pass
+	def compile(self, semicolon=True, indent=0):
+		if self.name == "suorittaa!" and list(self.args.keys()) == ["nimento"] and isinstance(self.args["nimento"], StrExpr) and option_allow_target_code:
+			return " "*indent + self.args["nimento"].str + ("\n" if semicolon else "")
+		else:
+			return super().compile(semicolon=semicolon, indent=indent)
+
+BUILTIN_ASSIGN_METHODS = [
+	("asettaa_P", "tulento", "nimento", lambda lval, arg: lval + " = " + arg),
+	("olla_A", "nimento", "nimento", lambda lval, arg: lval + " = " + arg),
+	("kasvattaa_P", "osanto", "ulkoolento", lambda lval, arg: lval + " += " + arg)
+]
 
 class MethodCallStatement(CallStatement):
 	def __init__(self, obj, obj_case, name, args, output_var, async_block):
@@ -342,25 +389,15 @@ class MethodCallStatement(CallStatement):
 				return self.obj.obj.compile(indent) + "." + escapeIdentifier(self.obj.field)
 			else:
 				return self.obj.compile(indent)
-		if (is_lval
-			and self.name == "asettaa_P"
-			and self.obj_case == "tulento"
-			and list(self.args.keys()) == ["nimento"]):
-			ans += compileLval() + " = " + self.args["nimento"].compile(indent)
-		elif (is_lval
-			and self.name == "olla_A"
-			and self.obj_case == "nimento"
-			and list(self.args.keys()) == ["nimento"]):
-			ans += compileLval() + " = " + self.args["nimento"].compile(indent)
-		elif (is_lval
-			and self.name == "kasvattaa_P"
-			and self.obj_case == "osanto"
-			and list(self.args.keys()) == ["ulkoolento"]):
-			ans += compileLval() + " += " + self.args["ulkoolento"].compile(indent)
-		elif self.name == "palauttaa_P" and self.obj_case == "nimento" and len(self.args) == 0:
-			ans += "return " + self.obj.compile(indent)
+		for mname, ocase, acase, f in BUILTIN_ASSIGN_METHODS:
+			if is_lval and self.name == mname and self.obj_case == ocase and list(self.args.keys()) == [acase]:
+				ans += f(compileLval(), self.args[acase].compile(indent))
+				break
 		else:
-			ans += self.compileAssignment() + self.obj.compile(indent) + "." + self.compileName() + self.compileArgs(indent) + self.compileAsync(indent)
+			if self.name == "palauttaa_P" and self.obj_case == "nimento" and len(self.args) == 0:
+				ans += "return " + self.obj.compile(indent)
+			else:
+				ans += self.compileAssignment() + self.obj.compile(indent) + "." + self.compileName() + self.compileArgs(indent) + self.compileAsync(indent)
 		if semicolon:
 			ans += ";\n"
 		return ans
@@ -392,6 +429,8 @@ class MethodAssignmentStatement:
 		if semicolon:
 			ans += ";\n"
 		return ans
+
+# lausekkeiden kääntäminen
 
 class Expr:
 	def backreferences(self):
@@ -443,6 +482,8 @@ class FieldExpr(Expr):
 	def compile(self, indent):
 		if self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]:
 			return self.compileArithmetic(indent)
+		elif self.field == "kohdekoodi_E" and isinstance(self.obj, StrExpr) and option_allow_target_code:
+			return "(" + self.obj.str + ")"
 		ans = self.obj.compile(indent) + ".f_" + escapeIdentifier(self.field)
 		if self.arg_case:
 			ans += "_" + formAbrv(self.arg_case)
