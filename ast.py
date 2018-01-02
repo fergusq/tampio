@@ -83,8 +83,6 @@ class VariableDecl(Decl):
 		Decl.__init__(self, stmts)
 		self.var = var
 		self.value = value
-	def __str__(self):
-		return self.var + " := " + str(self.value)
 	def compileDecl(self):
 		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile(0) + ";"
 	def compileAdditionalStatements(self):
@@ -98,8 +96,6 @@ class ProcedureDecl(Decl):
 		Decl.__init__(self, stmts)
 		self.signature = signature
 		self.body = body
-	def __str__(self):
-		return "prodecure " + str(self.signature) + " { " + " ".join([str(s) for s in self.body]) + " }"
 	def compileDecl(self):
 		if isinstance(self.signature, ProcedureCallStatement):
 			return "function " + self.signature.compile(semicolon=False) + " {\n" + compileBlock(self.body, 1) + "};"
@@ -122,8 +118,6 @@ class ClassDecl(Decl):
 		self.name = name
 		self.fields = fields
 		self.super = super_type
-	def __str__(self):
-		return self.name + " := class { " + ", ".join(self.fields) + "};"
 	def compile(self):
 		class_name = escapeIdentifier(self.name)
 		ans = "function " + class_name + "(vals) {\n"
@@ -165,8 +159,6 @@ class FunctionDecl(Whereable,Decl):
 		self.body = body
 		self.wheres = wheres
 		self.memoize = memoize
-	def __str__(self):
-		return self.type + "." + self.field + " := " + self.self_param + (", " + self.param if self.param else "") + " => " + str(self.body)
 	def compile(self):
 		ans = typeToJs(self.type) + ".prototype.f_" + self.field
 		if self.param_case:
@@ -197,11 +189,6 @@ class CondFunctionDecl(Whereable,Decl):
 		self.param = param
 		self.conditions = conditions
 		self.wheres = wheres
-	def __str__(self):
-		ans = self.type + self.name
-		if self.param:
-			ans += "(" + self.param + ")"
-		return ans + " := " + self.self_param + " => " + " and ".join(map(str, self.conditions))
 	def compileDecl(self):
 		ans = typeToJs(self.type) + ".prototype" + self.name + " = function("
 		if self.param != "":
@@ -220,8 +207,6 @@ class ForStatement:
 		self.stmt = stmt
 	def backreferences(self):
 		return self.expr.backreferences() + self.stmt.backreferences()
-	def __str__(self):
-		return "for (" + self.var + " in " + str(self.expr) + ") " + str(self.stmt)
 	def compile(self, indent=0):
 		return (" "*indent
 			+ "for (const " + escapeIdentifier(self.var)
@@ -240,8 +225,6 @@ class IfStatement:
 		for s in self.block:
 			ans += s.backreferences()
 		return ans
-	def __str__(self):
-		return "if (" + " and ".join([str(c) for c in self.conditions]) + ") { " + " ".join([str(s) for s in self.block]) + " }"
 	def compile(self, indent=0):
 		ans = ""
 		for c in self.conditions:
@@ -260,8 +243,6 @@ class QuantifierCondExpr(Whereable):
 		self.wheres = wheres
 	def backreferences(self):
 		return self.expr.backreferences() + self.cond.backreferences() + self.whereBackreferences()
-	def __str__(self):
-		return ("for all" if self.quantifier == "jokainen" else "exists") + " " + self.var + " in " + str(self.expr) + ": " + str(self.cond)
 	def compile(self, indent):
 		return self.expr.compile(indent) + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile(indent) + ")"
 
@@ -274,8 +255,6 @@ class CondExpr(Whereable):
 		self.wheres = wheres
 	def backreferences(self):
 		return self.left.backreferences() + (self.right.backreferences() if self.right else []) + self.whereBackreferences()
-	def __str__(self):
-		return str(self.left) + self.operator + str(self.right)
 	def compile(self, indent):
 		ans = self.left.compile(indent) + self.operator
 		if self.operator[0] == ".":
@@ -298,8 +277,6 @@ class BlockStatement(Whereable):
 		for s in self.stmts:
 			ans += s.backreferences()
 		return ans + self.whereBackreferences()
-	def __str__(self):
-		return "; ".join(map(str, self.stmts))
 	def compile(self, semicolon=True, indent=0):
 		return self.compileWheres(indent) + "".join([s.compile(indent=indent) for s in self.stmts])
 
@@ -343,8 +320,7 @@ class CallStatement:
 		return ans
 
 class ProcedureCallStatement(CallStatement):
-	def __str__(self):
-		return self.name + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
+	pass
 
 class MethodCallStatement(CallStatement):
 	def __init__(self, obj, obj_case, name, args, output_var, async_block):
@@ -356,8 +332,6 @@ class MethodCallStatement(CallStatement):
 		self.async_block = async_block
 	def backreferences(self):
 		return super().backreferences() + self.obj.backreferences()
-	def __str__(self):
-		return str(self.obj) + "." + self.name + "_" + self.obj_case + "(" + ", ".join([key + ": " + str(self.args[key]) for key in self.args]) + ")"
 	def compileName(self):
 		return super(MethodCallStatement, self).compileName() + "_" + formAbrv(self.obj_case)
 	def compile(self, semicolon=True, indent=0):
@@ -400,9 +374,6 @@ class MethodAssignmentStatement:
 		self.body = body
 	def backreferences(self):
 		return self.obj.backreferences() # ei palauta vartalon sisältämiä takaisinviittauksia
-	def __str__(self):
-		return (str(self.obj) + "." + self.method + " := ("
-			+ ", ".join([key + ": " + str(self.args[key]) for key in self.params]) + ") => { " + "; ".join(map(str, self.body)) + " }")
 	def compileName(self):
 		keys = sorted(self.params.keys())
 		return escapeIdentifier(self.method) + "_" + "".join([formAbrv(form) for form in keys]) + "_" + formAbrv(self.obj_case)
@@ -430,8 +401,6 @@ class VariableExpr(Expr):
 	def __init__(self, name, vtype="any"):
 		self.name = name
 		self.type = vtype
-	def __str__(self):
-		return self.name
 	def compile(self, indent):
 		ans = escapeIdentifier(self.name)
 		if self.type in currentBackreferences():
@@ -471,8 +440,6 @@ class FieldExpr(Expr):
 		self.arg = arg
 	def backreferences(self):
 		return self.obj.backreferences() + (self.arg.backreferences() if self.arg else [])
-	def __str__(self):
-		return str(self.obj) + "." + self.field
 	def compile(self, indent):
 		if self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]:
 			return self.compileArithmetic(indent)
@@ -497,8 +464,6 @@ class SubscriptExpr(Expr):
 		self.is_end_index = is_end_index
 	def backreferences(self):
 		return self.obj.backreferences()
-	def __str__(self):
-		return str(self.obj) + "[" + str(self.index) + "]"
 	def compile(self, indent):
 		if self.is_end_index:
 			return self.obj.compile(indent) + ".nth_last(" + self.index.compile(indent) + ")"
@@ -512,8 +477,6 @@ class SliceExpr(Expr):
 		self.end = end
 	def backreferences(self):
 		return self.obj.backreferences()
-	def __str__(self):
-		return str(self.obj) + "[" + str(self.start) + ":" + str(self.end if self.end else "") + "]"
 	def compile(self, indent):
 		ans = self.obj.compile(indent) + ".slice("
 		ans += self.start.compile(indent) + "-1"
@@ -525,16 +488,12 @@ class SliceExpr(Expr):
 class NumExpr(Expr):
 	def __init__(self, num):
 		self.num = num
-	def __str__(self):
-		return str(self.num)
 	def compile(self, indent):
 		return "(" + str(self.num) + ")"
 
 class StrExpr(Expr):
 	def __init__(self, string):
 		self.str = string
-	def __str__(self):
-		return repr(self.str)
 	def compile(self, indent):
 		return repr(self.str)
 
@@ -547,8 +506,6 @@ class NewExpr(Expr):
 		for arg in self.args:
 			ans += arg.value.backreferences()
 		return ans
-	def __str__(self):
-		return "new " + typeToJs(self.type) + "(" + ", ".join([arg.field + "=" + str(arg.value) for arg in self.args]) + ")"
 	def compile(self, indent):
 		ans = "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile(indent) for arg in self.args]) + "})"
 		if self.type in currentBackreferences():
@@ -568,16 +525,12 @@ class ListExpr(Expr):
 		for val in self.values:
 			ans += val.backreferences()
 		return ans
-	def __str__(self):
-		return "[" + ", ".join(map(str, self.values)) + "]"
 	def compile(self, indent):
 		return "[" + ", ".join([value.compile(indent) for value in self.values]) + "]"
 
 class LambdaExpr(Expr):
 	def __init__(self, body):
 		self.body = body
-	def __str__(self):
-		return "() => { " + "; ".join(map(str, body)) + " }"
 	def compile(self, indent):
 		return "() => {\n" + "".join([s.compile(indent=indent+1) for s in self.body]) + " }"
 
@@ -591,8 +544,6 @@ class TernaryExpr(Expr):
 		for c in self.conditions:
 			ans += c.backreferences()
 		return ans + self.then.backreferences() + self.otherwise.backreferences()
-	def __str__(self):
-		return str(self.then) + " if (" + " and ".join([str(c) for c in self.conditions]) + ") else " + str(self.otherwise)
 	def compile(self, indent):
 		return ("((" + ") && (".join([c.compile(indent) for c in self.conditions])
 			+ ") ? (" + self.then.compile(indent)
