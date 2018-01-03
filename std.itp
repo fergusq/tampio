@@ -41,7 +41,7 @@ Kun kivaan listaan lisätään kiva arvo,
 	suorita kohdekoodi "this.alkio.push(kiva_arvo);".
 
 Kun kivasta listasta poistetaan kiva arvo,
-	suorita kohdekoodi "var i = this.alkio.indexOf(item); if (i > -1) this.alkio.splice(i, 1);".
+	suorita kohdekoodi "var i = this.alkio.indexOf(kiva_arvo); if (i > -1) this.alkio.splice(i, 1);".
 
 Kiva lista on tyhjä, jos sen alkioiden määrä on nolla.
 
