@@ -680,6 +680,67 @@ Conditions must be in one of these forms:
 
 The operators are as in if statements, see the table in the If statements chapter.
 
+## Compiler imperatives
+
+There is a small number of special commands called "compiler imperatives".
+They are marked by verbs that are inflected in the imperative mood, hence the name.
+
+### Top-level imperatives
+
+These imperatives can be used at the top-level along with the definitions.
+
+|Imperative |Description|
+|:---------:|:----------|
+|`Salli`    |Enable an option
+|`Kiellä`   |Disable an option
+|`Sisällytä`|Include
+
+#### `Salli`/`Kiellä`
+
+These imperatives are used to enable and disable compiler features.
+
+Available options:
+
+|Option               |Default|Description|
+|:-------------------:|:-----:|:----------|
+|`kohdekoodi`         |Off    |Enable target code related commands (`Sisällytä kohdekoodi`, `suorita`, `kohdekoodina`).
+|`takaisinviittaukset`|Off    |Enable backreferences (a very experimental feature).
+
+#### `Sisällytä`
+
+This imperative is used to include code in the program.
+Currently it can only be used to include target code.
+
+    Sisällytä kohdekoodi "[code]".
+
+### Statement-level imperatives
+
+These imperatives work like usual statements.
+
+|Imperative |Description|
+|:---------:|:----------|
+|`suorita`  |Include target code
+
+#### `suorita`
+
+This imperative compiles to the given target code.
+
+    suorita kohdekoodi "[code]"
+
+### Expression-level imperatives
+
+These imperatives are exceptionally not in the imperative mood.
+
+|Imperative    |Description|
+|:------------:|:----------|
+|`kohdekoodina`|Include target code
+
+#### `kohdekoodina`
+
+This imperative compiles to the given target code.
+
+    koodi "[code]" kohdekoodina
+
 ## Standard library
 
 ### Object class
