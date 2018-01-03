@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+#
 # Tampio Interpreter
 # Copyright (C) 2017 Iikka Hauhio
 #
@@ -63,7 +65,7 @@ def createLatex(code):
 	return ans
 
 TAMPIO_VERSION = "1.32"
-COMPILER_VERSION = "1.43.0"
+COMPILER_VERSION = "1.43.1"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
@@ -116,6 +118,9 @@ def main():
 					print(prettyPrint(tokens, args.syntax_markup))
 				else:
 					print(compiled)
+			except EOFError:
+				print("")
+				break
 			except Exception:
 				traceback.print_exc()
 

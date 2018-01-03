@@ -734,7 +734,8 @@ def canStartNominalPhrase(word, tokens):
 		or word.isCardinal()
 		or re.fullmatch(r'\d+', word.baseform)
 		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).isString())
-		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).token == "," and tokens.peek(3) and tokens.peek(3).token.lower() == "jonka"))
+		or (word.isNoun() and tokens.peek(2) and tokens.peek(2).token == "," and tokens.peek(3) and tokens.peek(3).token.lower() == "jonka")
+		or word.word.lower() == "riippuen")
 
 def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], predicative=False):
 	checkEof(tokens)
