@@ -23,6 +23,10 @@ from inflect import *
 from ast import *
 from lex import accept, checkEof, eat, eatComma, eatPeriod, ADJ, NOUN, NAME, PRONOUN, NUMERAL, VERB, CONJ, CARDINALS, ORDINALS
 
+def initializeParser():
+	global global_allow_backreferences
+	global_allow_backreferences = False
+
 POSTPOSITIONS = {
 	"nimento": ["kertaa"],
 	"omanto": [
@@ -125,6 +129,10 @@ def parseDeclaration(tokens):
 		tokens.setStyle("keyword")
 		if tokens.peek() and tokens.peek().isWord():
 			option = tokens.next().token.lower()
+			tokens.setStyle("literal")
+			if option == "takaisinviittaukset":
+				global global_allow_backreferences
+				global_allow_backreferences = positive
 			eatPeriod(tokens)
 			tokens.addNewline()
 			return SetOptionDecl(positive, option)
@@ -354,7 +362,7 @@ class AllowBackreferences:
 	def __enter__(self):
 		global allow_backreferences
 		self.prev = allow_backreferences
-		allow_backreferences = True
+		allow_backreferences = global_allow_backreferences
 	def __exit__(self, *args):
 		global allow_backreferences
 		allow_backreferences = self.prev

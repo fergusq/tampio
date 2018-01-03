@@ -17,7 +17,7 @@
 import argparse, readline, sys, traceback
 from fatal_error import TampioSyntaxError
 from lex import lexCode
-from grammar import parseDeclaration
+from grammar import initializeParser, parseDeclaration
 from highlighter import prettyPrint, HIGHLIGHTERS
 from ast import compileModule
 
@@ -27,6 +27,7 @@ def compileCode(code):
 	tokens = lexCode(code)
 	decls = []
 	num_errors = 0
+	initializeParser()
 	while not tokens.eof():
 		try:
 			decls += [parseDeclaration(tokens)]
@@ -62,7 +63,7 @@ def createLatex(code):
 	return ans
 
 TAMPIO_VERSION = "1.32"
-COMPILER_VERSION = "1.42.0"
+COMPILER_VERSION = "1.43.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
