@@ -32,11 +32,7 @@ Tässä luvussa on määritellään sanojen taivuttamiseen tarvittavia työkaluj
 
 Nominilla on perusmuoto, omanto, osanto, olento, tulento, sisäolento, sisätulento, sisäeronto, ulko-olento, ulkotulento ja ulkoeronto.
 
-(
-Se-pronominin nimi on vain "pronomini", sillä voikko ei tunnista sanaa "se-pronomini".
-)
-
-(Se-)Pronomini on nomini, jolla on
+Se-pronomini on nomini, jolla on
 	perusmuoto, joka on "se",
 	omanto, joka on "sen",
 	osanto, joka on "sitä",
@@ -119,7 +115,7 @@ Kun outo objekti pannaan ovelan objektin eteen,
 
 (Funktiot)
 
-Objektin pronomini on (se-)pronomini.
+Objektin pronomini on se-pronomini.
 
 # Luku 3 – Huone, seinä ja ovi
 
@@ -140,7 +136,7 @@ Kun hieno huone syntyy,
 	sen pohjoisseinän omistajaksi asetetaan se
 ja	sen länsiseinän omistajaksi asetetaan se.
 
-Huoneen pronomini on (se-)pronomini, jonka sisäolento on "siellä", sisätulento on "sinne" ja sisäeronto on "sieltä".
+Huoneen pronomini on se-pronomini, jonka sisäolento on "siellä", sisätulento on "sinne" ja sisäeronto on "sieltä".
 
 Seinä on objekti, jolla on omistaja ja kuvaus, joka on yleensä "Tavallinen seinä.".
 
