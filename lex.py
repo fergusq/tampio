@@ -53,9 +53,14 @@ def lexCode(code):
 			continue
 		
 		analysis_list = voikko.analyze(word)
+		prefix = ""
+		if len(analysis_list) == 0 and "-" in word:
+			i = word.rindex("-")+1
+			analysis_list = voikko.analyze(word[i:])
+			prefix = word[:i]
 		alternatives = []
 		for analysis in analysis_list:
-			bf = analysis["BASEFORM"]
+			bf = prefix+analysis["BASEFORM"]
 			cl = analysis["CLASS"]
 			if bf in ORDINALS+CARDINALS or re.fullmatch(r'\d+', bf):
 				cl = "lukusana"

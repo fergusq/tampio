@@ -73,7 +73,7 @@ ja	kuvaus [yleensä ""].
 (Konstruoivat metodit)
 
 Kun ovela objekti syntyy,
-	sen sijaintiin lisätään se.
+	sen sijaintiin lisätään se itse.
 
 Kun ovelalla objektilla on kiva esine,
 	kivan esineen sijainnista poistetaan kiva esine,

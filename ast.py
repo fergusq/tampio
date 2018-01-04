@@ -195,12 +195,12 @@ class FunctionDecl(Whereable,Decl):
 		self.wheres = wheres
 		self.memoize = memoize
 	def compile(self):
-		ans = typeToJs(self.type) + ".prototype.f_" + self.field
+		ans = typeToJs(self.type) + ".prototype.f_" + escapeIdentifier(self.field)
 		if self.param_case:
 			ans += "_" + formAbrv(self.param_case)
 		ans += " = function("
 		if self.param:
-			ans += self.param
+			ans += escapeIdentifier(self.param)
 		ans += ") {\n"
 		if self.memoize:
 			ans += " if (this." + escapeIdentifier(self.field) + " !== undefined) return this." + escapeIdentifier(self.field) + ";\n"
@@ -227,7 +227,7 @@ class CondFunctionDecl(Whereable,Decl):
 	def compileDecl(self):
 		ans = typeToJs(self.type) + ".prototype" + self.name + " = function("
 		if self.param != "":
-			ans += self.param
+			ans += escapeIdentifier(self.param)
 		ans += ") {\n"
 		if self.self_param != "":
 			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
@@ -327,8 +327,8 @@ class CallStatement:
 		ans = []
 		for v in self.args.values():
 			ans += v.backreferences()
-		if self.async_block:
-			ans += self.async_block.backreferences()
+		for _, _, s in self.async_block:
+			ans += s.backreferences()
 		return ans
 	def compileName(self):
 		keys = sorted(self.args.keys())
@@ -338,15 +338,15 @@ class CallStatement:
 		return "(" + ", ".join([self.args[key].compile(indent) for key in keys]) + ")"
 	def compileAssignment(self):
 		if self.output_var:
-			return "var " + self.output_var + " = "
+			return "var " + escapeIdentifier(self.output_var) + " = "
 		else:
 			return ""
 	def compileAsync(self, indent):
 		ans = ""
-		for ab in self.async_block:
-			ans += ("." + ab[0]
-				+ "(" + ab[1] + " =>\n"
-				+ ab[2].compile(indent=indent+1, semicolon=False)
+		for mname, param, stmt in self.async_block:
+			ans += ("." + escapeIdentifier(mname)
+				+ "(" + escapeIdentifier(param) + " =>\n"
+				+ stmt.compile(indent=indent+1, semicolon=False)
 				+ " "*indent + ")")
 		return ans
 			

@@ -134,7 +134,7 @@ def htmlMarkup(style, span, token):
 		return markupSpan(html.escape(token), (style_span, "</span>"), span)
 
 def highlightLatex(tl, use_lists=False):
-	return highlight(tl, use_lists,
+	return highlight(tl, not use_lists,
 		pre_begin="",
 		pre_end="",
 		document_begin="\\setlength{\\parskip}{5pt}",
@@ -152,6 +152,9 @@ def latexMarkup(style, span, token):
 		token = token[1:] # poistetaan risuaita edestä
 	if style in LATEX_STYLES:
 		return markupSpan(escapeLatex(token), (LATEX_STYLES[style] + "{", "}"), span)
+	elif style == "block-comment-global":
+		paragraphs = token.split("\n\n")
+		return "\n\n".join(["\\emph{" + escapeLatex(paragraph) + "}" for paragraph in paragraphs])
 	else:
 		return escapeLatex(token)
 
@@ -167,15 +170,15 @@ LATEX_STYLES = {
 
 def escapeLatex(token):
 	return (token
-		.replace("\\", "\\textbackslash")
-		.replace("^", "\\textasciicircum")
-		.replace("~", "\\textasciitilde")
+		.replace("{", "\\{")
+		.replace("}", "\\}")
+		.replace("\\", "\\textbackslash{}")
+		.replace("^", "\\textasciicircum{}")
+		.replace("~", "\\textasciitilde{}")
 		.replace("&", "\\&")
 		.replace("%", "\\%")
 		.replace("#", "\\#")
 		.replace("_", "\\_")
-		.replace("{", "\\{")
-		.replace("}", "\\}")
 		.replace("\"", "''"))
 
 def highlightIndent(tl, nl, indent, item_start, global_sep, markup):
@@ -285,6 +288,7 @@ HIGHLIGHTERS = {
 	"markdown": highlightMarkdown,
 	"markdown-lists": highlightMarkdownIndent,
 	"latex": highlightLatex,
+	"latex-lists": lambda tl: highlightLatex(tl, use_lists=True),
 	"txt": highlightTxt,
 	"txt-kwuc": highlightTxtWithKeywords,
 	"json": highlightJson

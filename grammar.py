@@ -557,7 +557,7 @@ def readVerbModifiers(tokens, is_be_verb=False):
 	while not tokens.eof():
 		if nextIsValidVerbModifier(tokens, disallow_nominative_noun=is_be_verb):
 			token = tokens.next()
-			tokens.setStyle("function")
+			tokens.setStyle("function", continued=True)
 			ans += "_" + token.token.lower()
 		else:
 			break
@@ -844,6 +844,11 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				expr = BackreferenceExpr(word2.baseform)
 		else:
 			tokens.setStyle("variable")
+			if tokens.peek() and tokens.peek().isWord():
+				word2 = tokens.peek().toWord(cls=PRONOUN)
+				if word2.baseform == "itse" and word2.form == word.form:
+					tokens.next()
+					tokens.setStyle("variable", continued=True)
 			case = word.form
 			expr = VariableExpr("this")
 	elif word.baseform == "siellä":
@@ -864,6 +869,11 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			tokens.setStyle("variable", continued=True)
 			expr = BackreferenceExpr(word2.baseform)
 		else:
+			if tokens.peek() and tokens.peek().isWord():
+				word2 = tokens.peek().toWord(cls=PRONOUN)
+				if word2.baseform == "itse" and word2.form == word.form:
+					tokens.next()
+					tokens.setStyle("variable", continued=True)
 			expr = VariableExpr("this")
 	elif (word.isAdjective() and word.baseform == "uusi") or (word.isNoun() and tokens.peek(1).token == "," and tokens.peek(2).token.lower() == "jonka"):
 		if word.baseform == "uusi":

@@ -60,12 +60,12 @@ def createLatex(code):
 	ans = """\\documentclass{article}\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\\usepackage[finnish]{babel}"""
 	ans += """\\title{Tampiokoodi}"""
 	ans += """\\begin{document}\\setlength\\emergencystretch{\\hsize}"""
-	ans += prettyPrint(tokens, "latex")
+	ans += prettyPrint(tokens, "latex-lists")
 	ans += "\\end{document}"
 	return ans
 
-TAMPIO_VERSION = "1.32"
-COMPILER_VERSION = "1.43.1"
+TAMPIO_VERSION = "1.33"
+COMPILER_VERSION = "1.44.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():
