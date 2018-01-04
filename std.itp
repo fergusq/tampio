@@ -153,9 +153,7 @@ Ajankohdan tunti on "this.getHours()" kohdekoodina.
 Ajankohdan minuutti on "this.getMinutes()" kohdekoodina.
 Ajankohdan sekunti on "this.getSeconds()" kohdekoodina.
 
-Sisällytä kohdekoodi "
-const nykyinen_aika = new Date();
-".
+Olkoon nykyinen aika "new Date()" kohdekoodina.
 
 # Muuttuja
 
@@ -180,7 +178,17 @@ Promise.prototype.a_epäonnistuessa = Promise.prototype.catch;
 Kun toistetaan n kertaa tehokas toiminto,
 	suorita kohdekoodi "for (var i = 0; i < n; i++) tehokas_toiminto();".
 
-# console
+# tulostetaan
 
 Kun tulostetaan kiva viesti,
 	suorita kohdekoodi "console.log(kiva_viesti);".
+
+# annetut argumentit
+
+Sisällytä kohdekoodi "
+if (typeof process !== 'undefined') {
+".
+
+Olkoon annetut argumentit "process.argv.slice(2)" kohdekoodina.
+
+Sisällytä kohdekoodi "}\u".

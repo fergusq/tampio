@@ -118,3 +118,8 @@ function toistaa_KertaaN(n, tehokas_toiminto) { for (var i = 0; i < n; i++) teho
 
 // console
 function tulostaa_N(t) { console.log(t); }
+
+// argv
+if (typeof process !== 'undefined') {
+	var annettu_argumentti = process.argv.slice(2);
+}
