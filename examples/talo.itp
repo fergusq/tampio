@@ -324,7 +324,7 @@ ja	Lyhyen Toimintolistan jokainen alkio suoritetaan.
 
 Kun kerrotaan ovelasta objektista,
 	näytetään teksti "<div style=\lborder: 1px solid black; border-radius: 5px; padding: 5px; margin-bottom: 5px;\l>",
-	näytetään teksti "<em>" yhdistettynä ovelan objektin nimeen, yhdistettynä väliin "</em>: ", yhdistettynä ovelan objektin kuvaukseen ja yhdistettynä tekstiin "<br/>",
+	näytetään teksti "<em>" yhdistettynä ovelan objektin nimeen, yhdistettynä tekstiin "</em>: ", yhdistettynä ovelan objektin kuvaukseen ja yhdistettynä tekstiin "<br/>",
 	ovelasta objektista kerrotaan tarkasti,
 	kerrotaan ovelan objektin sisäsisällöstä ovelan objektin pronominin sisäolennolla,
 	kerrotaan ovelan objektin yläsisällöstä ovelan objektin pronominin ulko-olennolla,
@@ -348,8 +348,6 @@ Kun kerrotaan alakohdassa ovelasta objektista,
 ja	näytetään teksti "</li>".
 
 # Luku 4 – Tarkka kertominen
-
-Olkoon loistava laskuri nolla.
 
 (
 Objekti-yläluokan metodi
