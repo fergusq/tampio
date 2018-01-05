@@ -5,8 +5,9 @@ Salli kohdekoodi.
 Sisällytä kohdekoodi "
 Object.prototype.t_prepend = function(x) { return [this].concat(x); };
 Object.prototype.t_assign = function(n, v) { this[n] = v; };
-var kohdekoodiolio = Object;
 ".
+
+Tulkitse kohdekoodiolio kohdekoodityyppinä "Object".
 
 Kun kiva kohdekoodiolio kirjataan lokiin,
 	suorita kohdekoodi "console.log(this);".
@@ -15,8 +16,9 @@ Kun kiva kohdekoodiolio kirjataan lokiin,
 
 Sisällytä kohdekoodi "
 Array.prototype.nth_last = function(n) { return this[this.length-n]; };
-var kohdekoodilista = Array;
 ".
+
+Tulkitse kohdekoodilista kohdekoodityyppinä "Array".
 
 Kohdekoodilistan määrä on "this.length" kohdekoodina.
 Kohdekoodilistan summa on "this.reduce((a,b) => a+b)" kohdekoodina.
@@ -45,11 +47,11 @@ Kun kivasta listasta poistetaan kiva arvo,
 
 Kiva lista on tyhjä, jos sen alkioiden määrä on nolla.
 
-Sisällytä kohdekoodi "const tyhjä_lista = new lista({});".
+Olkoon tyhjä lista uusi lista.
 
 # Function
 
-Sisällytä kohdekoodi "var kohdekoodifunktio = Function;".
+Tulkitse kohdekoodifunktio kohdekoodityyppinä "Function".
 
 Kun kiva kohdekoodifunktio suoritetaan,
 	suorita kohdekoodi "this();".
@@ -58,8 +60,10 @@ Kun kiva kohdekoodifunktio suoritetaan,
 
 Sisällytä kohdekoodi "
 const power_handler = {get: (a, b) => Math.pow(a, Number.parseInt(b)+1)};
-var määrä = Number;
 ".
+
+Tulkitse luku kohdekoodityyppinä "Number".
+Tulkitse määrä lukuna.
 
 Luvun potenssit ovat "new Proxy(this, power_handler)" kohdekoodina.
 Luvun neliö on se kerrottuna sillä.
@@ -87,6 +91,8 @@ Luku merkkijonona on "this.toString()" kohdekoodina.
 
 # String/merkkijono
 
+Tulkitse merkkijono kohdekoodityyppinä "String".
+
 Merkkijonon pituus on "this.length" kohdekoodina.
 Merkkijonon merkit ovat "Array.from(this)" kohdekoodina.
 Merkkijonon sanat ovat "this.split(/\\s+/)" kohdekoodina.
@@ -100,6 +106,8 @@ Kun kiva merkkijono jaetaan kivasta erottimesta kivoiksi alamerkkijonoiksi,
 	suorita kohdekoodi "for (var s of this.split(kiva_erotin)) kiva_alamerkkijono.push(s);".
 
 # HTMLDocument/sivu
+
+Tulkitse sivu kohdekoodityyppinä "HTMLDocument".
 
 Sisällytä kohdekoodi "
 if (typeof HTMLDocument !== 'undefined') {
@@ -117,6 +125,8 @@ Kun kiva sivu etsii elementin kivalla nimellä,
 Sisällytä kohdekoodi "}\u".
 
 # HTMLElement/elementti
+
+Tulkitse elementti kohdekoodityyppinä "HTMLElement".
 
 Sisällytä kohdekoodi "if (typeof HTMLElement !== 'undefined') {
  HTMLElement.prototype.t_assign = function(n, v) {
@@ -141,6 +151,8 @@ Kun kiva elementti pyyhitään,
 Sisällytä kohdekoodi "}\u".
 
 # Date/ajankohta
+
+Tulkitse ajankohta kohdekoodityyppinä "Date".
 
 Ajankohta päivämäärämerkkijonona on "this.getLocaleDateString()" kohdekoodina.
 Ajankohta kellonaikamerkkijonona on "this.getLocaleTimeString()" kohdekoodina.

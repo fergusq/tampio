@@ -1,5 +1,5 @@
 # Tampio Interpreter
-# Copyright (C) 2017 Iikka Hauhio
+# Copyright (C) 2018 Iikka Hauhio
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,8 +24,11 @@ from ast import *
 from lex import accept, checkEof, eat, eatComma, eatPeriod, ADJ, NOUN, NAME, PRONOUN, NUMERAL, VERB, CONJ, CARDINALS, ORDINALS
 
 def initializeParser():
-	global global_allow_backreferences
-	global_allow_backreferences = False
+	global options
+	options = {
+		"kohdekoodi": False,
+		"takaisinviittaukset": False
+	}
 
 POSTPOSITIONS = {
 	"nimento": ["kertaa"],
@@ -91,16 +94,18 @@ def formToEnglish(form, article=True, short = False):
 def parseDeclaration(tokens):
 	checkEof(tokens)
 	token = tokens.peek()
+	# Metodi, proseduuri
 	if token.token.lower() == "kun":
 		tokens.next()
 		tokens.setStyle("keyword")
-		signature = parseSentence(tokens)
+		signature = parseSentence(tokens, signature=True)
 		with AllowBackreferences():
 			body = parseList(parseSentence, tokens, do_format=True)
 		stmts = parseAdditionalStatements(tokens)
 		eatPeriod(tokens)
 		tokens.addNewline()
 		return ProcedureDecl(signature, body, stmts)
+	# Globaali muuttuja
 	elif token.token.lower() == "olkoon":
 		tokens.next()
 		tokens.setStyle("keyword")
@@ -110,10 +115,11 @@ def parseDeclaration(tokens):
 		eatPeriod(tokens)
 		tokens.addNewline()
 		return VariableDecl(word1.baseform + "_" + word2.baseform, value, stmts)
+	# Imperatiivit
 	elif token.token.lower() == "sisällytä":
 		tokens.next()
 		tokens.setStyle("keyword")
-		if tokens.peek() and tokens.peek().token.lower() == "kohdekoodi":
+		if options["kohdekoodi"] and tokens.peek() and tokens.peek().token.lower() == "kohdekoodi":
 			tokens.next()
 			tokens.setStyle("keyword")
 			code = tokens.next()
@@ -124,20 +130,61 @@ def parseDeclaration(tokens):
 			eatPeriod(tokens)
 			tokens.addNewline()
 			return TargetCodeDecl(parseString(code.token), stmts)
+		elif tokens.peek() and tokens.peek().token.lower() in ["tiedosto"]+(["kohdekooditiedosto"] if options["kohdekoodi"] else []):
+			tc = tokens.next().token.lower() == "kohdekooditiedosto"
+			tokens.setStyle("keyword")
+			filename = tokens.next()
+			if not filename.isString():
+				syntaxError("file name is not a string token", tokens)
+			tokens.setStyle("literal")
+			stmts = parseAdditionalStatements(tokens)
+			eatPeriod(tokens)
+			tokens.addNewline()
+			if not tc:
+				return IncludeFileDecl(parseString(filename.token), stmts)
+			else:
+				return IncludeTargetCodeFileDecl(parseString(filename.token), stmts)
 	elif token.token.lower() in ["salli", "kiellä"]:
 		positive = tokens.next().token.lower() == "salli"
 		tokens.setStyle("keyword")
 		if tokens.peek() and tokens.peek().isWord():
 			option = tokens.next().token.lower()
 			tokens.setStyle("literal")
-			if option == "takaisinviittaukset":
-				global global_allow_backreferences
-				global_allow_backreferences = positive
+			options[option] = positive
 			eatPeriod(tokens)
 			tokens.addNewline()
 			return SetOptionDecl(positive, option)
+	elif token.token.lower() == "tulkitse":
+		tokens.next()
+		tokens.setStyle("keyword")
+		cl = tokens.next().toWord(cls=NOUN,forms="nimento")
+		if cl.form != "nimento":
+			syntaxError("class name not in the nominative case", tokens)
+		tokens.setStyle("type")
+		if (options["kohdekoodi"]
+			and tokens.peek() and tokens.peek().token.lower() == "kohdekoodityyppinä"
+			and tokens.peek(2) and tokens.peek(2).isString()):
+			tokens.next()
+			tokens.setStyle("keyword")
+			tc_class = parseString(tokens.next().token)
+			tokens.setStyle("literal")
+			stmts = parseAdditionalStatements(tokens)
+			eatPeriod(tokens)
+			tokens.addNewline()
+			return TargetCodeClassDecl(cl.baseform, tc_class, stmts)
+		else:
+			cl2 = tokens.next().toWord(cls=NOUN,forms="olento")
+			if cl2.form != "olento":
+				syntaxError("class name not in the essive case", tokens)
+			tokens.setStyle("type")
+			stmts = parseAdditionalStatements(tokens)
+			eatPeriod(tokens)
+			tokens.addNewline()
+			return AliasClassDecl(cl.baseform, cl2.baseform, stmts)
+	# Muut
 	else:
 		word = token.toWord(cls=NOUN+ADJ,forms=["ulkoolento", "omanto", "nimento"])
+		# Luokka
 		if word.isNoun() and word.form == "ulkoolento":
 			tokens.next()
 			tokens.setStyle("type")
@@ -165,6 +212,7 @@ def parseDeclaration(tokens):
 				peek = tokens.peek()
 				peek2 = tokens.peek(2)
 				peek3 = tokens.peek(3)
+				# Perivä luokka
 				if (varname == ""
 					and peek and peek.isWord() and peek.toWord(forms=["nimento"]).isNoun()
 					and (not (peek2 and peek3) or (peek2.token != "," or peek3.token.lower() != "jos"))
@@ -188,6 +236,7 @@ def parseDeclaration(tokens):
 					eatPeriod(tokens)
 					tokens.addNewline()
 					return ClassDecl(word.baseform, fields, stmts, super_type=super_type.baseform)
+				# Vertailuoperaattori
 				elif peek and peek.isWord() and not nextStartsNominalPhrase(tokens):
 					if word.form != "nimento":
 						syntaxError("self parameter not in the nominative case", tokens)
@@ -211,6 +260,7 @@ def parseDeclaration(tokens):
 					eatPeriod(tokens)
 					tokens.addNewline()
 					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres, stmts)
+			# Funktio
 			elif word.form in ["omanto", "nimento"]:
 				place = tokens.place()
 				field, field_case, field_number, param, param_case = parseFieldName(tokens, word.form)
@@ -362,7 +412,7 @@ class AllowBackreferences:
 	def __enter__(self):
 		global allow_backreferences
 		self.prev = allow_backreferences
-		allow_backreferences = global_allow_backreferences
+		allow_backreferences = options["takaisinviittaukset"]
 	def __exit__(self, *args):
 		global allow_backreferences
 		allow_backreferences = self.prev
@@ -393,10 +443,10 @@ def addForVar(i_name, expr, var_type, tokens):
 def popFor():
 	return FOR_STACK.pop()[1]
 
-def parseSentence(tokens):
+def parseSentence(tokens, signature=False):
 	checkEof(tokens)
 	token = tokens.peek()
-	if token.token.lower() == "jos" or (token.token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "jos"):
+	if not signature and token.token.lower() == "jos" or (token.token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "jos"):
 		if token.token == ",":
 			tokens.next()
 		elif tokens.current().token != ",":
@@ -427,6 +477,8 @@ def parseSentence(tokens):
 			syntaxError("predicate ("+word.word+") is not in indicative or imperative simple present", tokens, place)
 	else:
 		subject, case = parseNominalPhrase(tokens, promoted_cases=["nimento", "omanto"])
+		if signature and not isinstance(subject, VariableExpr):
+			syntaxError("malformed parameter", tokens)
 		
 		place = tokens.place()
 		
@@ -487,7 +539,7 @@ def parseSentence(tokens):
 	prev_args = {}
 	while True:
 		pushFor("jokainen")
-		args, ov = parseArgs(tokens, passive, predicate=="olla_A")
+		args, ov = parseArgs(tokens, passive, predicate=="olla_A", signature=signature)
 		
 		args_list.append({**prev_args, **args})
 		prev_args = args
@@ -496,7 +548,7 @@ def parseSentence(tokens):
 		
 		for_var_list.append(for_vars+popFor())
 		
-		if not tokens.eof() and tokens.peek().token.lower() == "sekä":
+		if not signature and not tokens.eof() and tokens.peek().token.lower() == "sekä":
 			tokens.next()
 			tokens.setStyle("keyword")
 			continue
@@ -563,12 +615,14 @@ def readVerbModifiers(tokens, is_be_verb=False):
 			break
 	return ans
 
-def parseArgs(tokens, passive, allow_predicatives):
+def parseArgs(tokens, passive, allow_predicatives, signature=False):
 	args = {}
 	while not tokens.eof():
 		if tokens.peek().token.lower() in ["sekä", ",", ";", ".", "]", "eikä", "ja", "tuloksenaan"]:
 			break
 		arg, case = parsePredicative(tokens) if allow_predicatives else parseNominalPhrase(tokens)
+		if signature and not isinstance(arg, VariableExpr):
+			syntaxError("malformed parameter", tokens)
 		if case in args:
 			syntaxError(formToEnglish(case, short=True) + " argument repeated twice", tokens)
 		args[case] = arg

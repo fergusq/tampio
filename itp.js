@@ -116,6 +116,9 @@ Promise.prototype.a_epäonnistuessa = Promise.prototype.catch;
 // toistetaan
 function toistaa_KertaaN(n, tehokas_toiminto) { for (var i = 0; i < n; i++) tehokas_toiminto(); };
 
+// tehdään
+function tehdä_KuluttuaN(t, tehokas_toiminto) { setTimeout(tehokas_toiminto, t); }
+
 // console
 function tulostaa_N(t) { console.log(t); }
 

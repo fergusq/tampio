@@ -1,5 +1,5 @@
 # Tampio Interpreter
-# Copyright (C) 2017 Iikka Hauhio
+# Copyright (C) 2018 Iikka Hauhio
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,13 +15,35 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from inflect import CASES_ABRV
-from fatal_error import fatalError
+from fatal_error import fatalError, typeError, TampioError
+from hierarchy import Class
 
 # kääntäjän tila
 
-def initializeCompiler():
-	global option_allow_target_code
-	option_allow_target_code = False
+def initializeCompiler(include_file):
+	global classes, variables, aliases, includeFile, options
+	options = {}
+	classes = {}
+	variables = []
+	aliases = {}
+	includeFile = include_file
+
+class CompilerFrame:
+	def __enter__(self):
+		global options
+		self.prev_options = options
+		options = {
+			"kohdekoodi": False
+		}
+	def __exit__(self, *args):
+		global options
+		options = self.prev_options
+
+def getClass(name):
+	if name in classes:
+		return classes[name]
+	else:
+		typeError("class not found: " + name)
 
 # apufunktiot
 
@@ -32,32 +54,31 @@ def formAbrv(form):
 		return form[0].upper() + form[1:].lower()
 
 def typeToJs(typename):
-	if typename == "luku":
-		return "Number"
-	elif typename == "merkkijono":
-		return "String"
-	elif typename == "sivu":
-		return "HTMLDocument"
-	elif typename == "elementti":
-		return "HTMLElement"
-	elif typename == "ajankohta":
-		return "Date"
-	else:
-		return escapeIdentifier(typename)
+	while typename in aliases:
+		typename = aliases[typename]
+	return escapeIdentifier(typename)
 
 def escapeIdentifier(identifier):
 	return identifier.replace("-", "_")
 
 # moduulin käätäminen
 
-def compileModule(declarations):
-	initializeCompiler()
-	ans = ""
-	additional_statements = ""
-	for decl in declarations:
-		ans += decl.compile() + "\n"
-		additional_statements += decl.compileAdditionalStatements()
-	return ans + additional_statements
+def compileModule(declarations, on_error):
+	with CompilerFrame():
+		for decl in declarations:
+			try:
+				decl.buildHierarchy()
+			except TampioError as e:
+				on_error(e)
+		ans = ""
+		additional_statements = ""
+		for decl in declarations:
+			try:
+				ans += decl.compile() + "\n"
+				additional_statements += decl.compileAdditionalStatements()
+			except TampioError as e:
+				on_error(e)
+		return ans + additional_statements
 
 # lohkon kääntäminen
 
@@ -94,6 +115,8 @@ class Decl:
 			return ";(function() {\n" + compileBlock(self.statements, 0) + "})();\n"
 		else:
 			return ""
+	def buildHierarchy(self):
+		pass
 
 class SetOptionDecl(Decl):
 	def __init__(self, positive, option):
@@ -101,9 +124,7 @@ class SetOptionDecl(Decl):
 		self.option = option
 		self.statements = []
 	def compileDecl(self):
-		global option_allow_target_code
-		if self.option == "kohdekoodi":
-			option_allow_target_code = self.positive
+		options[self.option] = self.positive
 		return ""
 
 class TargetCodeDecl(Decl):
@@ -112,6 +133,23 @@ class TargetCodeDecl(Decl):
 		self.code = code
 	def compileDecl(self):
 		return self.code
+
+class IncludeTargetCodeFileDecl(Decl):
+	def __init__(self, filename, stmts):
+		Decl.__init__(self, stmts)
+		self.file = filename
+	def compileDecl(self):
+		with open(self.file) as f:
+			return f.read()
+
+class IncludeFileDecl(Decl):
+	def __init__(self, filename, stmts):
+		Decl.__init__(self, stmts)
+		self.file = filename
+	def compileDecl(self):
+		return ""
+	def buildHierarchy(self):
+		includeFile(self.file)
 
 class VariableDecl(Decl):
 	def __init__(self, var, value, stmts):
@@ -125,6 +163,8 @@ class VariableDecl(Decl):
 			return ";(function() {\n" + compileBlock(self.statements, 1) + "}).call(" + escapeIdentifier(self.var) + ");\n"
 		else:
 			return ""
+	def buildHierarchy(self):
+		variables.append(self.var)
 
 class ProcedureDecl(Decl):
 	def __init__(self, signature, body, stmts):
@@ -135,8 +175,6 @@ class ProcedureDecl(Decl):
 		if isinstance(self.signature, ProcedureCallStatement):
 			return "function " + self.signature.compile(semicolon=False) + " {\n" + compileBlock(self.body, 1) + "};"
 		elif isinstance(self.signature, MethodCallStatement):
-			if not isinstance(self.signature.obj, VariableExpr):
-				fatalError("Illegal method declaration: subject is not a variable (in \"" + str(self.signature) + "\")")
 			return (
 				typeToJs(self.signature.obj.type) + ".prototype."
 				+ self.signature.compileName()
@@ -146,6 +184,9 @@ class ProcedureDecl(Decl):
 				+ "};")
 		else:
 			fatalError("TODO")
+	def buildHierarchy(self):
+		if isinstance(self.signature, MethodCallStatement):
+			getClass(self.signature.obj.type).addMethod(self.signature.name, sorted(self.signature.args.keys()))
 
 class ClassDecl(Decl):
 	def __init__(self, name, fields, stmts, super_type=None):
@@ -173,6 +214,35 @@ class ClassDecl(Decl):
 		for name, _, _, _, _, _ in self.fields:
 			ans += "\n" + class_name + ".prototype.f_" + escapeIdentifier(name) + " = function() { return this." + escapeIdentifier(name) + "; };"
 		return ans
+	def buildHierarchy(self):
+		cl = Class(self.name, self.super)
+		classes[self.name] = cl
+		for name, _, number, _, _, _ in self.fields:
+			cl.addField(name, number)
+
+class TargetCodeClassDecl(Decl):
+	def __init__(self, name, tc_name, stmts):
+		Decl.__init__(self, stmts)
+		self.name = name
+		self.tc_name = tc_name
+	def compileDecl(self):
+		return ""
+	def buildHierarchy(self):
+		cl = Class(self.name, None)
+		classes[self.name] = cl
+		if self.name != self.tc_name:
+			aliases[self.name] = self.tc_name
+
+class AliasClassDecl(Decl):
+	def __init__(self, alias_name, real_name, stmts):
+		Decl.__init__(self, stmts)
+		self.alias_name = alias_name
+		self.real_name = real_name
+	def compileDecl(self):
+		return ""
+	def buildHierarchy(self):
+		classes[self.alias_name] = getClass(self.real_name)
+		aliases[self.alias_name] = self.real_name
 
 class Whereable:
 	def compileWheres(self, indent=1):
@@ -213,6 +283,8 @@ class FunctionDecl(Whereable,Decl):
 		else:
 			ans += " return " + self.body.compile(0) + ";\n};"
 		return ans
+	def buildHierarchy(self):
+		getClass(self.type).addFunction(self.field, self.param_case)
 
 class CondFunctionDecl(Whereable,Decl):
 	def __init__(self, vtype, name, self_param, param, conditions, wheres, stmts):
@@ -234,6 +306,8 @@ class CondFunctionDecl(Whereable,Decl):
 		ans += self.compileWheres()
 		ans += " return (" + ") && (".join([c.compile(0) for c in self.conditions]) + ");\n};"
 		return ans
+	def buildHierarchy(self):
+		getClass(self.type).addComparisonOperator(self.name)
 
 # lauseiden kääntäminen
 
@@ -358,7 +432,7 @@ class CallStatement:
 
 class ProcedureCallStatement(CallStatement):
 	def compile(self, semicolon=True, indent=0):
-		if self.name == "suorittaa!" and list(self.args.keys()) == ["nimento"] and isinstance(self.args["nimento"], StrExpr) and option_allow_target_code:
+		if self.name == "suorittaa!" and list(self.args.keys()) == ["nimento"] and isinstance(self.args["nimento"], StrExpr) and options["kohdekoodi"]:
 			return " "*indent + self.args["nimento"].str + ("\n" if semicolon else "")
 		else:
 			return super().compile(semicolon=semicolon, indent=indent)
@@ -482,7 +556,7 @@ class FieldExpr(Expr):
 	def compile(self, indent):
 		if self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]:
 			return self.compileArithmetic(indent)
-		elif self.field == "kohdekoodi_E" and isinstance(self.obj, StrExpr) and option_allow_target_code:
+		elif self.field == "kohdekoodi_E" and isinstance(self.obj, StrExpr) and options["kohdekoodi"]:
 			return "(" + self.obj.str + ")"
 		ans = self.obj.compile(indent) + ".f_" + escapeIdentifier(self.field)
 		if self.arg_case:

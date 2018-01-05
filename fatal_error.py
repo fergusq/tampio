@@ -35,3 +35,14 @@ class TampioSyntaxError(Exception):
 		stream.write("Syntax error: " + self.msg + "\n" + self.tokens.fancyContext(self.place) + "\n")
 	def __str__(self):
 		return "Syntax error: " + self.msg + " (in \"" + self.tokens.context(self.place) + "\")"
+
+def typeError(msg):
+	raise(TampioError("Type error: " + msg))
+
+class TampioError(Exception):
+	def __init__(self, msg):
+		self.msg = msg
+	def printMe(self, stream):
+		stream.write(self.msg + "\n")
+	def __str__(self):
+		return self.msg

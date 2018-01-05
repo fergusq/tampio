@@ -694,6 +694,7 @@ These imperatives can be used at the top-level along with the definitions.
 |`Salli`    |Enable an option
 |`Kiellä`   |Disable an option
 |`Sisällytä`|Include
+|`Tulkitse` |Create type alias
 
 #### `Salli`/`Kiellä`
 
@@ -703,15 +704,25 @@ Available options:
 
 |Option               |Default|Description|
 |:-------------------:|:-----:|:----------|
-|`kohdekoodi`         |Off    |Enable target code related commands (`Sisällytä kohdekoodi`, `suorita`, `kohdekoodina`).
+|`kohdekoodi`         |Off    |Enable target code related commands (`Sisällytä kohdekoodi`, `Tulkitse kohdekoodityyppinä`, `suorita`, `kohdekoodina`).
 |`takaisinviittaukset`|Off    |Enable backreferences (a very experimental feature).
 
 #### `Sisällytä`
 
 This imperative is used to include code in the program.
-Currently it can only be used to include target code.
+It can be used to include Tampio files, target code and target code files.
 
+    Sisällytä tiedosto "[filename]".
     Sisällytä kohdekoodi "[code]".
+    Sisällytä kohdekooditiedosto "[filename]".
+
+#### `Tulkitse`
+
+This imperative is used to create a type alias.
+It can also be used to give a target code class a name in Tampio.
+
+    Tulkitse [alias name/nominative] [target name/essive].
+    Tulkitse [alias name/nominative] kohdekoodityyppinä "[target code type]".
 
 ### Statement-level imperatives
 

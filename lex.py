@@ -57,7 +57,7 @@ def lexCode(code):
 		if len(analysis_list) == 0 and "-" in word:
 			i = word.rindex("-")+1
 			analysis_list = voikko.analyze(word[i:])
-			prefix = word[:i]
+			prefix = word[:i].lower()
 		alternatives = []
 		for analysis in analysis_list:
 			bf = prefix+analysis["BASEFORM"]
