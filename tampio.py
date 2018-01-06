@@ -60,7 +60,8 @@ def compileCode(code):
 def createHTML(code):
 	tokens, compiled, _ = compileCode(code)
 	ans = """<!DOCTYPE html><html><head><meta charset="utf-8" /><title>Imperatiivinen Tampio</title>"""
-	ans += """<script type="text/javascript" src="itp.js" charset="utf-8"></script>"""
+	if not PRINT_INCLUDED:
+		ans += """<script type="text/javascript" src="itp.js" charset="utf-8"></script>"""
 	ans += """<link rel="stylesheet" type="text/css" href="syntax.css"></head><body>"""
 	ans += """<div style="max-height:98vh;overflow:auto;float:left;width:50%;">"""
 	ans += prettyPrint(tokens, "html")
@@ -78,8 +79,8 @@ def createLatex(code):
 	ans += "\\end{document}"
 	return ans
 
-TAMPIO_VERSION = "1.34"
-COMPILER_VERSION = "1.45.0"
+TAMPIO_VERSION = "1.35"
+COMPILER_VERSION = "1.46.0"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():

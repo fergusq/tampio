@@ -14,17 +14,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from itertools import chain
 from inflect import CASES_ABRV
-from fatal_error import fatalError, typeError, TampioError
+from fatal_error import fatalError, typeError, notfoundError, TampioError
 from hierarchy import Class
 
 # kääntäjän tila
 
 def initializeCompiler(include_file):
-	global classes, variables, aliases, includeFile, options
+	global classes, global_variables, aliases, includeFile, options, block_mode, VARIABLE_STACK, BACKREFERENCE_STACK
 	options = {}
 	classes = {}
-	variables = []
+	global_variables = []
+	block_mode = False
+	VARIABLE_STACK = [global_variables]
+	BACKREFERENCE_STACK = []
 	aliases = {}
 	includeFile = include_file
 
@@ -33,7 +37,8 @@ class CompilerFrame:
 		global options
 		self.prev_options = options
 		options = {
-			"kohdekoodi": False
+			"kohdekoodi": False,
+			"käyttömäärittelyt": False
 		}
 	def __exit__(self, *args):
 		global options
@@ -82,24 +87,51 @@ def compileModule(declarations, on_error):
 
 # lohkon kääntäminen
 
-BACKREFERENCE_STACK = []
-
-def compileBlock(statements, indent):
+def compileBlock(statements, indent, parameters):
+	global block_mode
+	
 	bcs = []
 	for stmt in statements:
 		bcs += stmt.backreferences()
 	BACKREFERENCE_STACK.append(bcs)
+	
 	ans = ""
 	for bc in set(bcs):
 		ans += " "*indent + "var se_" + escapeIdentifier(bc) + " = null;\n"
+	
+	variables = set(list(chain.from_iterable(VARIABLE_STACK)) + parameters)
+	VARIABLE_STACK.append(variables)
+	
+	prev_block_mode = block_mode
+	block_mode = True
+	
 	for stmt in statements:
+		# eksplisiittisesti luodut uudet muuttujat
+		variables.update(set(stmt.createdVariables()))
+		# vielä mainitsemattomat muuttujat ovat luodaan (poisluetaan väliaikaismuuttujat)
+		if options["käyttömäärittelyt"]:
+			new_vars = set(stmt.variables())
+			for name, vtype in new_vars.difference(variables).difference(set(stmt.temporaryVariables())):
+				warning("warning: autodeclaration of " + name + " as " + vtype)
+				ans += " "*indent + "var " + name + " = new " + vtype + "({});\n"
+			variables.update(new_vars)
 		ans += stmt.compile(indent=indent)
+	
 	del BACKREFERENCE_STACK[-1]
+	del VARIABLE_STACK[-1]
+	block_mode = prev_block_mode
+	
 	return ans
 
 def currentBackreferences():
 	if len(BACKREFERENCE_STACK) >= 1:
 		return BACKREFERENCE_STACK[-1]
+	else:
+		return []
+
+def currentVariables():
+	if len(VARIABLE_STACK) >= 1:
+		return VARIABLE_STACK[-1]
 	else:
 		return []
 
@@ -112,7 +144,7 @@ class Decl:
 		return self.compileDecl()
 	def compileAdditionalStatements(self):
 		if self.statements:
-			return ";(function() {\n" + compileBlock(self.statements, 0) + "})();\n"
+			return ";(function() {\n" + compileBlock(self.statements, 0, []) + "})();\n"
 		else:
 			return ""
 	def buildHierarchy(self):
@@ -152,19 +184,20 @@ class IncludeFileDecl(Decl):
 		includeFile(self.file)
 
 class VariableDecl(Decl):
-	def __init__(self, var, value, stmts):
+	def __init__(self, var, vtype, value, stmts):
 		Decl.__init__(self, stmts)
 		self.var = var
+		self.type = vtype
 		self.value = value
 	def compileDecl(self):
 		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile(0) + ";"
 	def compileAdditionalStatements(self):
 		if self.statements:
-			return ";(function() {\n" + compileBlock(self.statements, 1) + "}).call(" + escapeIdentifier(self.var) + ");\n"
+			return ";(function() {\n" + compileBlock(self.statements, 1, []) + "}).call(" + escapeIdentifier(self.var) + ");\n"
 		else:
 			return ""
 	def buildHierarchy(self):
-		variables.append(self.var)
+		global_variables.append((self.var, self.type))
 
 class ProcedureDecl(Decl):
 	def __init__(self, signature, body, stmts):
@@ -173,14 +206,15 @@ class ProcedureDecl(Decl):
 		self.body = body
 	def compileDecl(self):
 		if isinstance(self.signature, ProcedureCallStatement):
-			return "function " + self.signature.compile(semicolon=False) + " {\n" + compileBlock(self.body, 1) + "};"
+			return ("function " + self.signature.compile(semicolon=False)
+				+ " {\n" + compileBlock(self.body, 1, self.signature.variables()) + "};")
 		elif isinstance(self.signature, MethodCallStatement):
 			return (
 				typeToJs(self.signature.obj.type) + ".prototype."
 				+ self.signature.compileName()
 				+ " = function" + self.signature.compileArgs(indent=0) + " {\n"
 				+ " var " + escapeIdentifier(self.signature.obj.name) + " = this;\n"
-				+ compileBlock(self.body, 1)
+				+ compileBlock(self.body, 1, self.signature.variables())
 				+ "};")
 		else:
 			fatalError("TODO")
@@ -246,11 +280,16 @@ class AliasClassDecl(Decl):
 
 class Whereable:
 	def compileWheres(self, indent=1):
-		return "".join([" "*indent + "var "+escapeIdentifier(where[0])+" = "+where[1].compile(indent)+";\n" for where in self.wheres])
-	def whereBackreferences(self):
+		return "".join([" "*indent + "var "+escapeIdentifier(name)+" = "+val.compile(indent)+";\n" for name, _, val in self.wheres])
+	def whereSubexpressions(self):
 		ans = []
-		for _, val in self.wheres:
-			ans += val.backreferences()
+		for _, _, val in self.wheres:
+			ans += val.subexpressions()
+		return ans
+	def whereCreatedVariables(self):
+		ans = []
+		for name, vtype, _ in self.wheres:
+			ans.append((name, vtype))
 		return ans
 
 class FunctionDecl(Whereable,Decl):
@@ -311,13 +350,31 @@ class CondFunctionDecl(Whereable,Decl):
 
 # lauseiden kääntäminen
 
-class ForStatement:
+class Recursive:
+	def subexpressions(self):
+		return [self]
+	def search(self, f):
+		ans = []
+		for subexpr in self.subexpressions():
+			if subexpr is not self:
+				ans += f(subexpr)
+		return ans
+	def backreferences(self):
+		return self.search(lambda e: e.backreferences())
+	def variables(self):
+		return self.search(lambda e: e.variables())
+	def createdVariables(self):
+		return self.search(lambda e: e.createdVariables())
+	def temporaryVariables(self):
+		return self.search(lambda e: e.temporaryVariables())
+
+class ForStatement(Recursive):
 	def __init__(self, var, expr, stmt):
 		self.var = var
 		self.expr = expr
 		self.stmt = stmt
-	def backreferences(self):
-		return self.expr.backreferences() + self.stmt.backreferences()
+	def subexpressions(self):
+		return self.expr.subexpressions() + self.stmt.subexpressions()
 	def compile(self, indent=0):
 		return (" "*indent
 			+ "for (const " + escapeIdentifier(self.var)
@@ -325,16 +382,16 @@ class ForStatement:
 			+ ") {\n" + self.stmt.compile(indent=indent+1)
 			+ " "*indent + "}\n")
 
-class IfStatement:
+class IfStatement(Recursive):
 	def __init__(self, conditions, block):
 		self.conditions = conditions
 		self.block = block
-	def backreferences(self):
+	def subexpressions(self):
 		ans = []
 		for c in self.conditions:
-			ans += c.backreferences()
+			ans += c.subexpressions()
 		for s in self.block:
-			ans += s.backreferences()
+			ans += s.subexpressions()
 		return ans
 	def compile(self, indent=0):
 		ans = ""
@@ -345,27 +402,31 @@ class IfStatement:
 			+ "".join([s.compile(indent=indent+1) for s in self.block])
 			+ " "*indent + "}\n")
 
-class QuantifierCondExpr(Whereable):
+class QuantifierCondExpr(Whereable,Recursive):
 	def __init__(self, quant, var, expr, cond, wheres=[]):
 		self.quantifier = quant
 		self.var = var
 		self.expr = expr
 		self.cond = cond
 		self.wheres = wheres
-	def backreferences(self):
-		return self.expr.backreferences() + self.cond.backreferences() + self.whereBackreferences()
+	def subexpressions(self):
+		return self.expr.subexpressions() + self.cond.subexpressions() + self.whereSubexpressions()
+	def createdVariables(self):
+		return super().createdVariables() + self.whereCreatedVariables()
 	def compile(self, indent):
 		return self.expr.compile(indent) + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile(indent) + ")"
 
-class CondExpr(Whereable):
+class CondExpr(Whereable,Recursive):
 	def __init__(self, negation, operator, left, right, wheres=[]):
 		self.negation = negation
 		self.operator = operator
 		self.left = left
 		self.right = right
 		self.wheres = wheres
-	def backreferences(self):
-		return self.left.backreferences() + (self.right.backreferences() if self.right else []) + self.whereBackreferences()
+	def subexpressions(self):
+		return self.left.subexpressions() + (self.right.subexpressions() if self.right else []) + self.whereSubexpressions()
+	def createdVariables(self):
+		return super().createdVariables() + self.whereCreatedVariables()
 	def compile(self, indent):
 		ans = self.left.compile(indent) + self.operator
 		if self.operator[0] == ".":
@@ -379,30 +440,44 @@ class CondExpr(Whereable):
 		else:
 			return ans
 
-class BlockStatement(Whereable):
+class BlockStatement(Whereable,Recursive):
 	def __init__(self, stmts, wheres):
 		self.stmts = stmts
 		self.wheres = wheres
-	def backreferences(self):
+	def subexpressions(self):
 		ans = []
 		for s in self.stmts:
-			ans += s.backreferences()
-		return ans + self.whereBackreferences()
+			ans += s.subexpressions()
+		return ans + self.whereSubexpressions()
+	def createdVariables(self):
+		return super().createdVariables() + self.whereCreatedVariables()
 	def compile(self, semicolon=True, indent=0):
 		return self.compileWheres(indent) + "".join([s.compile(indent=indent) for s in self.stmts])
 
-class CallStatement:
+class CallStatement(Recursive):
 	def __init__(self, name, args, output_var, async_block):
 		self.name = name
 		self.args = args
 		self.output_var = output_var
 		self.async_block = async_block
-	def backreferences(self):
+	def subexpressions(self):
 		ans = []
 		for v in self.args.values():
-			ans += v.backreferences()
-		for _, _, s in self.async_block:
-			ans += s.backreferences()
+			ans += v.subexpressions()
+		for _, _, _, s in self.async_block:
+			ans += s.subexpressions()
+		return ans
+	def variables(self):
+		return super().variables()
+	def createdVariables(self):
+		if self.output_var:
+			return [self.output_var]
+		else:
+			return []
+	def temporaryVariables(self):
+		ans = []
+		for _, param, ptype, _ in self.async_block:
+			ans += [(param, ptype)]
 		return ans
 	def compileName(self):
 		keys = sorted(self.args.keys())
@@ -412,16 +487,18 @@ class CallStatement:
 		return "(" + ", ".join([self.args[key].compile(indent) for key in keys]) + ")"
 	def compileAssignment(self):
 		if self.output_var:
-			return "var " + escapeIdentifier(self.output_var) + " = "
+			return "var " + escapeIdentifier(self.output_var[0]) + " = "
 		else:
 			return ""
 	def compileAsync(self, indent):
 		ans = ""
-		for mname, param, stmt in self.async_block:
+		for mname, param, ptype, stmt in self.async_block:
+			VARIABLE_STACK.append(currentVariables().union(set([(param, ptype)])))
 			ans += ("." + escapeIdentifier(mname)
 				+ "(" + escapeIdentifier(param) + " =>\n"
 				+ stmt.compile(indent=indent+1, semicolon=False)
 				+ " "*indent + ")")
+			del VARIABLE_STACK[-1]
 		return ans
 			
 	def compile(self, semicolon=True, indent=0):
@@ -443,7 +520,7 @@ BUILTIN_ASSIGN_METHODS = [
 	("kasvattaa_P", "osanto", "ulkoolento", lambda lval, arg: lval + " += " + arg)
 ]
 
-class MethodCallStatement(CallStatement):
+class MethodCallStatement(CallStatement,Recursive):
 	def __init__(self, obj, obj_case, name, args, output_var, async_block):
 		self.obj = obj
 		self.obj_case = obj_case
@@ -451,10 +528,10 @@ class MethodCallStatement(CallStatement):
 		self.args = args
 		self.output_var = output_var
 		self.async_block = async_block
-	def backreferences(self):
-		return super().backreferences() + self.obj.backreferences()
+	def subexpressions(self):
+		return super().subexpressions() + self.obj.subexpressions()
 	def compileName(self):
-		return super(MethodCallStatement, self).compileName() + "_" + formAbrv(self.obj_case)
+		return super().compileName() + "_" + formAbrv(self.obj_case)
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
 		is_lval = isinstance(self.obj, VariableExpr) or isinstance(self.obj, SubscriptExpr) or isinstance(self.obj, FieldExpr)
@@ -476,15 +553,15 @@ class MethodCallStatement(CallStatement):
 			ans += ";\n"
 		return ans
 
-class MethodAssignmentStatement:
+class MethodAssignmentStatement(Recursive):
 	def __init__(self, obj, obj_case, method, params, body):
 		self.obj = obj
 		self.obj_case = obj_case
 		self.method = method
 		self.params = params
 		self.body = body
-	def backreferences(self):
-		return self.obj.backreferences() # ei palauta vartalon sisältämiä takaisinviittauksia
+	def subexpressions(self):
+		return self.obj.subexpressions() # ei palauta vartalon sisältämiä alalausekkeita (kuten ei lambdakaan)
 	def compileName(self):
 		keys = sorted(self.params.keys())
 		return escapeIdentifier(self.method) + "_" + "".join([formAbrv(form) for form in keys]) + "_" + formAbrv(self.obj_case)
@@ -498,7 +575,7 @@ class MethodAssignmentStatement:
 		ans += "\", "
 		ans += self.compileParams(indent)
 		ans += " => {\n"
-		ans += compileBlock(self.body, indent+1)
+		ans += compileBlock(self.body, indent+1, list(chain.from_iterable([p.variables() for p in self.params])))
 		ans += " "*indent + "});"
 		if semicolon:
 			ans += ";\n"
@@ -506,21 +583,25 @@ class MethodAssignmentStatement:
 
 # lausekkeiden kääntäminen
 
-class Expr:
-	def backreferences(self):
-		return []
-
-class VariableExpr(Expr):
-	def __init__(self, name, vtype="any"):
+class VariableExpr(Recursive):
+	def __init__(self, name, vtype=None):
 		self.name = name
 		self.type = vtype
 	def compile(self, indent):
+		if block_mode and self.type:
+			if (self.name, self.type) not in currentVariables():
+				notfoundError("variable not found: " + self.name)
 		ans = escapeIdentifier(self.name)
 		if self.type in currentBackreferences():
 			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
 		return ans
+	def variables(self):
+		if self.type:
+			return [(self.name, self.type)]
+		else:
+			return []
 
-class BackreferenceExpr(Expr):
+class BackreferenceExpr(Recursive):
 	def __init__(self, name, may_be_field=False):
 		self.name = name
 		self.may_be_field = may_be_field
@@ -545,14 +626,14 @@ ARI_OPERATORS = {
 	"rajattu_E": ("sisatulento", "%")
 }
 
-class FieldExpr(Expr):
+class FieldExpr(Recursive):
 	def __init__(self, obj, field, arg_case=None, arg=None):
 		self.obj = obj
 		self.field = field
 		self.arg_case = arg_case
 		self.arg = arg
-	def backreferences(self):
-		return self.obj.backreferences() + (self.arg.backreferences() if self.arg else [])
+	def subexpressions(self):
+		return [self] + self.obj.subexpressions() + (self.arg.subexpressions() if self.arg else [])
 	def compile(self, indent):
 		if self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]:
 			return self.compileArithmetic(indent)
@@ -572,26 +653,26 @@ class FieldExpr(Expr):
 		else:
 			return "(" + self.obj.compile(indent) + operator + self.arg.compile(indent) + ")"
 
-class SubscriptExpr(Expr):
+class SubscriptExpr(Recursive):
 	def __init__(self, obj, index, is_end_index=False):
 		self.obj = obj
 		self.index = index
 		self.is_end_index = is_end_index
-	def backreferences(self):
-		return self.obj.backreferences()
+	def subexpressions(self):
+		return [self] + self.obj.subexpressions()
 	def compile(self, indent):
 		if self.is_end_index:
 			return self.obj.compile(indent) + ".nth_last(" + self.index.compile(indent) + ")"
 		else:
 			return self.obj.compile(indent) + "[" + self.index.compile(indent) + "-1]"
 
-class SliceExpr(Expr):
+class SliceExpr(Recursive):
 	def __init__(self, obj, start, end):
 		self.obj = obj
 		self.start = start
 		self.end = end
-	def backreferences(self):
-		return self.obj.backreferences()
+	def subexpressions(self):
+		return [self] + self.obj.subexpressions()
 	def compile(self, indent):
 		ans = self.obj.compile(indent) + ".slice("
 		ans += self.start.compile(indent) + "-1"
@@ -600,27 +681,27 @@ class SliceExpr(Expr):
 		ans += ")"
 		return ans
 
-class NumExpr(Expr):
+class NumExpr(Recursive):
 	def __init__(self, num):
 		self.num = num
 	def compile(self, indent):
 		return "(" + str(self.num) + ")"
 
-class StrExpr(Expr):
+class StrExpr(Recursive):
 	def __init__(self, string):
 		self.str = string
 	def compile(self, indent):
 		return repr(self.str)
 
-class NewExpr(Expr):
+class NewExpr(Recursive):
 	def __init__(self, typename, args):
 		self.type = typename
 		self.args = args
-	def backreferences(self):
+	def subexpressions(self):
 		ans = []
 		for arg in self.args:
-			ans += arg.value.backreferences()
-		return ans
+			ans += arg.value.subexpressions()
+		return [self] + ans
 	def compile(self, indent):
 		ans = "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile(indent) for arg in self.args]) + "})"
 		if self.type in currentBackreferences():
@@ -632,33 +713,34 @@ class CtorArgExpr:
 		self.field = field
 		self.value = value
 
-class ListExpr(Expr):
+class ListExpr(Recursive):
 	def __init__(self, values):
 		self.values = values
-	def backreferences(self):
+	def subexpressions(self):
 		ans = []
 		for val in self.values:
-			ans += val.backreferences()
-		return ans
+			ans += val.subexpressions()
+		return [self] + ans
 	def compile(self, indent):
 		return "[" + ", ".join([value.compile(indent) for value in self.values]) + "]"
 
-class LambdaExpr(Expr):
+class LambdaExpr(Recursive):
 	def __init__(self, body):
 		self.body = body
 	def compile(self, indent):
-		return "() => {\n" + "".join([s.compile(indent=indent+1) for s in self.body]) + " }"
+		return "() => {\n" + compileBlock(self.body, indent+1, []) + " }"
+	# ei alalausekkeita
 
-class TernaryExpr(Expr):
+class TernaryExpr(Recursive):
 	def __init__(self, conditions, then, otherwise):
 		self.conditions = conditions
 		self.then = then
 		self.otherwise = otherwise
-	def backreferences(self):
+	def subexpressions(self):
 		ans = []
 		for c in self.conditions:
-			ans += c.backreferences()
-		return ans + self.then.backreferences() + self.otherwise.backreferences()
+			ans += c.subexpressions()
+		return [self] + ans + self.then.subexpressions() + self.otherwise.subexpressions()
 	def compile(self, indent):
 		return ("((" + ") && (".join([c.compile(indent) for c in self.conditions])
 			+ ") ? (" + self.then.compile(indent)

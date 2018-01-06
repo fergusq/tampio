@@ -39,6 +39,12 @@ class TampioSyntaxError(Exception):
 def typeError(msg):
 	raise(TampioError("Type error: " + msg))
 
+def notfoundError(msg):
+	raise(TampioError("Not found error: " + msg))
+
+def warning(msg):
+	sys.stderr.write("Warning: " + msg + "\n")
+
 class TampioError(Exception):
 	def __init__(self, msg):
 		self.msg = msg

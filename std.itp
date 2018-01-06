@@ -23,6 +23,9 @@ Tulkitse kohdekoodilista kohdekoodityyppinä "Array".
 Kohdekoodilistan määrä on "this.length" kohdekoodina.
 Kohdekoodilistan summa on "this.reduce((a,b) => a+b)" kohdekoodina.
 
+Kun kivaksi kohdekoodilistaksi lisätään kiva arvo,
+	suorita kohdekoodi "this.push(kiva_arvo);".
+
 # Lista
 
 Listalla on alkiot.

@@ -705,6 +705,7 @@ Available options:
 |Option               |Default|Description|
 |:-------------------:|:-----:|:----------|
 |`kohdekoodi`         |Off    |Enable target code related commands (`Sisällytä kohdekoodi`, `Tulkitse kohdekoodityyppinä`, `suorita`, `kohdekoodina`).
+|`käyttömäärittelyt`  |Off    |Enable variable autodeclarations (a very experimental feature).
 |`takaisinviittaukset`|Off    |Enable backreferences (a very experimental feature).
 
 #### `Sisällytä`

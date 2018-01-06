@@ -114,7 +114,7 @@ def parseDeclaration(tokens):
 		stmts = parseAdditionalStatements(tokens)
 		eatPeriod(tokens)
 		tokens.addNewline()
-		return VariableDecl(word1.baseform + "_" + word2.baseform, value, stmts)
+		return VariableDecl(word1.baseform + "_" + word2.baseform, word2.baseform, value, stmts)
 	# Imperatiivit
 	elif token.token.lower() == "sisällytä":
 		tokens.next()
@@ -635,7 +635,7 @@ def parseArgs(tokens, passive, allow_predicatives, signature=False):
 		tokens.next()
 		tokens.setStyle("keyword")
 		w1, w2 = parseVariable(tokens)
-		return args, w1.baseform + "_" + w2.baseform
+		return args, (w1.baseform + "_" + w2.baseform, w2.baseform)
 	else:
 		return args, None
 
@@ -657,7 +657,7 @@ def parseAsyncBlock(tokens):
 		predicate, passive = parsePredicate(word, tokens, w1.form)
 		args, ov = parseArgs(tokens, passive, predicate=="olla_A")
 		eatComma(tokens)
-		ans.append((method_name, parameter, MethodCallStatement(VariableExpr(parameter), w1.form, predicate, args, ov, [])))
+		ans.append((method_name, parameter, w2.baseform, MethodCallStatement(VariableExpr(parameter, w2.baseform), w1.form, predicate, args, ov, [])))
 	if len(ans) > 1 and not last:
 		tokens.setPlace(place)
 		syntaxError("the last sentence in this list must be separated from the others by \"ja\"", tokens)
@@ -995,7 +995,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				elif word.isVariable() and word.ordinal_like:
 					tokens.next()
 					tokens.setStyle("variable")
-					index = VariableExpr(word.baseform)
+					index = VariableExpr(word.baseform, "luku")
 					is_slice = True
 				if is_slice:
 					if word.form == "sisaeronto":
@@ -1046,7 +1046,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 					end_index = True
 				else:
 					tokens.setStyle("variable")
-					index = VariableExpr(word.baseform)
+					index = VariableExpr(word.baseform, "luku")
 					end_index = False
 				checkEof(tokens)
 				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
@@ -1148,15 +1148,17 @@ def parseAssignment(tokens):
 	if tokens.peek().toWord().isVariable():
 		var = tokens.next().toWord().baseform
 		tokens.setStyle("variable")
+		vtype = "luku"
 	else:
 		word, word2 = parseVariable(tokens)
 		var = word.baseform + "_" + word2.baseform
+		vtype = word2.baseform
 	accept(["on", "ovat"], tokens)
 	tokens.setStyle("keyword")
 	value, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
 	if case != "nimento":
 		syntaxError("contructor argument value is not in nominative case", tokens)
-	return (var, value)
+	return (var, vtype, value)
 
 def parseCtorArg(tokens):
 	checkEof(tokens)
