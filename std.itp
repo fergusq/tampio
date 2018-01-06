@@ -190,6 +190,11 @@ Promise.prototype.a_epäonnistuessa = Promise.prototype.catch;
 Kun toistetaan n kertaa tehokas toiminto,
 	suorita kohdekoodi "for (var i = 0; i < n; i++) tehokas_toiminto();".
 
+# tehdään
+
+Kun tehdään määritellyn ajan kuluttua tehokas toiminto,
+	suorita kohdekoodi "setTimeout(tehokas_toiminto, määritelty_aika);".
+
 # tulostetaan
 
 Kun tulostetaan kiva viesti,
