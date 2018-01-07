@@ -299,10 +299,8 @@ def parseVariable(tokens, word=None, case="nimento"):
 	word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
 	if not word2.isNoun() or (case and word2.form != case):
 		syntaxError("this variable must end with a noun " + formToEnglish(case, article=False), tokens)
-	if word.form != word2.form:
-		syntaxError("variable words do not accept in case", tokens)
-	if word.number != word2.number:
-		syntaxError("variable words do not accept in number", tokens)
+	if not word.agreesWith(word2):
+		syntaxError("variable words do not agree", tokens)
 	tokens.setStyle("type")
 	return word, word2
 
@@ -781,7 +779,7 @@ def nextStartsNominalPhrase(tokens):
 def canStartNominalPhrase(word, tokens):
 	return ((word.isAdjective()
 			and tokens.peek(2) and tokens.peek(2).isWord()
-			and tokens.peek(2).toWord(cls=NOUN).isNoun() and tokens.peek(2).toWord(cls=NOUN,forms=word.form).form == word.form)
+			and tokens.peek(2).toWord(cls=NOUN).isNoun() and tokens.peek(2).toWord(cls=NOUN,forms=word.form).agreesWith(word))
 		or word.isPronoun()
 		or word.isVariable()
 		or word.isOrdinal()
@@ -884,8 +882,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			expr = LambdaExpr(body)
 		elif (allow_backreferences and
 			nextIsValidVerbModifier(tokens, allow_adverbs=False, allow_verbs=False)
-			and tokens.peek().toWord(cls=NOUN,forms=word.form).form == word.form
-			and tokens.peek().toWord(cls=NOUN,forms=word.form).number == word.number): # takaisinviittaus edelliseen lausekkeeseen esim. "se olio"
+			and tokens.peek().toWord(cls=NOUN,forms=word.form).agreesWith(word)): # takaisinviittaus edelliseen lausekkeeseen esim. "se olio"
 			tokens.setStyle("variable")
 			word2 = tokens.next().toWord(cls=NOUN,forms=word.form)
 			if word2.form == "omanto":
@@ -900,7 +897,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			tokens.setStyle("variable")
 			if tokens.peek() and tokens.peek().isWord():
 				word2 = tokens.peek().toWord(cls=PRONOUN)
-				if word2.baseform == "itse" and word2.form == word.form:
+				if word2.baseform == "itse" and word2.agreesWith(word):
 					tokens.next()
 					tokens.setStyle("variable", continued=True)
 			case = word.form
@@ -917,31 +914,61 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			syntaxError("unexpected word", tokens)
 		# takaisinviittaus
 		if (nextIsValidVerbModifier(tokens, allow_adverbs=False, allow_verbs=False)
-			and tokens.peek().toWord(cls=NOUN,forms=word.form).form == word.form
-			and tokens.peek().toWord(cls=NOUN,forms=word.form).number == word.number):
+			and tokens.peek().toWord(cls=NOUN,forms=word.form).agreesWith(word)):
 			word2 = tokens.next().toWord(cls=NOUN,forms=word.form)
 			tokens.setStyle("variable", continued=True)
 			expr = BackreferenceExpr(word2.baseform)
 		else:
 			if tokens.peek() and tokens.peek().isWord():
 				word2 = tokens.peek().toWord(cls=PRONOUN)
-				if word2.baseform == "itse" and word2.form == word.form:
+				if word2.baseform == "itse" and word2.agreesWith(word):
 					tokens.next()
 					tokens.setStyle("variable", continued=True)
 			expr = VariableExpr("this")
-	elif (word.isAdjective() and word.baseform == "uusi") or (word.isNoun() and tokens.peek(1).token == "," and tokens.peek(2).token.lower() == "jonka"):
+	elif ((word.isAdjective() and word.baseform == "uusi")
+		or (word.isAdjective() and tokens.peek() and tokens.peek().toWord(cls=NOUN,forms=[word.form]).agreesWith(word, baseform="uusi"))
+		or (word.isNoun() and tokens.peek(1) and tokens.peek(1).token == "," and tokens.peek(2).token.lower() == "jonka")
+		):
+		# uusi-lausekkeen yhteydessä voidaan luoda uusi muuttuja ylimääräisen adjektiivin avulla, esim. "kiva uusi tyyppi" tai "uusi kiva tyyppi"
+		varname = None
 		if word.baseform == "uusi":
 			tokens.setStyle("keyword")
 			checkEof(tokens)
+			
+			word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
+			if word2.isAdjective():
+				if not word.agreesWith(word2):
+					syntaxError("the adjectives of a constructor call must be in the same case", tokens)
+				tokens.setStyle("variable")
+				varname = word2.baseform
+				word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
+			
+			if not word2.isNoun():
+				syntaxError("type must be a noun", tokens)
+			if not word.agreesWith(word2):
+				syntaxError("the adjective and the noun of a constructor call must be in the same case", tokens)
+		elif word.isAdjective():
+			tokens.setStyle("variable")
+			varname = word.baseform
+			word2 = tokens.next().toWord(cls=ADJ,forms=[word.form])
+			if word2.baseform != "uusi":
+				syntaxError("unexpected token, expected \"uusi\"", tokens)
+			if not word.agreesWith(word2):
+				syntaxError("the adjectives of a constructor call must be in the same case", tokens)
+			tokens.setStyle("keyword")
 			word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
 			if not word2.isNoun():
-				syntaxError("a type must be a noun", tokens)
-			if word.form != word2.form:
+				syntaxError("type must be a noun", tokens)
+			if not word.agreesWith(word2):
 				syntaxError("the adjective and the noun of a constructor call must be in the same case", tokens)
 		else:
 			word2 = word
 		
 		tokens.setStyle("type")
+		
+		if varname:
+			varname += "_" + word2.baseform
+		
 		case = word.form
 		if tokens.peek(1) and tokens.peek(2) and tokens.peek(1).token == "," and tokens.peek(2).token.lower() == "jonka":
 			tokens.next()
@@ -953,7 +980,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			eatComma(tokens)
 		else:
 			args = []
-		expr = NewExpr(word2.baseform, args)
+		expr = NewExpr(word2.baseform, args, variable=varname)
 	elif predicative and word.isNoun():
 		tokens.setStyle("type")
 		expr = NewExpr(word.baseform, [])
@@ -968,7 +995,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			syntaxError("a variable must begin with an adjective: "+word.baseform+" "+word2.baseform, tokens, place)
 		if not word2.isNoun():
 			syntaxError("a variable must end with a noun: "+word.baseform+" "+word2.baseform, tokens)
-		if word.form != word2.form:
+		if not word.agreesWith(word2):
 			syntaxError("the adjective and the noun of a variable must be in the same case", tokens)
 		
 		tokens.setStyle("type")
@@ -1023,7 +1050,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				tokens.setStyle("keyword")
 				checkEof(tokens)
 				word2 = tokens.next().toWord(cls=NOUN, forms=[word.form])
-				if not word2.isNoun() or word2.form != word.form:
+				if not word2.isNoun() or not word2.agreesWith(word):
 					syntaxError("expected a noun " + formToEnglish(word.form, article=False), tokens)
 				tokens.setStyle("field")
 				case = word.form
@@ -1076,7 +1103,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				tokens.setStyle("field")
 				
 				word2 = tokens.next().toWord(cls=NOUN,forms=[word.form])
-				if word2.form != word.form or word2.number != word2.number:
+				if not word.agreesWith(word2):
 					syntaxError("malformed member name, the adjective and the noun do not agree", tokens)
 				tokens.setStyle("field", continued=True)
 				

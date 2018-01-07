@@ -14,35 +14,50 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from collections import namedtuple
 from itertools import chain
 from inflect import CASES_ABRV
-from fatal_error import fatalError, typeError, notfoundError, TampioError
+from fatal_error import fatalError, typeError, notfoundError, warning, TampioError
 from hierarchy import Class
 
 # kääntäjän tila
 
 def initializeCompiler(include_file):
-	global classes, global_variables, aliases, includeFile, options, block_mode, VARIABLE_STACK, BACKREFERENCE_STACK
+	global classes, global_variables, aliases, includeFile, options, block_frame
 	options = {}
+	block_frame = BlockData(None, set(), False)
 	classes = {}
 	global_variables = []
-	block_mode = False
-	VARIABLE_STACK = [global_variables]
-	BACKREFERENCE_STACK = []
 	aliases = {}
 	includeFile = include_file
 
 class CompilerFrame:
 	def __enter__(self):
-		global options
+		global options, block_frame
 		self.prev_options = options
+		self.prev_block_frame = block_frame
 		options = {
 			"kohdekoodi": False,
 			"käyttömäärittelyt": False
 		}
+		block_frame = BlockData(None, set(), False)
 	def __exit__(self, *args):
-		global options
+		global options, block_frame
 		options = self.prev_options
+		block_frame = self.prev_block_frame
+
+BlockData = namedtuple("BlockData", "variables backreferences block_mode")
+
+class BlockFrame:
+	def __init__(self, new_frame):
+		self.new_frame = new_frame
+	def __enter__(self):
+		global block_frame
+		self.prev_frame = block_frame
+		block_frame = self.new_frame
+	def __exit__(self, *args):
+		global block_frame
+		block_frame = self.prev_frame
 
 def getClass(name):
 	if name in classes:
@@ -88,52 +103,36 @@ def compileModule(declarations, on_error):
 # lohkon kääntäminen
 
 def compileBlock(statements, indent, parameters):
-	global block_mode
-	
-	bcs = []
+	bcs = set()
 	for stmt in statements:
-		bcs += stmt.backreferences()
-	BACKREFERENCE_STACK.append(bcs)
+		bcs.update(set(stmt.backreferences()))
 	
 	ans = ""
-	for bc in set(bcs):
+	for bc in bcs:
 		ans += " "*indent + "var se_" + escapeIdentifier(bc) + " = null;\n"
 	
-	variables = set(list(chain.from_iterable(VARIABLE_STACK)) + parameters)
-	VARIABLE_STACK.append(variables)
+	prev_variables = block_frame.variables or set(global_variables)
+	variables = prev_variables.union(set(parameters))
 	
-	prev_block_mode = block_mode
-	block_mode = True
-	
-	for stmt in statements:
-		# eksplisiittisesti luodut uudet muuttujat
-		variables.update(set(stmt.createdVariables()))
-		# vielä mainitsemattomat muuttujat ovat luodaan (poisluetaan väliaikaismuuttujat)
-		if options["käyttömäärittelyt"]:
-			new_vars = set(stmt.variables())
-			for name, vtype in new_vars.difference(variables).difference(set(stmt.temporaryVariables())):
-				warning("warning: autodeclaration of " + name + " as " + vtype)
-				ans += " "*indent + "var " + name + " = new " + vtype + "({});\n"
+	with BlockFrame(BlockData(variables, bcs, True)):
+		for stmt in statements:
+			# eksplisiittisesti luodut uudet muuttujat
+			variables.update(set(stmt.createdVariables()))
+			# uusi-avainsanalla luodut uudet muuttujat
+			new_vars = set(stmt.newVariables())
+			for name, vtype in new_vars:
+				ans += " "*indent + "var " + escapeIdentifier(name) + " = null;\n"
 			variables.update(new_vars)
-		ans += stmt.compile(indent=indent)
-	
-	del BACKREFERENCE_STACK[-1]
-	del VARIABLE_STACK[-1]
-	block_mode = prev_block_mode
+			# vielä mainitsemattomat muuttujat ovat luodaan (poisluetaan väliaikaismuuttujat)
+			if options["käyttömäärittelyt"]:
+				new_vars = set(stmt.variables())
+				for name, vtype in new_vars.difference(variables).difference(set(stmt.temporaryVariables())):
+					warning("autodeclaration of " + name + " as " + vtype)
+					ans += " "*indent + "var " + escapeIdentifier(name) + " = new " + escapeIdentifier(vtype) + "({});\n"
+				variables.update(new_vars)
+			ans += stmt.compile(indent=indent)
 	
 	return ans
-
-def currentBackreferences():
-	if len(BACKREFERENCE_STACK) >= 1:
-		return BACKREFERENCE_STACK[-1]
-	else:
-		return []
-
-def currentVariables():
-	if len(VARIABLE_STACK) >= 1:
-		return VARIABLE_STACK[-1]
-	else:
-		return []
 
 # määrittelyjen kääntäminen
 
@@ -361,10 +360,16 @@ class Recursive:
 		return ans
 	def backreferences(self):
 		return self.search(lambda e: e.backreferences())
+	# kaikki muuttujat
 	def variables(self):
 		return self.search(lambda e: e.variables())
+	# lausekkeissa luodut muuttujat (muuttujaluonti käännetään lausekkeen yhteydessä)
 	def createdVariables(self):
 		return self.search(lambda e: e.createdVariables())
+	# lausekkeissa luodut muuttujat (muuttujaluonti käännetään ennen lauseketta)
+	def newVariables(self):
+		return self.search(lambda e: e.newVariables())
+	# väliaikaismuuttujat
 	def temporaryVariables(self):
 		return self.search(lambda e: e.temporaryVariables())
 
@@ -461,7 +466,7 @@ class CallStatement(Recursive):
 		self.output_var = output_var
 		self.async_block = async_block
 	def subexpressions(self):
-		ans = []
+		ans = [self]
 		for v in self.args.values():
 			ans += v.subexpressions()
 		for _, _, _, s in self.async_block:
@@ -493,12 +498,11 @@ class CallStatement(Recursive):
 	def compileAsync(self, indent):
 		ans = ""
 		for mname, param, ptype, stmt in self.async_block:
-			VARIABLE_STACK.append(currentVariables().union(set([(param, ptype)])))
-			ans += ("." + escapeIdentifier(mname)
-				+ "(" + escapeIdentifier(param) + " =>\n"
-				+ stmt.compile(indent=indent+1, semicolon=False)
-				+ " "*indent + ")")
-			del VARIABLE_STACK[-1]
+			with BlockFrame(block_frame._replace(variables=block_frame.variables.union(set([(param, ptype)])))):
+				ans += ("." + escapeIdentifier(mname)
+					+ "(" + escapeIdentifier(param) + " =>\n"
+					+ stmt.compile(indent=indent+1, semicolon=False)
+					+ " "*indent + ")")
 		return ans
 			
 	def compile(self, semicolon=True, indent=0):
@@ -588,11 +592,11 @@ class VariableExpr(Recursive):
 		self.name = name
 		self.type = vtype
 	def compile(self, indent):
-		if block_mode and self.type:
-			if (self.name, self.type) not in currentVariables():
+		if block_frame.block_mode and self.type:
+			if (self.name, self.type) not in block_frame.variables:
 				notfoundError("variable not found: " + self.name)
 		ans = escapeIdentifier(self.name)
-		if self.type in currentBackreferences():
+		if self.type in block_frame.backreferences:
 			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
 		return ans
 	def variables(self):
@@ -694,18 +698,26 @@ class StrExpr(Recursive):
 		return repr(self.str)
 
 class NewExpr(Recursive):
-	def __init__(self, typename, args):
+	def __init__(self, typename, args, variable=None):
 		self.type = typename
 		self.args = args
+		self.variable = variable
 	def subexpressions(self):
 		ans = []
 		for arg in self.args:
 			ans += arg.value.subexpressions()
 		return [self] + ans
+	def newVariables(self):
+		if self.variable:
+			return [(self.variable, self.type)]
+		else:
+			return []
 	def compile(self, indent):
 		ans = "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile(indent) for arg in self.args]) + "})"
-		if self.type in currentBackreferences():
+		if self.type in block_frame.backreferences:
 			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
+		if self.variable:
+			ans = "(" + escapeIdentifier(self.variable) + "=" + ans + ")"
 		return ans
 
 class CtorArgExpr:
@@ -728,7 +740,7 @@ class LambdaExpr(Recursive):
 	def __init__(self, body):
 		self.body = body
 	def compile(self, indent):
-		return "() => {\n" + compileBlock(self.body, indent+1, []) + " }"
+		return "() => {\n" + compileBlock(self.body, indent+1, []) + " "*indent + "}"
 	# ei alalausekkeita
 
 class TernaryExpr(Recursive):

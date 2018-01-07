@@ -302,3 +302,5 @@ class Word:
 		return self.word_class in ["sidesana"]
 	def isAdverb(self):
 		return self.word_class in ["seikkasana"] or self.form == "kerrontosti"
+	def agreesWith(self, word, baseform=None):
+		return self.form == word.form and self.number == word.number and (not baseform or self.baseform == baseform)
