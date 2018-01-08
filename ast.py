@@ -23,28 +23,34 @@ from hierarchy import Class
 # kääntäjän tila
 
 def initializeCompiler(include_file):
-	global classes, global_variables, aliases, includeFile, options, block_frame
+	global classes, global_variables, aliases, includeFile, options, block_frame, tokens
 	options = {}
 	block_frame = BlockData(None, set(), False)
 	classes = {}
 	global_variables = []
 	aliases = {}
 	includeFile = include_file
+	tokens = None
 
 class CompilerFrame:
+	def __init__(self, tl):
+		self.tokens = tl
 	def __enter__(self):
-		global options, block_frame
+		global options, block_frame, tokens
 		self.prev_options = options
 		self.prev_block_frame = block_frame
+		self.prev_tokens = tokens
 		options = {
 			"kohdekoodi": False,
 			"käyttömäärittelyt": False
 		}
 		block_frame = BlockData(None, set(), False)
+		tokens = self.tokens
 	def __exit__(self, *args):
-		global options, block_frame
+		global options, block_frame, tokens
 		options = self.prev_options
 		block_frame = self.prev_block_frame
+		tokens = self.prev_tokens
 
 BlockData = namedtuple("BlockData", "variables backreferences block_mode")
 
@@ -83,8 +89,8 @@ def escapeIdentifier(identifier):
 
 # moduulin käätäminen
 
-def compileModule(declarations, on_error):
-	with CompilerFrame():
+def compileModule(declarations, on_error, tokens):
+	with CompilerFrame(tokens):
 		for decl in declarations:
 			try:
 				decl.buildHierarchy()
@@ -590,11 +596,10 @@ class MethodAssignmentStatement(Recursive):
 # lausekkeiden kääntäminen
 
 class VariableExpr(Recursive):
-	def __init__(self, name, vtype=None, initial_value=None, tokens=None, place=None):
+	def __init__(self, name, vtype=None, initial_value=None, place=None):
 		self.name = name
 		self.type = vtype
 		self.initial_value = initial_value
-		self.tokens = tokens
 		self.place = place
 	def subexpressions(self):
 		if self.initial_value:
@@ -609,7 +614,10 @@ class VariableExpr(Recursive):
 	def compile(self, indent):
 		if block_frame.block_mode and self.type and not self.initial_value:
 			if (self.name, self.type) not in block_frame.variables:
-				notfoundError("variable not found: " + self.name, self.tokens, self.place)
+				if self.place:
+					notfoundError("variable not found: " + self.name, tokens, self.place)
+				else:
+					notfoundError("variable not found: " + self.name)
 		ans = escapeIdentifier(self.name)
 		if self.initial_value:
 			ans = "(" + ans + "=" + self.initial_value.compile(indent) + ")"

@@ -54,7 +54,7 @@ def compileCode(code):
 			decls += [parseDeclaration(tokens)]
 		except TampioSyntaxError as e:
 			handleError(e)
-	target_code = compileModule(decls, on_error=handleError)
+	target_code = compileModule(decls, handleError, tokens)
 	return tokens, target_code, num_errors
 
 def createHTML(code):
@@ -80,7 +80,7 @@ def createLatex(code):
 	return ans
 
 TAMPIO_VERSION = "1.37"
-COMPILER_VERSION = "1.48.0"
+COMPILER_VERSION = "1.48.1"
 VERSION_STRING = "Tampio " + TAMPIO_VERSION + " Compiler " + COMPILER_VERSION
 
 def main():

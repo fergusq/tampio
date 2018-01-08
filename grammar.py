@@ -1012,13 +1012,13 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			else:
 				accept(["on"], tokens)
 			val_expr = parseNominativePredicative(tokens)
-			if star_token == ",":
+			if start_token == ",":
 				eatComma(tokens)
 			else:
 				accept(["]"], tokens)
-			expr = VariableExpr(variable, word2.baseform, initial_value=val_expr, tokens=tokens, place=place)
+			expr = VariableExpr(variable, word2.baseform, initial_value=val_expr, place=place)
 		else:
-			expr = VariableExpr(variable, word2.baseform, tokens=tokens, place=place)
+			expr = VariableExpr(variable, word2.baseform, place=place)
 	
 	cont = True
 	while cont:
