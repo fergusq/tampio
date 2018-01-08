@@ -443,7 +443,8 @@ For example:
 
 ### Assignments
 
-There are three ways to create variables in Tampio: `missä` clauses, return value assignments and assignment statements.
+There are several ways to create variables in Tampio:
+`joka on` expressions, `uusi` expressions, `missä` clauses, return value assignments, assignment statements and parameter declarations.
 Return value assignments are covered in the method call chapter.
 Assignment statements consist of the name of the variable or field in the translative case and an expression.
 
@@ -491,6 +492,40 @@ For example:
     napakan neuronin lauetessa sähäkästä syötteestä käyköön niin, että napakan neuronin ulostuloksi asetetaan sähäkän syötteen summan neliöjuuri,
 
 ## Expressions
+
+### Variables
+
+Usually variables consist of an adjective and a noun.
+
+    kiva luku        # the nice number
+    lyhyt lista      # the short list
+    pieni vektori    # the small vector
+    loistava laskuri # the great counter
+    annettu pituus   # the given length
+    haluttu tulos    # the desired result
+
+The special variable `se` is used to refer to the self object (`this` in JavaScript).
+It can also appear in form `se itse` (meaning "itself") when appearing
+as the object or predicative of a sentence where it is also the subject.
+
+    Luvun arvo on se itse. # the identity function
+
+It is possible to create the variable when first using it.
+
+    [variable], joka on [expression/predicative],
+    [variable] [joka on [expression/predicative]]
+
+Note that the second syntax has literal `[]` characters.
+When either of these is used, the variable is created
+and its value is set to the value of the expression.
+
+It is also possible to initialize the variable to be a new object.
+
+    uusi [adjective] [noun]
+    [adjective] uusi [noun]
+
+This is equivalent to `[adjective] [noun], joka on uusi [noun],`.
+All words must agree in case (be inflected in the same case).
 
 ### Literal numbers
 
