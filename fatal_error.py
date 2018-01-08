@@ -23,32 +23,36 @@ def fatalError(msg):
 class StopEvaluation(Exception):
 	pass
 
+class TampioError(Exception):
+	def __init__(self, msg, tokens=None, place=None):
+		self.msg = msg
+		self.tokens = tokens
+		self.place = place
+	def printMe(self, stream):
+		if self.tokens and self.place:
+			stream.write(self.msg + "\n" + self.tokens.fancyContext(self.place) + "\n")
+		else:
+			stream.write(self.msg)
+	def __str__(self):
+		if self.tokens  and self.place:
+			return "Syntax error: " + self.msg + " (in \"" + self.tokens.context(self.place) + "\")"
+		else:
+			return self.msg
+
 def syntaxError(msg, tokens, place=None):
 	raise(TampioSyntaxError(msg, tokens, place if place else tokens.place()))
 
-class TampioSyntaxError(Exception):
+class TampioSyntaxError(TampioError):
 	def __init__(self, msg, tokens, i):
-		self.msg = msg
+		self.msg = "Syntax error: " + msg
 		self.tokens = tokens
 		self.place = i
-	def printMe(self, stream):
-		stream.write("Syntax error: " + self.msg + "\n" + self.tokens.fancyContext(self.place) + "\n")
-	def __str__(self):
-		return "Syntax error: " + self.msg + " (in \"" + self.tokens.context(self.place) + "\")"
 
-def typeError(msg):
-	raise(TampioError("Type error: " + msg))
+def typeError(msg, tokens=None, place=None):
+	raise(TampioError("Type error: " + msg, tokens, place))
 
-def notfoundError(msg):
-	raise(TampioError("Not found error: " + msg))
+def notfoundError(msg, tokens=None, place=None):
+	raise(TampioError("Not found error: " + msg, tokens, place))
 
 def warning(msg):
 	sys.stderr.write("Warning: " + msg + "\n")
-
-class TampioError(Exception):
-	def __init__(self, msg):
-		self.msg = msg
-	def printMe(self, stream):
-		stream.write(self.msg + "\n")
-	def __str__(self):
-		return self.msg

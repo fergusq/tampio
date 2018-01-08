@@ -571,7 +571,9 @@ class MethodAssignmentStatement(Recursive):
 		return escapeIdentifier(self.method) + "_" + "".join([formAbrv(form) for form in keys]) + "_" + formAbrv(self.obj_case)
 	def compileParams(self, indent):
 		keys = sorted(self.params.keys())
-		return "(" + ", ".join([self.params[key].compile(indent) for key in keys]) + ")"
+		with BlockFrame(block_frame._replace(block_mode=False)):
+			ans = "(" + ", ".join([self.params[key].compile(indent) for key in keys]) + ")"
+		return ans
 	def compile(self, semicolon=True, indent=0):
 		ans = " "*indent
 		ans += self.obj.compile(indent)
@@ -579,7 +581,7 @@ class MethodAssignmentStatement(Recursive):
 		ans += "\", "
 		ans += self.compileParams(indent)
 		ans += " => {\n"
-		ans += compileBlock(self.body, indent+1, list(chain.from_iterable([p.variables() for p in self.params])))
+		ans += compileBlock(self.body, indent+1, list(chain.from_iterable([self.params[key].variables() for key in self.params])))
 		ans += " "*indent + "});"
 		if semicolon:
 			ans += ";\n"
@@ -588,14 +590,29 @@ class MethodAssignmentStatement(Recursive):
 # lausekkeiden kääntäminen
 
 class VariableExpr(Recursive):
-	def __init__(self, name, vtype=None):
+	def __init__(self, name, vtype=None, initial_value=None, tokens=None, place=None):
 		self.name = name
 		self.type = vtype
+		self.initial_value = initial_value
+		self.tokens = tokens
+		self.place = place
+	def subexpressions(self):
+		if self.initial_value:
+			return [self] + self.initial_value.subexpressions()
+		else:
+			return [self]
+	def newVariables(self):
+		if self.type and self.initial_value:
+			return [(self.name, self.type)]
+		else:
+			return []
 	def compile(self, indent):
-		if block_frame.block_mode and self.type:
+		if block_frame.block_mode and self.type and not self.initial_value:
 			if (self.name, self.type) not in block_frame.variables:
-				notfoundError("variable not found: " + self.name)
+				notfoundError("variable not found: " + self.name, self.tokens, self.place)
 		ans = escapeIdentifier(self.name)
+		if self.initial_value:
+			ans = "(" + ans + "=" + self.initial_value.compile(indent) + ")"
 		if self.type in block_frame.backreferences:
 			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
 		return ans

@@ -1002,7 +1002,23 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 		case = word.form
 		variable = word.baseform + "_" + word2.baseform
 		
-		expr = VariableExpr(variable, word2.baseform)
+		# muuttujan luominen ensimmäisen viittauksen yhteydessä: "kiva luku, joka on nätin luvun neliöjuuri"
+		if tokens.peek() and tokens.peek().token in [",", "["] and tokens.peek(2) and tokens.peek(2).token.lower() == "joka":
+			start_token = tokens.next().token
+			tokens.next()
+			tokens.setStyle("keyword")
+			if word.number == "plural":
+				accept(["ovat"], tokens)
+			else:
+				accept(["on"], tokens)
+			val_expr = parseNominativePredicative(tokens)
+			if star_token == ",":
+				eatComma(tokens)
+			else:
+				accept(["]"], tokens)
+			expr = VariableExpr(variable, word2.baseform, initial_value=val_expr, tokens=tokens, place=place)
+		else:
+			expr = VariableExpr(variable, word2.baseform, tokens=tokens, place=place)
 	
 	cont = True
 	while cont:
