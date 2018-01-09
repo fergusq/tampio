@@ -33,7 +33,7 @@ To print Markdown code that contains the syntax highlighting data of the file:
 
 To print a HTML page that contains both JavaScript and the syntax highlighted code:
 
-    python3 tampio.py -p file.itp
+    python3 tampio.py -i -p file.itp
 
 ## Introduction
 
