@@ -264,7 +264,7 @@ def parseDeclaration(tokens):
 			elif word.form in ["omanto", "nimento"]:
 				place = tokens.place()
 				field, field_case, field_number, param, param_case = parseFieldName(tokens, word.form)
-				if field in ARI_OPERATORS:
+				if field in ARI_OPERATORS and ARI_OPERATORS[field][0] == param_case:
 					tokens.setPlace(place)
 					tokens.next()
 					syntaxError("redefinition of builtin", tokens)
@@ -1002,6 +1002,10 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 		case = word.form
 		variable = word.baseform + "_" + word2.baseform
 		
+		if tokens.peek() and tokens.peek().isWord() and tokens.peek().toWord().agreesWith(word, baseform="itse"):
+			tokens.next()
+			tokens.setStyle("keyword")
+		
 		# muuttujan luominen ensimmäisen viittauksen yhteydessä: "kiva luku, joka on nätin luvun neliöjuuri"
 		if tokens.peek() and tokens.peek().token in [",", "["] and tokens.peek(2) and tokens.peek(2).token.lower() == "joka":
 			start_token = tokens.next().token
@@ -1011,6 +1015,9 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				accept(["ovat"], tokens)
 			else:
 				accept(["on"], tokens)
+			if tokens.peek() and tokens.peek().token.lower() in INITIAL_VALUE_KEYWORDS:
+				tokens.next()
+				tokens.setStyle("keyword")
 			val_expr = parseNominativePredicative(tokens)
 			if start_token == ",":
 				eatComma(tokens)

@@ -32,9 +32,12 @@ Listalla on alkiot.
 
 Listan koko on "this.alkio.length" kohdekoodina
 	(eli sen alkioiden määrä).
+Listan pituus on sen koko.
 Listan häntä on "new lista({alkio: this.alkio.slice(1)})" kohdekoodina
 	(eli uusi lista, jonka alkiot ovat sen alkiot toisesta alkaen).
 Lista järjestettynä on "new lista({alkio: Array.from(this.alkio).sort()})" kohdekoodina.
+Listan suurin alkio on "this.alkio.reduce((a, b) => Math.max(a, b), -Infinity)" kohdekoodina.
+Listan pisin alkio on "this.alkio.reduce((a, b) => a.f_pituus()<b.f_pituus()?b:a, {f_pituus(){return -Infinity;}})" kohdekoodina.
 
 Kun kiva lista etsii indeksin kivalle arvolle,
 	suorita kohdekoodi "return this.alkio.indexOf(kiva_arvo);".

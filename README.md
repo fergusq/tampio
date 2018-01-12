@@ -44,17 +44,17 @@ A Tampio file is a list of definitions, each which defines either a class, a fun
 For example, here is a simple program that calculates the factorial of a given number.
 
     Pienen luvun kertoma on
-    	riippuen siitä, onko pieni luku pienempi tai yhtä suuri kuin yksi,
-    	joko pieni luku
-    	tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
+        riippuen siitä, onko se pienempi tai yhtä suuri kuin yksi,
+        joko pieni luku itse
+        tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
     
-    Luonnollisen luvun edeltäjä on luonnollinen luku vähennettynä yhdellä.
+    Luvun edeltäjä on se vähennettynä yhdellä.
     
     Olkoon pieni muuttuja uusi muuttuja, jonka arvo on nolla.
     
     Kun nykyinen sivu avautuu,
-    	pieneen muuttujaan luetaan luku
-    	ja nykyinen sivu näyttää pienen muuttujan arvon kertoman.
+        pieneen muuttujaan luetaan luku
+        ja nykyinen sivu näyttää pienen muuttujan arvon kertoman.
 
 It contains two functions definitions, one variable definition and one method definition.
 Let's iterate these line by line.
@@ -65,15 +65,17 @@ This is the signature of the `kertoma` function, which has one parameter `pieni 
 As you can see, the name of the parameter comes before the name of the function and is in the genitive case.
 The last word, `on`, is a keyword that separates the signature of the function and its body.
 
-    riippuen siitä, onko pieni luku pienempi tai yhtä suuri kuin yksi,
+    riippuen siitä, onko se pienempi tai yhtä suuri kuin yksi,
 
 This is a conditional expression.
-It tests if `pieni luku` is less than or equal to (`pienempi tai yhtä suuri kuin`) one (`yksi`).
+It tests if `se` is less than or equal to (`pienempi tai yhtä suuri kuin`) one (`yksi`).
+`se` is like `this` in JavaScript and always means the first parameter (here `pieni luku`).
 
-    joko pieni luku
+    joko pieni luku itse
 
 If the condition is true, the function returns the value of its argument, `pieni luku`.
 `joko` is a keyword that comes after the condition of `riippuen siitä` expression.
+`itse` is a keyword that does nothing and is used because it makes the sentence sound more natural Finnish.
 
     tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
 
@@ -83,10 +85,10 @@ The right operand of `kerrottuna` consists of two function calls (which are simi
 First, the predecessor (`edeltäjä`) of `pieni luku` is calculated, and then its factorial (`kertoma`).
 The arguments of functions are in the genitive case.
 
-    Luonnollisen luvun edeltäjä on luonnollinen luku vähennettynä yhdellä.
+    Luvun edeltäjä on se vähennettynä yhdellä.
 
-This is a helper function that calculates the predecessor of a natural number.
-It simply consists of a `vähennettynä` operator that operands `luonnollinen luku` (the parameter) and `yksi` (one).
+This is a helper function that calculates the predecessor of a number.
+It simply consists of a `vähennettynä` operator with operands `se` (the parameter) and `yksi` (one).
 
     Olkoon pieni muuttuja uusi muuttuja, jonka arvo on nolla.
 

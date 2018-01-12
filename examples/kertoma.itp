@@ -1,9 +1,9 @@
 Pienen luvun kertoma on
-	riippuen siitä, onko pieni luku pienempi tai yhtä suuri kuin yksi,
-	joko pieni luku
+	riippuen siitä, onko se pienempi tai yhtä suuri kuin yksi,
+	joko pieni luku itse
 	tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
 
-Luonnollisen luvun edeltäjä on luonnollinen luku vähennettynä yhdellä.
+Luvun edeltäjä on se vähennettynä yhdellä.
 
 Olkoon pieni muuttuja uusi muuttuja, jonka arvo on nolla.
 
