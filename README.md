@@ -418,12 +418,15 @@ Below is a table of available comparison operators.
 |(empty)                       |`==`                 |
 |`yhtä kuin`                   |`==`                 |
 |`yhtä suuri kuin`             |`==`                 |
+|`tasan`                       |`==`                 |
 |`sama kuin`                   |`===`                |
 |`erisuuri kuin`               |`!=`                 |
 |`pienempi kuin`               |`<`                  |
 |`suurempi kuin`               |`>`                  |
 |`pienempi tai yhtä suuri kuin`|`<=`                 |
+|`enintään`                    |`<=`                 |
 |`suurempi tai yhtä suuri kuin`|`>=`                 |
+|`vähintään`                   |`>=`                 |
 
 It is possible to define custom comparison operators for classes.
 

@@ -665,14 +665,17 @@ CMP_OPERATORS = {
 	"yhtä suuri kuin": "==",
 	"yhtäsuuri kuin": "==",
 	"yhtä kuin": "==",
+	"tasan": "==",
 	"sama kuin": "===",
 	"erisuuri kuin": "!=",
 	"pienempi kuin": "<",
 	"pienempi tai yhtä suuri kuin": "<=",
 	"pienempi tai yhtäsuuri kuin": "<=",
+	"enintään": "<=",
 	"suurempi kuin": ">",
 	"suurempi tai yhtä suuri kuin": ">=",
-	"suurempi tai yhtäsuuri kuin": ">="
+	"suurempi tai yhtäsuuri kuin": ">=",
+	"vähintään": ">="
 }
 
 CMP_TREE = {}
