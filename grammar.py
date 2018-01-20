@@ -39,9 +39,38 @@ POSTPOSITIONS = {
 		"takana", "takaa", "taakse",
 		"vieressä", "vierestä", "viereen",
 		"vierellä", "viereltä", "vierelle",
+		"luona", "luota", "luokse",
+		"lähellä", "läheltä", "lähelle",
+		"ohessa", "ohesta", "oheen",
+		"ohella", "ohelta", "ohelle",
+		"seassa", "seasta", "sekaan",
+		"sisällä", "sisältä", "sisälle",
+		
+		"ohi", "ohitse",
+		"lomitse",
+		"läpi", "lävitse",
+		"poikki", "poikitse",
+		"yli", "ylitse",
+		"ympäri",
+		
 		"mukaisesti", "mukaan",
+		
 		"kanssa",
+		"suhteen",
+		"takia",
+		
+		"kuluessa"
+	],
+	"osanto": [
+		"kohden", "kohti",
+		"vastaan",
+		"vasten",
 		"varten"
+	],
+	"sisatulento": [
+		"asti",
+		"mennessä",
+		"saakka"
 	]
 }
 
