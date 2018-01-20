@@ -45,7 +45,7 @@ For example, here is a simple program that calculates the factorial of a given n
 
     Pienen luvun kertoma on
         riippuen siitä, onko se pienempi tai yhtä suuri kuin yksi,
-        joko pieni luku itse
+        joko yksi
         tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
     
     Luvun edeltäjä on se vähennettynä yhdellä.
@@ -71,11 +71,10 @@ This is a conditional expression.
 It tests if `se` is less than or equal to (`pienempi tai yhtä suuri kuin`) one (`yksi`).
 `se` is like `this` in JavaScript and always means the first parameter (here `pieni luku`).
 
-    joko pieni luku itse
+    joko yksi
 
-If the condition is true, the function returns the value of its argument, `pieni luku`.
+If the condition is true, the function returns one, (`yksi`).
 `joko` is a keyword that comes after the condition of `riippuen siitä` expression.
-`itse` is a keyword that does nothing and is used because it makes the sentence sound more natural Finnish.
 
     tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
 

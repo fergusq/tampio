@@ -1,6 +1,6 @@
 Pienen luvun kertoma on
 	riippuen siitä, onko se pienempi tai yhtä suuri kuin yksi,
-	joko pieni luku itse
+	joko yksi
 	tai pieni luku kerrottuna pienen luvun edeltäjän kertomalla.
 
 Luvun edeltäjä on se vähennettynä yhdellä.
