@@ -46,6 +46,7 @@ POSTPOSITIONS = {
 		"seassa", "seasta", "sekaan",
 		"sisällä", "sisältä", "sisälle",
 		
+		"ali", "alitse",
 		"ohi", "ohitse",
 		"lomitse",
 		"läpi", "lävitse",

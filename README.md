@@ -246,6 +246,8 @@ These rules are the same in both method definitions and method calls.
 
 |Postposition|Required case|
 |:-----------|:------------|
+|`ali`       |genitive     |
+|`alitse`    |genitive     |
 |`alla`      |genitive     |
 |`alta`      |genitive     |
 |`alle`      |genitive     |
