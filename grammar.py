@@ -24,11 +24,12 @@ from ast import *
 from lex import accept, checkEof, eat, eatComma, eatPeriod, ADJ, NOUN, NAME, PRONOUN, NUMERAL, VERB, CONJ, CARDINALS, ORDINALS
 
 def initializeParser():
-	global options
+	global options, current_class
 	options = {
 		"kohdekoodi": False,
 		"takaisinviittaukset": False
 	}
+	current_class = None
 
 POSTPOSITIONS = {
 	"nimento": ["kertaa"],
@@ -122,6 +123,8 @@ def formToEnglish(form, article=True, short = False):
 			return "an agent to the " + form + " participle"
 
 def parseDeclaration(tokens):
+	global current_class
+	current_class = None
 	checkEof(tokens)
 	token = tokens.peek()
 	# Metodi, proseduuri
@@ -129,6 +132,8 @@ def parseDeclaration(tokens):
 		tokens.next()
 		tokens.setStyle("keyword")
 		signature = parseSentence(tokens, signature=True)
+		if isinstance(signature, MethodCallStatement):
+			current_class = signature.obj.type
 		with AllowBackreferences():
 			body = parseList(parseSentence, tokens, do_format=True)
 		stmts = parseAdditionalStatements(tokens)
@@ -236,6 +241,7 @@ def parseDeclaration(tokens):
 				tokens.next()
 				tokens.setStyle("type")
 				varname = ""
+			current_class = typeword.baseform
 			if tokens.peek() and tokens.peek().token.lower() == "on":
 				tokens.next()
 				tokens.setStyle("keyword")
@@ -934,7 +940,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 					tokens.next()
 					tokens.setStyle("variable", continued=True)
 			case = word.form
-			expr = VariableExpr("this")
+			expr = VariableExpr("this", vtype=current_class)
 	elif word.baseform == "siellä":
 		tokens.setStyle("variable")
 		if word.word.lower() == "siellä":
@@ -957,7 +963,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				if word2.baseform == "itse" and word2.agreesWith(word):
 					tokens.next()
 					tokens.setStyle("variable", continued=True)
-			expr = VariableExpr("this")
+			expr = VariableExpr("this", vtype=current_class)
 	elif ((word.isAdjective() and word.baseform == "uusi")
 		or (word.isAdjective() and tokens.peek() and tokens.peek().toWord(cls=NOUN,forms=[word.form]).agreesWith(word, baseform="uusi"))
 		or (word.isNoun() and tokens.peek(1) and tokens.peek(1).token == "," and tokens.peek(2).token.lower() == "jonka")
@@ -1111,7 +1117,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				tokens.setStyle("field")
 				case = word.form
 				field = word2.baseform
-				field_expr = FieldExpr(expr, field)
+				field_expr = FieldExpr(expr, field, place=tokens.place())
 				var = addForVar(word.baseform + "_" + word2.baseform, field_expr, word.baseform, tokens)
 				expr = VariableExpr(var)
 			elif ((word.isOrdinal() or (word.isVariable() and word.ordinal_like) or word.baseform == "viimeinen")
@@ -1144,7 +1150,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				tokens.setStyle("field")
 				case = word.form
 				field = word2.baseform
-				expr = SubscriptExpr(FieldExpr(expr, field), index, end_index)
+				expr = SubscriptExpr(FieldExpr(expr, field, place=tokens.place()), index, end_index)
 				cont = True
 			elif word.isNoun() and word.possessive == "":
 				tokens.next()
@@ -1152,7 +1158,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				case = word.form
 				field = word.baseform
 				
-				expr = FieldExpr(expr, field)
+				expr = FieldExpr(expr, field, place=tokens.place())
 				cont = True
 			elif word.isAdjective() and word.comparison == "superlative":
 				tokens.next()
@@ -1166,7 +1172,7 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 				case = word.form
 				field = word.baseform + "_" + word2.baseform
 				
-				expr = FieldExpr(expr, field)
+				expr = FieldExpr(expr, field, place=tokens.place())
 				cont = True
 			else:
 				break
@@ -1182,16 +1188,17 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 			if word.isNoun() and word.form == "olento" and word.possessive == "" and word.word != "tuloksena":
 				tokens.next()
 				tokens.setStyle("operator")
-				expr = FieldExpr(expr, word.baseform + "_E")
+				expr = FieldExpr(expr, word.baseform + "_E", place=tokens.place())
 				cont = True
 			elif word.isAdjective() and word.form == "olento":
 				tokens.next()
 				tokens.setStyle("operator")
+				place = tokens.place()
 				if nextStartsNominalPhrase(tokens) and tokens.peek().toWord(cls=NOUN).form != "olento":
 					arg, arg_case = parseNominalPhrase(tokens)
-					expr = FieldExpr(expr, word.baseform + "_E", arg_case, arg)
+					expr = FieldExpr(expr, word.baseform + "_E", arg_case, arg, place=place)
 				else:
-					expr = FieldExpr(expr, word.baseform + "_E")
+					expr = FieldExpr(expr, word.baseform + "_E", place=place)
 				cont = True
 			else:
 				break

@@ -18,15 +18,14 @@ from collections import namedtuple
 from itertools import chain
 from inflect import CASES_ABRV
 from fatal_error import fatalError, typeError, notfoundError, warning, TampioError
-from hierarchy import Class
+from hierarchy import Class, classes, getClass, isClass, classSet, getFunctions, getFields
 
 # kääntäjän tila
 
 def initializeCompiler(include_file):
-	global classes, global_variables, aliases, includeFile, options, block_frame, tokens
+	global global_variables, aliases, includeFile, options, block_frame, tokens
 	options = {}
-	block_frame = BlockData(None, set(), False)
-	classes = {}
+	block_frame = BlockData(None, set(), False, None)
 	global_variables = []
 	aliases = {}
 	includeFile = include_file
@@ -44,7 +43,7 @@ class CompilerFrame:
 			"kohdekoodi": False,
 			"käyttömäärittelyt": False
 		}
-		block_frame = BlockData(None, set(), False)
+		block_frame = BlockData(None, set(), False, None)
 		tokens = self.tokens
 	def __exit__(self, *args):
 		global options, block_frame, tokens
@@ -52,7 +51,7 @@ class CompilerFrame:
 		block_frame = self.prev_block_frame
 		tokens = self.prev_tokens
 
-BlockData = namedtuple("BlockData", "variables backreferences block_mode")
+BlockData = namedtuple("BlockData", "variables backreferences block_mode self_type")
 
 class BlockFrame:
 	def __init__(self, new_frame):
@@ -64,12 +63,6 @@ class BlockFrame:
 	def __exit__(self, *args):
 		global block_frame
 		block_frame = self.prev_frame
-
-def getClass(name):
-	if name in classes:
-		return classes[name]
-	else:
-		typeError("class not found: " + name)
 
 # apufunktiot
 
@@ -100,6 +93,7 @@ def compileModule(declarations, on_error, tokens):
 		additional_statements = ""
 		for decl in declarations:
 			try:
+				decl.validateTree()
 				ans += decl.compile() + "\n"
 				additional_statements += decl.compileAdditionalStatements()
 			except TampioError as e:
@@ -120,7 +114,7 @@ def compileBlock(statements, indent, parameters):
 	prev_variables = block_frame.variables or set(global_variables)
 	variables = prev_variables.union(set(parameters))
 	
-	with BlockFrame(BlockData(variables, bcs, True)):
+	with BlockFrame(BlockData(variables, bcs, True, block_frame.self_type)):
 		for stmt in statements:
 			# eksplisiittisesti luodut uudet muuttujat
 			variables.update(set(stmt.createdVariables()))
@@ -153,6 +147,8 @@ class Decl:
 		else:
 			return ""
 	def buildHierarchy(self):
+		pass
+	def validateTree(self):
 		pass
 
 class SetOptionDecl(Decl):
@@ -214,18 +210,27 @@ class ProcedureDecl(Decl):
 			return ("function " + self.signature.compile(semicolon=False)
 				+ " {\n" + compileBlock(self.body, 1, self.signature.variables()) + "};")
 		elif isinstance(self.signature, MethodCallStatement):
-			return (
-				typeToJs(self.signature.obj.type) + ".prototype."
-				+ self.signature.compileName()
-				+ " = function" + self.signature.compileArgs(indent=0) + " {\n"
-				+ " var " + escapeIdentifier(self.signature.obj.name) + " = this;\n"
-				+ compileBlock(self.body, 1, self.signature.variables())
-				+ "};")
+			with BlockFrame(block_frame._replace(self_type=self.signature.obj.type)):
+				return (
+					typeToJs(self.signature.obj.type) + ".prototype."
+					+ self.signature.compileName()
+					+ " = function" + self.signature.compileArgs(indent=0) + " {\n"
+					+ " var " + escapeIdentifier(self.signature.obj.name) + " = this;\n"
+					+ compileBlock(self.body, 1, self.signature.variables())
+					+ "};")
 		else:
 			fatalError("TODO")
 	def buildHierarchy(self):
 		if isinstance(self.signature, MethodCallStatement):
 			getClass(self.signature.obj.type).addMethod(self.signature.name, sorted(self.signature.args.keys()))
+	def validateTree(self):
+		if isinstance(self.signature, MethodCallStatement):
+			with BlockFrame(block_frame._replace(self_type=self.signature.obj.type)):
+				for s in self.body:
+					s.validateTree()
+		else:
+			for s in self.body:
+				s.validateTree()
 
 class ClassDecl(Decl):
 	def __init__(self, name, fields, stmts, super_type=None):
@@ -296,6 +301,9 @@ class Whereable:
 		for name, vtype, _ in self.wheres:
 			ans.append((name, vtype))
 		return ans
+	def validateWheres(self):
+		for _, _, val in self.wheres:
+			val.validateTree()
 
 class FunctionDecl(Whereable,Decl):
 	def __init__(self, vtype, field, self_param, param, param_case, body, wheres, memoize, stmts):
@@ -320,15 +328,20 @@ class FunctionDecl(Whereable,Decl):
 			ans += " if (this." + escapeIdentifier(self.field) + " !== undefined) return this." + escapeIdentifier(self.field) + ";\n"
 		if self.self_param != "":
 			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
-		ans += self.compileWheres()
-		if self.memoize:
-			ans += " this." + escapeIdentifier(self.field) + " = " + self.body.compile(0) + ";\n"
-			ans += " return this." + escapeIdentifier(self.field) + ";\n};"
-		else:
-			ans += " return " + self.body.compile(0) + ";\n};"
+		with BlockFrame(block_frame._replace(self_type=self.type)):
+			ans += self.compileWheres()
+			if self.memoize:
+				ans += " this." + escapeIdentifier(self.field) + " = " + self.body.compile(0) + ";\n"
+				ans += " return this." + escapeIdentifier(self.field) + ";\n};"
+			else:
+				ans += " return " + self.body.compile(0) + ";\n};"
 		return ans
 	def buildHierarchy(self):
-		getClass(self.type).addFunction(self.field, self.param_case)
+		getClass(self.type).addFunction(self.field, self.param_case, self.body)
+	def validateTree(self):
+		with BlockFrame(block_frame._replace(self_type=self.type)):
+			self.validateWheres()
+			self.body.validateTree()
 
 class CondFunctionDecl(Whereable,Decl):
 	def __init__(self, vtype, name, self_param, param, conditions, wheres, stmts):
@@ -352,6 +365,11 @@ class CondFunctionDecl(Whereable,Decl):
 		return ans
 	def buildHierarchy(self):
 		getClass(self.type).addComparisonOperator(self.name)
+	def validateTree(self):
+		with BlockFrame(block_frame._replace(self_type=self.type)):
+			self.validateWheres()
+			for c in self.conditions:
+				c.validateTree()
 
 # lauseiden kääntäminen
 
@@ -378,6 +396,14 @@ class Recursive:
 	# väliaikaismuuttujat
 	def temporaryVariables(self):
 		return self.search(lambda e: e.temporaryVariables())
+	# syntaksipuun validoiminen
+	def validateTree(self):
+		self.validate()
+		for e in self.subexpressions():
+			if e is not self:
+				e.validateTree()
+	def validate(self):
+		pass
 
 class ForStatement(Recursive):
 	def __init__(self, var, expr, stmt):
@@ -426,6 +452,8 @@ class QuantifierCondExpr(Whereable,Recursive):
 		return super().createdVariables() + self.whereCreatedVariables()
 	def compile(self, indent):
 		return self.expr.compile(indent) + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile(indent) + ")"
+	def validate(self):
+		self.validateWheres()
 
 class CondExpr(Whereable,Recursive):
 	def __init__(self, negation, operator, left, right, wheres=[]):
@@ -450,6 +478,8 @@ class CondExpr(Whereable,Recursive):
 			return "!(" + ans + ")"
 		else:
 			return ans
+	def validate(self):
+		self.validateWheres()
 
 class BlockStatement(Whereable,Recursive):
 	def __init__(self, stmts, wheres):
@@ -464,6 +494,8 @@ class BlockStatement(Whereable,Recursive):
 		return super().createdVariables() + self.whereCreatedVariables()
 	def compile(self, semicolon=True, indent=0):
 		return self.compileWheres(indent) + "".join([s.compile(indent=indent) for s in self.stmts])
+	def validate(self):
+		self.validateWheres()
 
 class CallStatement(Recursive):
 	def __init__(self, name, args, output_var, async_block):
@@ -595,8 +627,17 @@ class MethodAssignmentStatement(Recursive):
 
 # lausekkeiden kääntäminen
 
-class VariableExpr(Recursive):
+class Expr:
+	def __init__(self):
+		self.type_cache = None
+	def inferType(self, expected_types=[]):
+		if self.type_cache is None:
+			self.type_cache = self.infer(expected_types)
+		return self.type_cache
+
+class VariableExpr(Expr,Recursive):
 	def __init__(self, name, vtype=None, initial_value=None, place=None):
+		Expr.__init__(self)
 		self.name = name
 		self.type = vtype
 		self.initial_value = initial_value
@@ -611,27 +652,40 @@ class VariableExpr(Recursive):
 			return [(self.name, self.type)]
 		else:
 			return []
+	def variables(self):
+		if self.type:
+			return [(self.name, self.type)]
+		else:
+			return []
 	def compile(self, indent):
-		if block_frame.block_mode and self.type and not self.initial_value:
-			if (self.name, self.type) not in block_frame.variables:
-				if self.place:
-					notfoundError("variable not found: " + self.name, tokens, self.place)
-				else:
-					notfoundError("variable not found: " + self.name)
 		ans = escapeIdentifier(self.name)
 		if self.initial_value:
 			ans = "(" + ans + "=" + self.initial_value.compile(indent) + ")"
 		if self.type in block_frame.backreferences:
 			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
 		return ans
-	def variables(self):
+	def infer(self, expected_types):
 		if self.type:
-			return [(self.name, self.type)]
+			ans = set()
+			for i in range(len(self.type)):
+				if isClass(self.type[i:]):
+					ans.add(getClass(self.type[i:]))
+			return ans
 		else:
-			return []
+			return classSet()
+	def validate(self):
+		if block_frame.block_mode and self.type and not self.initial_value:
+			if (self.name, self.type) not in block_frame.variables:
+				if self.place:
+					notfoundError("variable not found: " + self.name, tokens, self.place)
+				else:
+					notfoundError("variable not found: " + self.name)
+		#if self.type and len(self.infer([])) == 0:
+		#	warning("class not found: " + self.type, tokens, self.place)
 
-class BackreferenceExpr(Recursive):
+class BackreferenceExpr(Expr,Recursive):
 	def __init__(self, name, may_be_field=False):
+		Expr.__init__(self)
 		self.name = name
 		self.may_be_field = may_be_field
 	def backreferences(self):
@@ -642,31 +696,40 @@ class BackreferenceExpr(Recursive):
 			return "(this.f_" + name + "!==undefined ? this.f_" + name + " : se_" + name + ")"
 		else:
 			return "se_" + name
+	def infer(self, expected_types):
+		# TODO
+		return classSet()
 
 ARI_OPERATORS = {
-	"lisätty_E": ("sisatulento", "+"),
-	"ynnätty_E": ("sisatulento", "+"),
-	"kasvatettu_E": ("ulkoolento", "+"),
-	"yhdistetty_E": ("sisatulento", ".concat"),
-	"liitetty_E": ("sisatulento", ".t_prepend"),
-	"vähennetty_E": ("ulkoolento", "-"),
-	"kerrottu_E": ("ulkoolento", "*"),
-	"jaettu_E": ("ulkoolento", "/"),
-	"rajattu_E": ("sisatulento", "%")
+	"lisätty_E": ("sisatulento", "+", ["luku", "merkkijono"]),
+	"ynnätty_E": ("sisatulento", "+", ["luku", "merkkijono"]),
+	"kasvatettu_E": ("ulkoolento", "+", ["luku", "merkkijono"]),
+	"yhdistetty_E": ("sisatulento", ".concat", []),
+	"liitetty_E": ("sisatulento", ".t_prepend", ["kohdekoodilista"]),
+	"vähennetty_E": ("ulkoolento", "-", ["luku"]),
+	"kerrottu_E": ("ulkoolento", "*", ["luku"]),
+	"jaettu_E": ("ulkoolento", "/", ["luku"]),
+	"rajattu_E": ("sisatulento", "%", ["luku"])
 }
 
-class FieldExpr(Recursive):
-	def __init__(self, obj, field, arg_case=None, arg=None):
+class FieldExpr(Expr,Recursive):
+	def __init__(self, obj, field, arg_case=None, arg=None, place=None):
+		Expr.__init__(self)
 		self.obj = obj
 		self.field = field
 		self.arg_case = arg_case
 		self.arg = arg
+		self.place = place
 	def subexpressions(self):
 		return [self] + self.obj.subexpressions() + (self.arg.subexpressions() if self.arg else [])
+	def isArithmetic(self):
+		return self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]
+	def isTargetCode(self):
+		return self.field == "kohdekoodi_E" and isinstance(self.obj, StrExpr) and options["kohdekoodi"]
 	def compile(self, indent):
-		if self.field in ARI_OPERATORS and self.arg_case == ARI_OPERATORS[self.field][0]:
+		if self.isArithmetic():
 			return self.compileArithmetic(indent)
-		elif self.field == "kohdekoodi_E" and isinstance(self.obj, StrExpr) and options["kohdekoodi"]:
+		elif self.isTargetCode():
 			return "(" + self.obj.str + ")"
 		ans = self.obj.compile(indent) + ".f_" + escapeIdentifier(self.field)
 		if self.arg_case:
@@ -681,9 +744,58 @@ class FieldExpr(Recursive):
 			return self.obj.compile(indent) + operator + "(" + self.arg.compile(indent) + ")"
 		else:
 			return "(" + self.obj.compile(indent) + operator + self.arg.compile(indent) + ")"
+	def infer(self, expected_types):
+		if self.isArithmetic():
+			return set(map(getClass, ARI_OPERATORS[self.field][2])) or classSet()
+		elif self.isTargetCode():
+			return classSet()
+		functions = [
+			f
+			for f in getFunctions(self.field+"_"+str(self.arg_case))
+			if not expected_types or not f.inferType().isdisjoint(expected_types)
+		]
+		possible_obj_types = set()
+		for f in functions:
+			possible_obj_types.update(f.classes())
+		fields = getFields(self.field) if not self.arg_case else []
+		if fields:
+			for f in fields:
+				possible_obj_types.update(f.classes())
+		obj_types = self.obj.inferType(possible_obj_types)
+		for f in fields:
+			if not f.classes().isdisjoint(obj_types):
+				return classSet()
+		ret_types = set()
+		for f in functions:
+			if not f.classes().isdisjoint(obj_types):
+				ret_types.update(f.inferType())
+		if not ret_types:
+			warning("unsuccessful inference of " + self.field + ", argument type is illegal: "
+				+ "expected argument to be one of: {" + ", ".join([cl.name for cl in possible_obj_types])
+				+ "}, but it is one of: {" + ", ".join([cl.name for cl in obj_types]) + "}",
+				tokens, self.place, severity="Note")
+		return ret_types
+	def validate(self):
+		if len(self.inferType()) == 0:
+			if self.place:
+				typeError("cannot infer the type of expression", tokens, self.place)
+			else:
+				typeError("cannot infer the type of expression")
+		
+		# erikoistapaukset
+		if self.isArithmetic() or self.isTargetCode():
+			pass
+		
+		# päätapaus
+		elif len(getFunctions(self.field+"_"+str(self.arg_case)) + (getFields(self.field) if not self.arg_case else [])) == 0:
+			if self.place:
+				typeError("member not found", tokens, self.place)
+			else:
+				typeError("member not found")
 
-class SubscriptExpr(Recursive):
+class SubscriptExpr(Expr,Recursive):
 	def __init__(self, obj, index, is_end_index=False):
+		Expr.__init__(self)
 		self.obj = obj
 		self.index = index
 		self.is_end_index = is_end_index
@@ -694,9 +806,12 @@ class SubscriptExpr(Recursive):
 			return self.obj.compile(indent) + ".nth_last(" + self.index.compile(indent) + ")"
 		else:
 			return self.obj.compile(indent) + "[" + self.index.compile(indent) + "-1]"
+	def infer(self, expected_types):
+		return classSet()
 
-class SliceExpr(Recursive):
+class SliceExpr(Expr,Recursive):
 	def __init__(self, obj, start, end):
+		Expr.__init__(self)
 		self.obj = obj
 		self.start = start
 		self.end = end
@@ -709,21 +824,30 @@ class SliceExpr(Recursive):
 			ans += ", " + self.end.compile(indent)
 		ans += ")"
 		return ans
+	def infer(self, expected_types):
+		return set([getClass("kohdekoodilista")])
 
-class NumExpr(Recursive):
+class NumExpr(Expr,Recursive):
 	def __init__(self, num):
+		Expr.__init__(self)
 		self.num = num
 	def compile(self, indent):
 		return "(" + str(self.num) + ")"
+	def infer(self, expected_types):
+		return set([getClass("luku")])
 
-class StrExpr(Recursive):
+class StrExpr(Expr,Recursive):
 	def __init__(self, string):
+		Expr.__init__(self)
 		self.str = string
 	def compile(self, indent):
 		return repr(self.str)
+	def infer(self, expected_types):
+		return set([getClass("merkkijono")])
 
-class NewExpr(Recursive):
+class NewExpr(Expr,Recursive):
 	def __init__(self, typename, args, variable=None):
+		Expr.__init__(self)
 		self.type = typename
 		self.args = args
 		self.variable = variable
@@ -744,14 +868,17 @@ class NewExpr(Recursive):
 		if self.variable:
 			ans = "(" + escapeIdentifier(self.variable) + "=" + ans + ")"
 		return ans
+	def infer(self, expected_types):
+		return set([getClass(self.type)])
 
 class CtorArgExpr:
 	def __init__(self, field, value):
 		self.field = field
 		self.value = value
 
-class ListExpr(Recursive):
+class ListExpr(Expr,Recursive):
 	def __init__(self, values):
+		Expr.__init__(self)
 		self.values = values
 	def subexpressions(self):
 		ans = []
@@ -760,16 +887,22 @@ class ListExpr(Recursive):
 		return [self] + ans
 	def compile(self, indent):
 		return "[" + ", ".join([value.compile(indent) for value in self.values]) + "]"
+	def infer(self, expected_types):
+		return set([getClass("kohdekoodilista")])
 
-class LambdaExpr(Recursive):
+class LambdaExpr(Expr,Recursive):
 	def __init__(self, body):
+		Expr.__init__(self)
 		self.body = body
 	def compile(self, indent):
 		return "() => {\n" + compileBlock(self.body, indent+1, []) + " "*indent + "}"
+	def infer(self, expected_types):
+		return set([getClass("kohdekoodifunktio")])
 	# ei alalausekkeita
 
-class TernaryExpr(Recursive):
+class TernaryExpr(Expr,Recursive):
 	def __init__(self, conditions, then, otherwise):
+		Expr.__init__(self)
 		self.conditions = conditions
 		self.then = then
 		self.otherwise = otherwise
@@ -782,3 +915,5 @@ class TernaryExpr(Recursive):
 		return ("((" + ") && (".join([c.compile(indent) for c in self.conditions])
 			+ ") ? (" + self.then.compile(indent)
 			+ ") : (" + self.otherwise.compile(indent) + "))")
+	def infer(self, expected_types):
+		return self.then.inferType(expected_types) | self.otherwise.inferType(expected_types)
