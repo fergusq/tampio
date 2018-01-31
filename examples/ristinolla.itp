@@ -26,6 +26,9 @@ EIKÄ LUULTAVASTI TOIMI. KÄYTÄ OMALLA VASTUULLA.
 Matriisilla on rivit.
 Vektorilla on ruudut.
 
+Tulkitse rivi vektorina.
+Tulkitse sarake vektorina.
+
 Matriisin koko on
 	riippuen siitä, onko sen rivien määrä nolla,
 	joko nolla
