@@ -26,7 +26,7 @@ def initializeCompiler(include_file):
 	global global_variables, aliases, includeFile, options, block_frame, tokens
 	options = {}
 	block_frame = BlockData(None, set(), False, None)
-	global_variables = []
+	global_variables = {}
 	aliases = {}
 	includeFile = include_file
 	tokens = None
@@ -43,7 +43,7 @@ class CompilerFrame:
 			"kohdekoodi": False,
 			"käyttömäärittelyt": False
 		}
-		block_frame = BlockData(None, set(), False, None)
+		block_frame = BlockData(None, {}, False, None)
 		tokens = self.tokens
 	def __exit__(self, *args):
 		global options, block_frame, tokens
@@ -89,6 +89,7 @@ def compileModule(declarations, on_error, tokens):
 				decl.buildHierarchy()
 			except TampioError as e:
 				on_error(e)
+	with CompilerFrame(tokens):
 		ans = ""
 		additional_statements = ""
 		for decl in declarations:
@@ -111,24 +112,26 @@ def compileBlock(statements, indent, parameters):
 	for bc in bcs:
 		ans += " "*indent + "var se_" + escapeIdentifier(bc) + " = null;\n"
 	
-	prev_variables = block_frame.variables or set(global_variables)
-	variables = prev_variables.union(set(parameters))
+	prev_variables = block_frame.variables or {**global_variables}
+	variables = {**prev_variables, **parameters}
 	
 	with BlockFrame(BlockData(variables, bcs, True, block_frame.self_type)):
 		for stmt in statements:
 			# eksplisiittisesti luodut uudet muuttujat
-			variables.update(set(stmt.createdVariables()))
+			variables.update(stmt.createdVariables())
 			# uusi-avainsanalla luodut uudet muuttujat
-			new_vars = set(stmt.newVariables())
-			for name, vtype in new_vars:
+			new_vars = stmt.newVariables()
+			for name, vtype in new_vars.items():
 				ans += " "*indent + "var " + escapeIdentifier(name) + " = null;\n"
 			variables.update(new_vars)
 			# vielä mainitsemattomat muuttujat ovat luodaan (poisluetaan väliaikaismuuttujat)
 			if options["käyttömäärittelyt"]:
-				new_vars = set(stmt.variables())
-				for name, vtype in new_vars.difference(variables).difference(set(stmt.temporaryVariables())):
-					warning("autodeclaration of " + name + " as " + vtype)
-					ans += " "*indent + "var " + escapeIdentifier(name) + " = new " + escapeIdentifier(vtype) + "({});\n"
+				new_vars = stmt.variables()
+				tmp_vars = stmt.temporaryVariables()
+				for name, vtype in new_vars.items():
+					if name not in variables and name not in tmp_vars:
+						warning("autodeclaration of " + name + " as " + vtype)
+						ans += " "*indent + "var " + escapeIdentifier(name) + " = new " + escapeIdentifier(vtype) + "({});\n"
 				variables.update(new_vars)
 			ans += stmt.compile(indent=indent)
 	
@@ -143,7 +146,7 @@ class Decl:
 		return self.compileDecl()
 	def compileAdditionalStatements(self):
 		if self.statements:
-			return ";(function() {\n" + compileBlock(self.statements, 0, []) + "})();\n"
+			return ";(function() {\n" + compileBlock(self.statements, 0, {}) + "})();\n"
 		else:
 			return ""
 	def buildHierarchy(self):
@@ -157,6 +160,9 @@ class SetOptionDecl(Decl):
 		self.option = option
 		self.statements = []
 	def compileDecl(self):
+		options[self.option] = self.positive
+		return ""
+	def buildHierarchy(self):
 		options[self.option] = self.positive
 		return ""
 
@@ -194,11 +200,11 @@ class VariableDecl(Decl):
 		return "var " + escapeIdentifier(self.var) + " = " + self.value.compile(0) + ";"
 	def compileAdditionalStatements(self):
 		if self.statements:
-			return ";(function() {\n" + compileBlock(self.statements, 1, []) + "}).call(" + escapeIdentifier(self.var) + ");\n"
+			return ";(function() {\n" + compileBlock(self.statements, 1, {}) + "}).call(" + escapeIdentifier(self.var) + ");\n"
 		else:
 			return ""
 	def buildHierarchy(self):
-		global_variables.append((self.var, self.type))
+		global_variables[self.var] = self.value.inferType()
 
 class ProcedureDecl(Decl):
 	def __init__(self, signature, body, stmts):
@@ -297,9 +303,9 @@ class Whereable:
 			ans += val.subexpressions()
 		return ans
 	def whereCreatedVariables(self):
-		ans = []
-		for name, vtype, _ in self.wheres:
-			ans.append((name, vtype))
+		ans = {}
+		for name, vtype, val in self.wheres:
+			ans[name] = val.inferType()
 		return ans
 	def validateWheres(self):
 		for _, _, val in self.wheres:
@@ -382,20 +388,26 @@ class Recursive:
 			if subexpr is not self:
 				ans += f(subexpr)
 		return ans
+	def searchDict(self, f):
+		ans = {}
+		for subexpr in self.subexpressions():
+			if subexpr is not self:
+				ans.update(f(subexpr))
+		return ans
 	def backreferences(self):
 		return self.search(lambda e: e.backreferences())
 	# kaikki muuttujat
 	def variables(self):
-		return self.search(lambda e: e.variables())
+		return self.searchDict(lambda e: e.variables())
 	# lausekkeissa luodut muuttujat (muuttujaluonti käännetään lausekkeen yhteydessä)
 	def createdVariables(self):
-		return self.search(lambda e: e.createdVariables())
+		return self.searchDict(lambda e: e.createdVariables())
 	# lausekkeissa luodut muuttujat (muuttujaluonti käännetään ennen lauseketta)
 	def newVariables(self):
-		return self.search(lambda e: e.newVariables())
+		return self.searchDict(lambda e: e.newVariables())
 	# väliaikaismuuttujat
 	def temporaryVariables(self):
-		return self.search(lambda e: e.temporaryVariables())
+		return self.searchDict(lambda e: e.temporaryVariables())
 	# syntaksipuun validoiminen
 	def validateTree(self):
 		self.validate()
@@ -449,7 +461,7 @@ class QuantifierCondExpr(Whereable,Recursive):
 	def subexpressions(self):
 		return self.expr.subexpressions() + self.cond.subexpressions() + self.whereSubexpressions()
 	def createdVariables(self):
-		return super().createdVariables() + self.whereCreatedVariables()
+		return {**super().createdVariables(), **self.whereCreatedVariables()}
 	def compile(self, indent):
 		return self.expr.compile(indent) + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile(indent) + ")"
 	def validate(self):
@@ -465,7 +477,7 @@ class CondExpr(Whereable,Recursive):
 	def subexpressions(self):
 		return self.left.subexpressions() + (self.right.subexpressions() if self.right else []) + self.whereSubexpressions()
 	def createdVariables(self):
-		return super().createdVariables() + self.whereCreatedVariables()
+		return {**super().createdVariables(), **self.whereCreatedVariables()}
 	def compile(self, indent):
 		ans = self.left.compile(indent) + self.operator
 		if self.operator[0] == ".":
@@ -491,7 +503,7 @@ class BlockStatement(Whereable,Recursive):
 			ans += s.subexpressions()
 		return ans + self.whereSubexpressions()
 	def createdVariables(self):
-		return super().createdVariables() + self.whereCreatedVariables()
+		return {**super().createdVariables(), **self.whereCreatedVariables()}
 	def compile(self, semicolon=True, indent=0):
 		return self.compileWheres(indent) + "".join([s.compile(indent=indent) for s in self.stmts])
 	def validate(self):
@@ -514,9 +526,9 @@ class CallStatement(Recursive):
 		return super().variables()
 	def createdVariables(self):
 		if self.output_var:
-			return [self.output_var]
+			return dict([self.output_var])
 		else:
-			return []
+			return {}
 	def temporaryVariables(self):
 		ans = []
 		for _, param, ptype, _ in self.async_block:
@@ -536,7 +548,7 @@ class CallStatement(Recursive):
 	def compileAsync(self, indent):
 		ans = ""
 		for mname, param, ptype, stmt in self.async_block:
-			with BlockFrame(block_frame._replace(variables=block_frame.variables.union(set([(param, ptype)])))):
+			with BlockFrame(block_frame._replace(variables={**block_frame.variables, **dict([(param, ptype)])})):
 				ans += ("." + escapeIdentifier(mname)
 					+ "(" + escapeIdentifier(param) + " =>\n"
 					+ stmt.compile(indent=indent+1, semicolon=False)
@@ -619,7 +631,7 @@ class MethodAssignmentStatement(Recursive):
 		ans += "\", "
 		ans += self.compileParams(indent)
 		ans += " => {\n"
-		ans += compileBlock(self.body, indent+1, list(chain.from_iterable([self.params[key].variables() for key in self.params])))
+		ans += compileBlock(self.body, indent+1, dict(chain.from_iterable([self.params[key].variables().items() for key in self.params])))
 		ans += " "*indent + "});"
 		if semicolon:
 			ans += ";\n"
@@ -649,14 +661,14 @@ class VariableExpr(Expr,Recursive):
 			return [self]
 	def newVariables(self):
 		if self.type and self.initial_value:
-			return [(self.name, self.type)]
+			return {self.name: self.type}
 		else:
-			return []
+			return {}
 	def variables(self):
 		if self.type:
-			return [(self.name, self.type)]
+			return {self.name: self.type}
 		else:
-			return []
+			return {}
 	def compile(self, indent):
 		ans = escapeIdentifier(self.name)
 		if self.initial_value:
@@ -665,17 +677,25 @@ class VariableExpr(Expr,Recursive):
 			ans = "(se_" + escapeIdentifier(self.type) + "=" + ans + ")"
 		return ans
 	def infer(self, expected_types):
-		if self.type:
+		if block_frame.block_mode and self.name in block_frame.variables:
+			ans = block_frame.variables[self.name]
+		elif self.name in global_variables:
+			ans = global_variables[self.name]
+		elif self.type:
+			ans = {}
+		else:
+			return classSet()
+		
+		if not ans:
 			ans = set()
 			for i in range(len(self.type)):
 				if isClass(self.type[i:]):
 					ans.add(getClass(self.type[i:]))
-			return ans
-		else:
-			return classSet()
+		
+		return ans
 	def validate(self):
 		if block_frame.block_mode and self.type and not self.initial_value:
-			if (self.name, self.type) not in block_frame.variables:
+			if self.name not in block_frame.variables:
 				if self.place:
 					notfoundError("variable not found: " + self.name, tokens, self.place)
 				else:
@@ -858,9 +878,9 @@ class NewExpr(Expr,Recursive):
 		return [self] + ans
 	def newVariables(self):
 		if self.variable:
-			return [(self.variable, self.type)]
+			return {self.variable: self.type}
 		else:
-			return []
+			return {}
 	def compile(self, indent):
 		ans = "new " + typeToJs(self.type) + "({" + ", ".join(["\"" + arg.field + "\": " + arg.value.compile(indent) for arg in self.args]) + "})"
 		if self.type in block_frame.backreferences:
@@ -895,7 +915,7 @@ class LambdaExpr(Expr,Recursive):
 		Expr.__init__(self)
 		self.body = body
 	def compile(self, indent):
-		return "() => {\n" + compileBlock(self.body, indent+1, []) + " "*indent + "}"
+		return "() => {\n" + compileBlock(self.body, indent+1, {}) + " "*indent + "}"
 	def infer(self, expected_types):
 		return set([getClass("kohdekoodifunktio")])
 	# ei alalausekkeita
