@@ -205,6 +205,8 @@ class VariableDecl(Decl):
 			return ""
 	def buildHierarchy(self):
 		global_variables[self.var] = self.value.inferType()
+	def validateTree(self):
+		self.value.validateTree()
 
 class ProcedureDecl(Decl):
 	def __init__(self, signature, body, stmts):
