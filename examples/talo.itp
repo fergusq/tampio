@@ -71,30 +71,30 @@ ja	kuvaus [yleensä ""].
 Kun ovela objekti syntyy,
 	sen sijaintiin lisätään se itse.
 
-Kun ovelalla objektilla on kiva esine,
-	kivan esineen sijainnista poistetaan kiva esine,
-	kivan esineen sijainniksi asetetaan ovelan objektin yläsisältö
-ja	sen yläsisältöön lisätään kiva esine.
+Kun ovelalla objektilla on kiva objekti,
+	kivan objektin sijainnista poistetaan kiva objekti,
+	kivan objektin sijainniksi asetetaan ovelan objektin yläsisältö
+ja	sen yläsisältöön lisätään kiva objekti.
 
-Kun ovelassa objektissa on kiva esine,
-	kivan esineen sijainnista poistetaan kiva esine,
-	kivan esineen sijainniksi asetetaan ovelan objektin sisäsisältö
-ja	sen sisäsisältöön lisätään kiva esine.
+Kun ovelassa objektissa on kiva objekti,
+	kivan objektin sijainnista poistetaan kiva objekti,
+	kivan objektin sijainniksi asetetaan ovelan objektin sisäsisältö
+ja	sen sisäsisältöön lisätään kiva objekti.
 
-Kun ovelan objektin alla on kiva esine,
-	kivan esineen sijainnista poistetaan kiva esine,
-	kivan esineen sijainniksi asetetaan ovelan objektin alasisältö
-ja	sen alasisältöön lisätään kiva esine.
+Kun ovelan objektin alla on kiva objekti,
+	kivan objektin sijainnista poistetaan kiva objekti,
+	kivan objektin sijainniksi asetetaan ovelan objektin alasisältö
+ja	sen alasisältöön lisätään kiva objekti.
 
-Kun ovelan objektin takana on kiva esine,
-	kivan esineen sijainnista poistetaan kiva esine,
-	kivan esineen sijainniksi asetetaan ovelan objektin takasisältö
-ja	sen takasisältöön lisätään kiva esine.
+Kun ovelan objektin takana on kiva objekti,
+	kivan objektin sijainnista poistetaan kiva objekti,
+	kivan objektin sijainniksi asetetaan ovelan objektin takasisältö
+ja	sen takasisältöön lisätään kiva objekti.
 
-Kun ovelan objektin edessä on kiva esine,
-	kivan esineen sijainnista poistetaan kiva esine,
-	kivan esineen sijainniksi asetetaan ovelan objektin etusisältö
-ja	sen etusisältöön lisätään kiva esine.
+Kun ovelan objektin edessä on kiva objekti,
+	kivan objektin sijainnista poistetaan kiva objekti,
+	kivan objektin sijainniksi asetetaan ovelan objektin etusisältö
+ja	sen etusisältöön lisätään kiva objekti.
 
 (Toimintometodit, jotka vastaavat konstruoivia metodeja)
 
@@ -333,13 +333,13 @@ Kun kerrotaan ovelasta objektista,
 	kerrotaan ovelan objektin takasisällöstä tekstillä "sen takana"
 ja	näytetään teksti "</div>".
 	
-Kun kerrotaan mielenkiintoisesta sisällöstä tietyllä sanalla,
-	jos mielenkiintoisen sisällön koko on suurempi kuin nolla, niin
+Kun kerrotaan mielenkiintoisesta listasta tietyllä sanalla,
+	jos mielenkiintoinen lista ei ole tyhjä, niin
 		näytetään teksti "Nähdäksesi "
 			yhdistettynä tiettyyn sanaan
 			ja yhdistettynä tekstiin " on:"
 			sekä teksti "<ul>",
-		kerrotaan alakohdassa mielenkiintoisen sisällön jokaisesta alkiosta
+		kerrotaan alakohdassa mielenkiintoisen listan jokaisesta alkiosta
 	ja	näytetään teksti "</ul>".
 
 Kun kerrotaan alakohdassa ovelasta objektista,

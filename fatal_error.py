@@ -32,7 +32,7 @@ class TampioError(Exception):
 		if self.tokens and self.place:
 			stream.write(self.msg + "\n" + self.tokens.fancyContext(self.place) + "\n")
 		else:
-			stream.write(self.msg)
+			stream.write(self.msg + "\n")
 	def __str__(self):
 		if self.tokens  and self.place:
 			return "Syntax error: " + self.msg + " (in \"" + self.tokens.context(self.place) + "\")"
@@ -54,5 +54,8 @@ def typeError(msg, tokens=None, place=None):
 def notfoundError(msg, tokens=None, place=None):
 	raise(TampioError("Not found error: " + msg, tokens, place))
 
-def warning(msg):
-	sys.stderr.write("Warning: " + msg + "\n")
+def warning(msg, tokens=None, place=None, severity="Warning"):
+	if tokens and place:
+		sys.stderr.write(severity + ": " + msg + "\n" + tokens.fancyContext(place) + "\n")
+	else:
+		sys.stderr.write(severity + ": " + msg + "\n")
