@@ -352,14 +352,14 @@ class FunctionDecl(Whereable,Decl):
 			self.body.validateTree()
 
 class CondFunctionDecl(Whereable,Decl):
-	def __init__(self, vtype, name, self_param, param, conditions, wheres, stmts):
+	def __init__(self, vtype, name, self_param, param, condition, wheres, stmts):
 		Decl.__init__(self, stmts)
 		assert name[0] == "."
 		self.type = vtype
 		self.name = name
 		self.self_param = self_param
 		self.param = param
-		self.conditions = conditions
+		self.condition = condition
 		self.wheres = wheres
 	def compileDecl(self):
 		ans = typeToJs(self.type) + ".prototype" + self.name + " = function("
@@ -369,15 +369,14 @@ class CondFunctionDecl(Whereable,Decl):
 		if self.self_param != "":
 			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
 		ans += self.compileWheres()
-		ans += " return (" + ") && (".join([c.compile(0) for c in self.conditions]) + ");\n};"
+		ans += " return " + self.condition.compile(0) + ";\n};"
 		return ans
 	def buildHierarchy(self):
 		getClass(self.type).addComparisonOperator(self.name)
 	def validateTree(self):
 		with BlockFrame(block_frame._replace(self_type=self.type)):
 			self.validateWheres()
-			for c in self.conditions:
-				c.validateTree()
+			self.condition.validateTree()
 
 # lauseiden kääntäminen
 
@@ -434,22 +433,20 @@ class ForStatement(Recursive):
 			+ " "*indent + "}\n")
 
 class IfStatement(Recursive):
-	def __init__(self, conditions, block):
-		self.conditions = conditions
+	def __init__(self, condition, block):
+		self.condition = condition
 		self.block = block
 	def subexpressions(self):
 		ans = []
-		for c in self.conditions:
-			ans += c.subexpressions()
+		ans += self.condition.subexpressions()
 		for s in self.block:
 			ans += s.subexpressions()
 		return ans
 	def compile(self, indent=0):
 		ans = ""
-		for c in self.conditions:
-			ans += c.compileWheres()
+		self.condition.compileWheres()
 		return ans + (" "*indent
-			+ "if ((" + ") && (".join([c.compile(indent) for c in self.conditions]) + ")) {\n"
+			+ "if (" + self.condition.compile(indent+1) + ") {\n"
 			+ "".join([s.compile(indent=indent+1) for s in self.block])
 			+ " "*indent + "}\n")
 
@@ -466,6 +463,23 @@ class QuantifierCondExpr(Whereable,Recursive):
 		return {**super().createdVariables(), **self.whereCreatedVariables()}
 	def compile(self, indent):
 		return self.expr.compile(indent) + (".every(" if self.quantifier == "jokainen" else ".some(") + self.var + " => " + self.cond.compile(indent) + ")"
+	def validate(self):
+		self.validateWheres()
+
+class CondConjunctionExpr(Whereable,Recursive):
+	def __init__(self, op, exprs, wheres=[]):
+		self.op = op
+		self.exprs = exprs
+		self.wheres = []
+	def subexpressions(self):
+		ans = []
+		for expr in self.exprs:
+			ans += expr.subexpressions()
+		return ans
+	def createdVariables(self):
+		return {**super().createdVariables(), **self.whereCreatedVariables()}
+	def compile(self, indent):
+		return "((" + (") " + self.op + " (").join([e.compile(indent) for e in self.exprs]) + "))"
 	def validate(self):
 		self.validateWheres()
 
@@ -923,18 +937,17 @@ class LambdaExpr(Expr,Recursive):
 	# ei alalausekkeita
 
 class TernaryExpr(Expr,Recursive):
-	def __init__(self, conditions, then, otherwise):
+	def __init__(self, condition, then, otherwise):
 		Expr.__init__(self)
-		self.conditions = conditions
+		self.condition = condition
 		self.then = then
 		self.otherwise = otherwise
 	def subexpressions(self):
 		ans = []
-		for c in self.conditions:
-			ans += c.subexpressions()
+		ans += self.condition.subexpressions()
 		return [self] + ans + self.then.subexpressions() + self.otherwise.subexpressions()
 	def compile(self, indent):
-		return ("((" + ") && (".join([c.compile(indent) for c in self.conditions])
+		return ("((" + self.condition.compile(indent)
 			+ ") ? (" + self.then.compile(indent)
 			+ ") : (" + self.otherwise.compile(indent) + "))")
 	def infer(self, expected_types):

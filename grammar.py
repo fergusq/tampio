@@ -290,7 +290,7 @@ def parseDeclaration(tokens):
 					accept([","], tokens)
 					accept(["jos"], tokens)
 					tokens.setStyle("keyword")
-					conditions = parseList(parseCondition, tokens)
+					conditions = parseOuterCondition(tokens)
 					wheres = parseWheres(tokens)
 					stmts = parseAdditionalStatements(tokens)
 					eatPeriod(tokens)
@@ -487,7 +487,10 @@ def parseSentence(tokens, signature=False):
 			syntaxError("there must be a comma before \"jos\"", tokens)
 		tokens.next()
 		tokens.setStyle("keyword")
-		conditions = parseList(parseCondition, tokens, ["niin"])
+		conditions = parseOuterCondition(tokens, False, ["niin"])
+		if tokens.peek().token.lower() == "niin":
+			tokens.next()
+			tokens.setStyle("keyword")
 		block = parseList(parseSentence, tokens, do_format=True)
 		eatComma(tokens)
 		return IfStatement(conditions, block)
@@ -725,6 +728,22 @@ for key in CMP_OPERATORS.keys():
 		branch = branch[word]
 	branch[words[-1]] = CMP_OPERATORS[key]
 
+def parseOuterCondition(tokens, prefix=False, end_keyword=[]):
+	expr = parseInnerCondition(tokens, prefix, end_keyword)
+	while tokens.peek().token.lower() in ["sekä", "taikka"]:
+		op = "&&" if tokens.next().token.lower() == "sekä" else "||"
+		expr = CondConjunctionExpr(op, [expr, parseInnerCondition(tokens, prefix, end_keyword)])
+	expr.wheres = parseWheres(tokens)
+	eatComma(tokens)
+	return expr
+
+def parseInnerCondition(tokens, prefix, custom_endings):
+	conds, op = parseList(lambda t: parseCondition(t, prefix), tokens, custom_endings+["sekä", "taikka"], custom_conjunctions=["ja", "tai"])
+	if len(conds) == 1:
+		return conds[0]
+	else:
+		return CondConjunctionExpr("&&" if op == "ja" else "||", conds)
+
 def parseCondition(tokens, prefix=False):
 	pushFor("jokainen", "jokin")
 	if prefix:
@@ -762,13 +781,10 @@ def parseCondition(tokens, prefix=False):
 			syntaxError("predicative is " +formToEnglish(case) + " (should be in the nominative case)", tokens)
 	else:
 		operand2 = None
-	wheres = parseWheres(tokens)
-	eatComma(tokens)
 	for_vars = popFor()
 	expr = CondExpr(negation, operator, operand1, operand2)
 	for for_var in reversed(for_vars):
 		expr = QuantifierCondExpr(for_var.type, for_var.name, for_var.expr, expr)
-	expr.wheres = wheres
 	return expr
 
 def parseOperator(tokens):
@@ -836,7 +852,10 @@ def parseNominalPhrase(tokens, must_be_in_genitive=False, promoted_cases=[], pre
 		accept(["siitä"], tokens)
 		tokens.setStyle("keyword")
 		accept([","], tokens)
-		conds = parseList(lambda t: parseCondition(t, prefix=True), tokens, ["joko"])
+		conds = parseOuterCondition(tokens, True, ["joko"])
+		if tokens.peek().token.lower() == "joko":
+			tokens.next()
+			tokens.setStyle("keyword")
 		tokens.increaseIndentLevel()
 		alt1, case1 = parseNominalPhrase(tokens)
 		accept(["tai"], tokens)
@@ -1278,12 +1297,14 @@ def parseCtorArg(tokens):
 def parseString(string):
 	return string[1:-1].replace("\\l", "\"").replace("\\u", "\n").replace("\\s", "\t").replace("\\\\", "\\")
 
-def parseList(parseChild, tokens, custom_endings=[], do_format=False):
+def parseList(parseChild, tokens, custom_endings=[], do_format=False, custom_conjunctions=[]):
 	if do_format:
 		tokens.increaseIndentLevel()
 	ans = []
 	force = False
-	while force or (not tokens.eof() and not tokens.peek().token.lower() in [";", ".", "]", "ja", "eikä"] + custom_endings):
+	checkEof(tokens)
+	peek = tokens.peek().token.lower()
+	while (force or peek not in [";", ".", "]", "ja", "eikä"]+custom_conjunctions) and peek not in custom_endings:
 		if do_format and len(ans) > 0:
 			tokens.addNewline()
 		ans += [parseChild(tokens)]
@@ -1292,22 +1313,37 @@ def parseList(parseChild, tokens, custom_endings=[], do_format=False):
 			force = True
 		else:
 			force = False
-	checkEof(tokens)
+		checkEof(tokens)
+		peek = tokens.peek().token.lower()
 	if len(ans) == 1 and tokens.peek().token in [".", ";", "]"]:
 		if do_format:
 			tokens.decreaseIndentLevel()
-		return ans
+		if custom_conjunctions:
+			return ans, custom_conjunctions[0]
+		else:
+			return ans
 	if do_format:
 		tokens.addNewline()
-	token = tokens.next()
-	tokens.setStyle("keyword")
-	if token.token.lower() == "eikä":
-		accept(["muuta"], tokens)
+	
+	ending = tokens.peek().token.lower()
+	if ending not in custom_endings:
+		tokens.next()
 		tokens.setStyle("keyword")
-	elif token.token.lower() == "ja":
-		ans += [parseChild(tokens)]
-	elif token.token.lower() not in custom_endings:
-		syntaxError("unexpected token, expected " + ", ".join(["\""+t+"\"" for t in custom_endings+["ja"]]) + " or \"eikä\"", tokens)
+		if ending == "eikä":
+			accept(["muuta"], tokens)
+			tokens.setStyle("keyword")
+		elif custom_conjunctions and ending in custom_conjunctions:
+			ans += [parseChild(tokens)]
+		elif ending == "ja":
+			ans += [parseChild(tokens)]
+		else:
+			syntaxError("unexpected token, expected " + ", ".join(["\""+t+"\"" for t in custom_endings+["ja"]]) + " or \"eikä\"", tokens)
+	
 	if do_format:
 		tokens.decreaseIndentLevel()
-	return ans
+	
+	# jos annettiin vaihtoehtoisia konjunktioita, palautetaan mitä niistä käytettiin
+	if custom_conjunctions:
+		return ans, ending
+	else:
+		return ans

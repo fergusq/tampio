@@ -67,7 +67,7 @@ The last word, `on`, is a keyword that separates the signature of the function a
 
     riippuen siitä, onko se pienempi tai yhtä suuri kuin yksi,
 
-This is a conditional expression.
+This is a ternary expression.
 It tests if `se` is less than or equal to (`pienempi tai yhtä suuri kuin`) one (`yksi`).
 `se` is like `this` in JavaScript and always means the first parameter (here `pieni luku`).
 
@@ -180,7 +180,7 @@ Please note that some syntaxes contain the literal `[]` characters.
 
 ## Functions
 
-In Tampio, a function is always defined for one class and is polymorphic to that class.
+In Tampio, a _function_ is always defined for one class and is polymorphic to that class.
 This means that it is possible to define the same function differently for multiple classes.
 
 A function normally has one parameter and one expression that is the return value.
@@ -217,7 +217,7 @@ it can have an optional second parameter.
 
 ## Methods
 
-A method is a procedure that can take multiple arguments.
+A _method_ is a procedure that can take multiple arguments.
 
     Kun [self parameter] [method name] [parameters], [statement list].
 
@@ -324,17 +324,19 @@ For example:
             tehokas toiminto suoritetaan
         ja  toistetaan m kertaa tehokas toiminto, missä m on n vähennettynä yhdellä.
 
-## Comparison operators
+## Comparison operators and other boolean functions
 
-Comparison operators are functions that return boolean values.
-They can only be used inside other comparison operators, if statements and conditional expressions.
-Comparison operators can have either zero or one parameters.
+_Boolean functions_ are functions that return boolean values.
+They can only be used inside other boolean functions, if statements and ternary expressions.
+Boolean functions can have either zero or one parameters.
 
-    [parameter/nominative] on [operator name], jos [condition list].
+    [parameter/nominative] on [function name name], jos [condition list].
     [parameter/nominative] on [adjective/comparative nominative] kuin [parameter/nominative], jos [condition list].
 
-If the name of the operator is a comparative adjective,
+If the name of the function is a comparative adjective,
 it must also be nominative and be followed by the `kuin` keyword.
+This kind of functions are called _comparison operators_.
+
 Otherwise, it can be any word that doesn't start a nominal phrase expression.
 
 For example:
@@ -388,7 +390,7 @@ However, it is may be clearer to use a `missä` clause to create a temporary var
     nykyinen sivu näyttää villin vektorin n:nnen komponentin,
         missä n on villin vektorin dimensio vähennettynä kahdella,
 
-#### Async calls
+#### Asynchronous calls
 
 If the method returns a JavaScript Promise (or any similar object),
 the `then` and `catch` methods can be called using a special syntax.
@@ -433,8 +435,7 @@ An if statement consists of a condition and a list of substatements.
 There should be a comma before `jos`.
 The `niin` keyword can be used in place of `eikä muuta`, when there is only one condition.
 
-    , jos [condition], niin [statement list]
-    , jos [condition list], [statement list]
+    , jos [condition expression], niin [statement list]
 
 For example, to iterate an array, one must write a recursive method.
 An if statement is used to end the recursion when the array is empty.
@@ -448,7 +449,19 @@ Below is a pseudocode of such iteration method.
 
 An real example would be the `painetaan` method described in the Methods chapter.
 
-A condition consists of two operands and a comparison operator.
+#### Condition expressions
+
+A _condition expression_ is a list of conditions separated by logical connectives `ja`, `sekä`, `tai` and `taikka`.
+`ja` and `tai` have higher precedence than respective `sekä` and `taikka`.
+
+|Precedence level|Connective|JavaScript equivalent|
+|:--------------:|:---------|:--------------------|
+|1.              |`ja`      |`&&`                 |
+|1.              |`tai`     |`||`                 |
+|2.              |`sekä`    |`&&`                 |
+|2.              |`taikka`  |`||`                 |
+
+A _condition_ consists of two operands and a comparison operator.
 
     [expression] on [operator] [expression]
     [expression] ei ole [operator] [expression]
@@ -746,12 +759,11 @@ The slice syntax is used to retrieve a subarray that contains only the elements 
 
 The ordinal before `alkaen` is the start index and the ordinal before `päättyen` is the end index.
 
-### Conditional expression
+### Ternary expression
 
-A conditional expression contains two subexpressions and evaluates one of them depending on the truth value of the condition.
+A ternary expression contains two subexpressions and evaluates one of them depending on the truth value of the condition.
 
-    riippuen siitä, [condition], joko [expression] tai [expression]
-    riippuen siitä, [condition list], [expression] tai [expression]
+    riippuen siitä, [condition expression], joko [expression] tai [expression]
 
 `joko` is a keyword that can be used in place of `eikä muuta` when there is only one condition.
 
@@ -761,6 +773,7 @@ Conditions must be in one of these forms:
     eikö [expression] ole [operator] [expression]
 
 The operators are as in if statements, see the table in the If statements chapter.
+Multiple conditions can be connected using logical connectives `ja`, `tai`, `sekä` and `taikka`.
 
 ## Compiler imperatives
 
