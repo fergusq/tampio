@@ -1,0 +1,68 @@
+Puulla on juurisolmu [yleensä määrittelemätön solmu].
+
+Solmulla on avain, etulapsi [yleensä määrittelemätön solmu] ja takalapsi [yleensä määrittelemätön solmu].
+
+Solmu on määritelty, jos se ei ole sama kuin määrittelemätön solmu.
+Solmu on määrittelemätön, jos se ei ole määritelty.
+
+Olkoon määrittelemätön solmu solmu.
+
+# Sisältäminen
+
+Puu sisältää ihanan avaimen, jos
+	sen juurisolmu on määritelty ja sen juurisolmu sisältää ihanan avaimen.
+
+Solmu sisältää ihanan avaimen, jos
+	sen avain on ihana avain taikka
+	sen avain on suurempi kuin ihana avain, sen etulapsi on määritelty ja sen etulapsi sisältää ihanan avaimen taikka
+	sen avain on pienempi kuin ihana avain, sen takalapsi on määritelty ja sen takalapsi sisältää ihanan avaimen.
+
+# Lisääminen
+
+Kun pirteään puuhun lisätään ihana alkio,
+	jos sen juurisolmu on määritelty, niin
+		pirteän puun juurisolmulle lisätään ihana alkio
+	eikä muuta
+ja,	jos sen juurisolmu on määrittelemätön, niin
+		pirteän puun juurisolmuksi asetetaan uusi solmu, jonka avain on ihana alkio.
+
+Kun selvälle solmulle lisätään ihana alkio,
+	jos sen avain on suurempi kuin ihana alkio ja sen etulapsi on määrittelemätön, niin
+		sen etulapseksi asetetaan uusi solmu, jonka avain on ihana alkio eikä muuta,
+	eikä muuta,
+	jos sen avain on suurempi kuin ihana alkio ja sen etulapsi on määritelty, niin
+		sen etulapselle lisätään ihana alkio,
+	eikä muuta,
+	jos sen avain on pienempi kuin ihana alkio ja sen takalapsi on määrittelemätön, niin
+		sen takalapseksi asetetaan uusi solmu, jonka avain on ihana alkio eikä muuta,
+	eikä muuta
+ja,	jos sen avain on pienempi kuin ihana alkio ja sen takalapsi on määritelty, niin
+		sen takalapselle lisätään ihana alkio
+	eikä muuta.
+
+# Merkkijonoesitys
+
+Puun merkkijonoesitys on sulku "[" yhdistettynä sen juurisolmun merkkijonoesitykseen ja yhdistettynä sulkuun "]".
+
+Solmun merkkijonoesitys on
+	riippuen siitä, onko se määrittelemätön,
+	joko	merkkijono ""
+	tai riippuen siitä, onko sen etulapsi määritelty ja onko sen takalapsi määritelty,
+	joko	sen etulapsen merkkijonoesitys
+			yhdistettynä pilkkuun ",",
+			yhdistettynä sen avaimen merkkijonoesitykseen,
+			yhdistettynä pilkkuun ","
+			ja yhdistettynä sen takalapsen merkkijonoesitykseen
+	tai riippuen siitä, onko sen etulapsi määritelty,
+	joko 	sen etulapsen merkkijonoesitys yhdistettynä pilkkuun "," ja yhdistettynä sen avaimen merkkijonoesitykseen
+	tai riippuen siitä, onko sen takalapsi määritelty,
+	joko	sen avaimen merkkijonoesitys yhdistettynä pilkkuun "," ja yhdistettynä sen takalapsen merkkijonoesitykseen
+	tai	sen avaimen merkkijonoesitys.
+
+# Pääohjelma
+
+Olkoon reipas hakupuu puu.
+
+Kun nykyinen sivu avautuu,
+	reippaaseen hakupuuhun lisätään 2 sekä 3 sekä 4 sekä 5
+ja	nykyinen sivu näyttää reippaan hakupuun merkkijonoesityksen.
