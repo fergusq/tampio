@@ -94,6 +94,7 @@ Luku pyöristettynä on "Math.round(this)" kohdekoodina.
 Luku pyöristettynä kivaan tarkkuuteen on "Math.round(this*Math.pow(10, e))/Math.pow(10, e)" kohdekoodina.
 Luku kokonaislukuna on "Math.floor(this)" kohdekoodina.
 Luku merkkijonona on "this.toString()" kohdekoodina.
+Luvun merkkijonoesitys on "this.toString()" kohdekoodina.
 
 # String/merkkijono
 
@@ -104,6 +105,8 @@ Merkkijonon merkit ovat "Array.from(this)" kohdekoodina.
 Merkkijonon sanat ovat "this.split(/\\s+/)" kohdekoodina.
 Merkkijonon kentät ovat "this.split(/,/)" kohdekoodina.
 Merkkijono siistittynä on "this.trim()" kohdekoodina.
+Merkkijono merkkijonona on se itse.
+Merkkijonon merkkijonoesitys on se itse.
 
 Kun kiva merkkijono näytetään käyttäjälle,
 	suorita kohdekoodi "alert(this);".
