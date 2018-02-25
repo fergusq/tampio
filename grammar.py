@@ -21,7 +21,7 @@ from fatal_error import syntaxError
 from inflect import *
 
 from ast import *
-from lex import accept, checkEof, eat, eatComma, eatPeriod, ADJ, NOUN, NAME, PRONOUN, NUMERAL, VERB, CONJ, CARDINALS, ORDINALS
+from lex import accept, checkEof, eat, eatComma, eatPeriod, afterCommaThereIs, ADJ, NOUN, NAME, PRONOUN, NUMERAL, VERB, CONJ, CARDINALS, ORDINALS
 
 def initializeParser():
 	global options, current_class
@@ -216,6 +216,19 @@ def parseDeclaration(tokens):
 			eatPeriod(tokens)
 			tokens.addNewline()
 			return AliasClassDecl(cl.baseform, cl2.baseform, stmts)
+	# Vertailuoperaattori
+	elif afterCommaThereIs("jos", tokens):
+		varname, typename, case = parseSelfVariable(tokens)
+		signature = parseConditionPredicateAndArgs(tokens, VariableExpr(varname, typename), case, allow_negation=False)
+		accept([","], tokens)
+		accept(["jos"], tokens)
+		tokens.setStyle("keyword")
+		conditions = parseOuterCondition(tokens, do_format=True)
+		wheres = parseWheres(tokens)
+		stmts = parseAdditionalStatements(tokens)
+		eatPeriod(tokens)
+		tokens.addNewline()
+		return CondFunctionDecl(typename, signature, conditions, wheres, stmts)
 	# Muut
 	else:
 		word = token.toWord(cls=NOUN+ADJ,forms=["ulkoolento", "omanto", "nimento"])
@@ -231,73 +244,33 @@ def parseDeclaration(tokens):
 			tokens.addNewline()
 			return ClassDecl(word.baseform, fields, stmts)
 		elif word.isNoun() or word.isAdjective():
-			if word.isAdjective():
-				tokens.next()
-				tokens.setStyle("variable")
-				_, typeword = parseVariable(tokens, word=word, case="")
-				varname = word.baseform + "_" + typeword.baseform
-			elif word.isNoun():
-				typeword = word
-				tokens.next()
-				tokens.setStyle("type")
-				varname = ""
-			current_class = typeword.baseform
-			if tokens.peek() and tokens.peek().token.lower() == "on":
+			varname, typename, case = parseSelfVariable(tokens, ["omanto", "nimento"])
+			current_class = typename
+			# Perivä luokka
+			if varname == "" and case == "nimento" and tokens.peek() and tokens.peek().token.lower() == "on":
 				tokens.next()
 				tokens.setStyle("keyword")
-				peek = tokens.peek()
-				peek2 = tokens.peek(2)
-				peek3 = tokens.peek(3)
-				# Perivä luokka
-				if (varname == ""
-					and peek and peek.isWord() and peek.toWord(forms=["nimento"]).isNoun()
-					and (not (peek2 and peek3) or (peek2.token != "," or peek3.token.lower() != "jos"))
-					):
-					if word.form != "nimento":
-						syntaxError("class name not in the nominative case", tokens)
-					checkEof(tokens)
-					super_type = tokens.next().toWord(cls=NOUN,forms=["nimento"])
-					if not super_type.isNoun() or super_type.form != "nimento":
-						syntaxError("super type must be a noun in the nominative case", tokens)
-					if tokens.peek() and tokens.peek().token == ",":
-						tokens.next()
-						accept(["jolla"], tokens)
-						tokens.setStyle("keyword")
-						accept(["on"], tokens)
-						tokens.setStyle("keyword")
-						fields = parseList(parseFieldDecl, tokens)
-					else:
-						fields = []
-					stmts = parseAdditionalStatements(tokens)
-					eatPeriod(tokens)
-					tokens.addNewline()
-					return ClassDecl(word.baseform, fields, stmts, super_type=super_type.baseform)
-				# Vertailuoperaattori
-				elif peek and peek.isWord() and not nextStartsNominalPhrase(tokens):
-					if word.form != "nimento":
-						syntaxError("self parameter not in the nominative case", tokens)
-					place = tokens.place()
-					operator, req_second_param = parseOperator(tokens)
-					if operator[0] != ".":
-						tokens.setPlace(place)
-						tokens.next()
-						syntaxError("redefinition of builtin", tokens)
-					if req_second_param:
-						w1, w2 = parseVariable(tokens)
-						param = w1.baseform+"_"+w2.baseform
-					else:
-						param = ""
-					accept([","], tokens)
-					accept(["jos"], tokens)
+				if word.form != "nimento":
+					syntaxError("class name not in the nominative case", tokens)
+				checkEof(tokens)
+				super_type = tokens.next().toWord(cls=NOUN,forms=["nimento"])
+				if not super_type.isNoun() or super_type.form != "nimento":
+					syntaxError("super type must be a noun in the nominative case", tokens)
+				if tokens.peek() and tokens.peek().token == ",":
+					tokens.next()
+					accept(["jolla"], tokens)
 					tokens.setStyle("keyword")
-					conditions = parseOuterCondition(tokens)
-					wheres = parseWheres(tokens)
-					stmts = parseAdditionalStatements(tokens)
-					eatPeriod(tokens)
-					tokens.addNewline()
-					return CondFunctionDecl(typeword.baseform, operator, varname, param, conditions, wheres, stmts)
+					accept(["on"], tokens)
+					tokens.setStyle("keyword")
+					fields = parseList(parseFieldDecl, tokens)
+				else:
+					fields = []
+				stmts = parseAdditionalStatements(tokens)
+				eatPeriod(tokens)
+				tokens.addNewline()
+				return ClassDecl(typename, fields, stmts, super_type=super_type.baseform)
 			# Funktio
-			elif word.form in ["omanto", "nimento"]:
+			elif case in ["omanto", "nimento"]:
 				place = tokens.place()
 				field, field_case, field_number, param, param_case = parseFieldName(tokens, word.form)
 				if field in ARI_OPERATORS and ARI_OPERATORS[field][0] == param_case:
@@ -320,9 +293,23 @@ def parseDeclaration(tokens):
 				stmts = parseAdditionalStatements(tokens)
 				eatPeriod(tokens)
 				tokens.addNewline()
-				return FunctionDecl(typeword.baseform, field, varname, param, param_case, body, wheres, memoize, stmts)
+				return FunctionDecl(typename, field, varname, param, param_case, body, wheres, memoize, stmts)
 	tokens.next()
-	syntaxError("unexpected token \"" + token.token + "\"", tokens)
+	syntaxError("malformed declaration", tokens)
+
+def parseSelfVariable(tokens, forms=[]):
+	word = tokens.next().toWord(cls=ADJ+NOUN,forms=forms)
+	if word.isAdjective():
+		tokens.setStyle("variable")
+		_, typeword = parseVariable(tokens, word=word, case="")
+		varname = word.baseform + "_" + typeword.baseform
+	elif word.isNoun():
+		typeword = word
+		tokens.setStyle("type")
+		varname = ""
+	else:
+		syntaxError("expected variable or type name", tokens)
+	return varname, typeword.baseform, typeword.form
 
 def parseVariable(tokens, word=None, case="nimento"):
 	if not word:
@@ -621,7 +608,7 @@ def parseSentence(tokens, signature=False):
 
 def parsePredicate(word, tokens, subject_case):
 	if not word.isVerb() or word.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
-		syntaxError("predicate is not in indicative simple present", tokens)
+		syntaxError("predicate is not in indicative simple present 3rd active or passive", tokens)
 	tokens.setStyle("function")
 	
 	passive = word.form[-1] == "4"
@@ -652,10 +639,10 @@ def readVerbModifiers(tokens, is_be_verb=False):
 			break
 	return ans
 
-def parseArgs(tokens, passive, allow_predicatives, signature=False):
+def parseArgs(tokens, passive, allow_predicatives, signature=False, allow_return_var=True):
 	args = {}
 	while not tokens.eof():
-		if tokens.peek().token.lower() in ["sekä", ",", ";", ".", "]", "eikä", "ja", "tuloksenaan"]:
+		if tokens.peek().token.lower() in [",", ";", ".", "]", "eikä", "ja", "sekä", "tai", "taikka", "tuloksenaan"]:
 			break
 		arg, case = parsePredicative(tokens) if allow_predicatives else parseNominalPhrase(tokens)
 		if signature and not isinstance(arg, VariableExpr):
@@ -665,7 +652,7 @@ def parseArgs(tokens, passive, allow_predicatives, signature=False):
 		args[case] = arg
 		if isinstance(arg, LambdaExpr): # että-lohkot ovat lauseissa aina viimeisenä
 			break
-	if (not tokens.eof() and (
+	if (allow_return_var and not tokens.eof() and (
 			(tokens.peek().token.lower() == "tuloksenaan" and not passive)
 			or (tokens.peek().token.lower() == "tuloksena" and passive)
 			)):
@@ -728,11 +715,18 @@ for key in CMP_OPERATORS.keys():
 		branch = branch[word]
 	branch[words[-1]] = CMP_OPERATORS[key]
 
-def parseOuterCondition(tokens, prefix=False, end_keyword=[]):
+def parseOuterCondition(tokens, prefix=False, end_keyword=[], do_format=False):
+	if do_format:
+		tokens.increaseIndentLevel()
 	expr = parseInnerCondition(tokens, prefix, end_keyword)
 	while tokens.peek().token.lower() in ["sekä", "taikka"]:
+		if do_format:
+			tokens.addNewline()
 		op = "&&" if tokens.next().token.lower() == "sekä" else "||"
+		tokens.setStyle("keyword")
 		expr = CondConjunctionExpr(op, [expr, parseInnerCondition(tokens, prefix, end_keyword)])
+	if do_format:
+		tokens.decreaseIndentLevel()
 	expr.wheres = parseWheres(tokens)
 	eatComma(tokens)
 	return expr
@@ -746,6 +740,8 @@ def parseInnerCondition(tokens, prefix, custom_endings):
 
 def parseCondition(tokens, prefix=False):
 	pushFor("jokainen", "jokin")
+	predicate = None
+	verbIsOlla = None
 	if prefix:
 		checkEof(tokens)
 		if tokens.peek().token.lower() == "eikö":
@@ -753,39 +749,63 @@ def parseCondition(tokens, prefix=False):
 			tokens.setStyle("keyword")
 			negation = True
 		else:
-			accept(["onko"], tokens)
-			tokens.setStyle("keyword")
+			predicate, verbIsOlla = parseConditionPredicate(tokens, True, False)
 			negation = False
-	operand1, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
-	if case != "nimento":
-		syntaxError("subject is not in nominative case", tokens)
-	if not prefix:
-		checkEof(tokens)
-		if tokens.peek().token.lower() == "ei":
-			tokens.next()
-			tokens.setStyle("keyword")
-			accept(["ole"], tokens)
-			tokens.setStyle("keyword")
-			negation = True
-		else:
-			accept(["on"], tokens)
-			tokens.setStyle("keyword")
-			negation = False
-	elif negation:
-		accept(["ole"], tokens)
-		tokens.setStyle("keyword")
-	operator, requires_second_operand = parseOperator(tokens)
-	if requires_second_operand:
-		operand2, case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
-		if case != "nimento":
-			syntaxError("predicative is " +formToEnglish(case) + " (should be in the nominative case)", tokens)
-	else:
-		operand2 = None
+	operand1, self_case = parseNominalPhrase(tokens, promoted_cases=["nimento"])
+	expr = parseConditionPredicateAndArgs(tokens, operand1, self_case, predicate=predicate, verbIsOlla=verbIsOlla, prefix=prefix, negation=prefix and negation)
 	for_vars = popFor()
-	expr = CondExpr(negation, operator, operand1, operand2)
 	for for_var in reversed(for_vars):
 		expr = QuantifierCondExpr(for_var.type, for_var.name, for_var.expr, expr)
 	return expr
+
+def parseConditionPredicateAndArgs(tokens, operand1, self_case, predicate=None, verbIsOlla=None, prefix=False, negation=False, allow_negation=True):
+	if not prefix:
+		checkEof(tokens)
+		if allow_negation and tokens.peek().token.lower() == "ei":
+			tokens.next()
+			tokens.setStyle("keyword")
+			predicate, verbIsOlla = parseConditionPredicate(tokens, False, True)
+			negation = True
+		else:
+			predicate, verbIsOlla = parseConditionPredicate(tokens, False, False)
+			negation = False
+	elif negation:
+		predicate, verbIsOlla = parseConditionPredicate(tokens, True, True)
+		tokens.setStyle("keyword")
+	args = []
+	if verbIsOlla:
+		operator, requires_second_operand = parseOperator(tokens)
+		if requires_second_operand:
+			operand2, case = parseNominalPhrase(tokens, promoted_cases=[self_case])
+			if case != self_case:
+				syntaxError("predicative is in " +formToEnglish(case) + " (should be in " +formToEnglish(self_case)+ ")", tokens)
+		else:
+			operand2 = None
+		return CondOperatorExpr(negation, operator, operand1, operand2)
+	else:
+		args, _ = parseArgs(tokens, False, False, allow_return_var=False)
+		return CondFunctionExpr(negation, predicate, operand1, args)
+
+def parseConditionPredicate(tokens, prefix, negative):
+	verb = tokens.next().toWord(cls=VERB,forms=["indicative_present_simple3", "indicative_present_simple4"])
+	if not negative:
+		if prefix and not verb.interrogative:
+			syntaxError("predicate does not contain the interrogative suffix \"-ko\"", tokens)
+		if verb.form not in ["indicative_present_simple3", "indicative_present_simple4"]:
+			syntaxError("predicative is not in indicative simple present 3rd person active or passive", tokens)
+	else:
+		if verb.form != "imperative_present_simple2":
+			syntaxError("predicative is not in negative form (imperative)", tokens)
+	passive = verb.form[-1] == "4"
+	verbIsOlla = verb.baseform == "olla"
+	predicate = verb.baseform
+	if verbIsOlla:
+		tokens.setStyle("keyword")
+	else:
+		tokens.setStyle("conditional-operator")
+		predicate += readVerbModifiers(tokens)
+	predicate += "_P" if passive else "_A"
+	return predicate, verbIsOlla
 
 def parseOperator(tokens):
 	checkEof(tokens)

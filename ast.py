@@ -352,27 +352,23 @@ class FunctionDecl(Whereable,Decl):
 			self.body.validateTree()
 
 class CondFunctionDecl(Whereable,Decl):
-	def __init__(self, vtype, name, self_param, param, condition, wheres, stmts):
+	def __init__(self, vtype, signature, condition, wheres, stmts):
 		Decl.__init__(self, stmts)
-		assert name[0] == "."
 		self.type = vtype
-		self.name = name
-		self.self_param = self_param
-		self.param = param
+		self.signature = signature
 		self.condition = condition
 		self.wheres = wheres
 	def compileDecl(self):
-		ans = typeToJs(self.type) + ".prototype" + self.name + " = function("
-		if self.param != "":
-			ans += escapeIdentifier(self.param)
-		ans += ") {\n"
-		if self.self_param != "":
-			ans += " var " + escapeIdentifier(self.self_param) + " = this;\n"
+		ans = typeToJs(self.type) + ".prototype." + self.signature.compileName() + " = function"
+		ans += self.signature.compileArgs(indent=0)
+		ans += " {\n"
+		if self.signature.getSelfArg().name:
+			ans += " var " + escapeIdentifier(self.signature.getSelfArg().name) + " = this;\n"
 		ans += self.compileWheres()
 		ans += " return " + self.condition.compile(0) + ";\n};"
 		return ans
 	def buildHierarchy(self):
-		getClass(self.type).addComparisonOperator(self.name)
+		getClass(self.type).addComparisonOperator(self.signature.compileName())
 	def validateTree(self):
 		with BlockFrame(block_frame._replace(self_type=self.type)):
 			self.validateWheres()
@@ -483,7 +479,7 @@ class CondConjunctionExpr(Whereable,Recursive):
 	def validate(self):
 		self.validateWheres()
 
-class CondExpr(Whereable,Recursive):
+class CondOperatorExpr(Whereable,Recursive):
 	def __init__(self, negation, operator, left, right, wheres=[]):
 		self.negation = negation
 		self.operator = operator
@@ -494,14 +490,57 @@ class CondExpr(Whereable,Recursive):
 		return self.left.subexpressions() + (self.right.subexpressions() if self.right else []) + self.whereSubexpressions()
 	def createdVariables(self):
 		return {**super().createdVariables(), **self.whereCreatedVariables()}
+	def getSelfArg(self):
+		return self.left
+	def compileName(self):
+		"""Tätä saa käyttää vain, jos operaattori ei ole JavaScript-operaattori"""
+		assert self.operator[0] == "."
+		return escapeIdentifier(self.operator[1:])
+	def compileArgs(self, indent):
+		return "(" + (self.right.compile(indent) if self.right else "") + ")"
 	def compile(self, indent):
-		ans = self.left.compile(indent) + self.operator
+		ans = self.left.compile(indent) + escapeIdentifier(self.operator)
 		if self.operator[0] == ".":
 			ans += "("
 		if self.right:
 			ans += self.right.compile(indent)
 		if self.operator[0] == ".":
 			ans += ")"
+		if self.negation:
+			return "!(" + ans + ")"
+		else:
+			return ans
+	def validate(self):
+		self.validateWheres()
+
+class ArgContainer:
+	def compileName(self):
+		keys = sorted(self.args.keys())
+		return escapeIdentifier(self.name) + "_" + "".join([formAbrv(form) for form in keys])
+	def compileArgs(self, indent):
+		keys = sorted(self.args.keys())
+		return "(" + ", ".join([self.args[key].compile(indent) for key in keys]) + ")"
+
+class CondFunctionExpr(Whereable,Recursive,ArgContainer):
+	def __init__(self, negation, func_name, self_obj, args, wheres=[]):
+		self.negation = negation
+		self.name = func_name
+		self.self_obj = self_obj
+		self.args = args
+		self.wheres = wheres
+	def subexpressions(self):
+		ans = self.self_obj.subexpressions()
+		for arg in self.args.values():
+			ans += arg.subexpressions()
+		return ans + self.whereSubexpressions()
+	def createdVariables(self):
+		return {**super().createdVariables(), **self.whereCreatedVariables()}
+	def getSelfArg(self):
+		return self.self_obj
+	def compileName(self):
+		return "b_" + super().compileName()
+	def compile(self, indent):
+		ans = self.self_obj.compile(indent) + "." + self.compileName() + self.compileArgs(indent)
 		if self.negation:
 			return "!(" + ans + ")"
 		else:
@@ -525,7 +564,7 @@ class BlockStatement(Whereable,Recursive):
 	def validate(self):
 		self.validateWheres()
 
-class CallStatement(Recursive):
+class CallStatement(Recursive,ArgContainer):
 	def __init__(self, name, args, output_var, async_block):
 		self.name = name
 		self.args = args
@@ -550,12 +589,6 @@ class CallStatement(Recursive):
 		for _, param, ptype, _ in self.async_block:
 			ans += [(param, ptype)]
 		return ans
-	def compileName(self):
-		keys = sorted(self.args.keys())
-		return escapeIdentifier(self.name) + "_" + "".join([formAbrv(form) for form in keys])
-	def compileArgs(self, indent):
-		keys = sorted(self.args.keys())
-		return "(" + ", ".join([self.args[key].compile(indent) for key in keys]) + ")"
 	def compileAssignment(self):
 		if self.output_var:
 			return "var " + escapeIdentifier(self.output_var[0]) + " = "
@@ -698,7 +731,7 @@ class VariableExpr(Expr,Recursive):
 		elif self.name in global_variables:
 			ans = global_variables[self.name]
 		elif self.type:
-			ans = {}
+			ans = set()
 		else:
 			return classSet()
 		

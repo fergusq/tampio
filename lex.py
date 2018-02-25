@@ -70,6 +70,7 @@ def lexCode(code):
 			person = analysis.get("PERSON", "")
 			comparison = analysis.get("COMPARISON", "")
 			possessive = analysis.get("POSSESSIVE", "")
+			ko_suffix = analysis.get("KYSYMYSLIITE", "") == "true"
 			if "MOOD" in analysis and "SIJAMUOTO" in analysis:
 				form = analysis["MOOD"] + "_" + analysis["SIJAMUOTO"]
 			elif "SIJAMUOTO" in analysis:
@@ -97,7 +98,7 @@ def lexCode(code):
 				form = analysis["MOOD"]
 			else:
 				form = ""
-			alternatives += [Word(word, bf, form + person, number, cl, possessive, comparison)]
+			alternatives += [Word(word, bf, form + person, number, cl, possessive, comparison, interrogative=ko_suffix)]
 		if len(alternatives) == 0:
 			alternatives = [Word(word, word, "", "", "")]
 		output += [AltWords(word, alternatives)]
@@ -211,6 +212,12 @@ def accept(accepted, tokens):
 	if tokens.next().token.lower() not in accepted:
 		syntaxError("unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in accepted]), tokens)
 
+def afterCommaThereIs(word, tokens):
+	i = 1
+	while tokens.peek(i) and tokens.peek(i).token not in [",", "."]:
+		i += 1
+	return tokens.peek(i) and tokens.peek(i).token == "," and tokens.peek(i+1) and tokens.peek(i+1).token.lower() == word
+
 CARDINALS = ["nolla", "yksi", "kaksi", "kolme", "neljä", "viisi", "kuusi", "seitsemän", "kahdeksan", "yhdeksän", "kymmenen"]
 ORDINALS = ["ensimmäinen", "toinen", "kolmas", "neljäs", "viides", "kuudes", "seitsemäs", "kahdeksas", "yhdeksäs", "kymmenes"]
 
@@ -268,7 +275,7 @@ VERB = ["teonsana", "kieltosana"]
 CONJ = ["sidesana"]
 
 class Word:
-	def __init__(self, word, baseform, form, number, word_class, possessive="", comparison="", ordinal_like=False):
+	def __init__(self, word, baseform, form, number, word_class, possessive="", comparison="", ordinal_like=False, interrogative=False):
 		#print(word, baseform, form, number, word_class)
 		self.word = word
 		self.baseform = baseform
@@ -278,6 +285,7 @@ class Word:
 		self.possessive = possessive
 		self.ordinal_like = ordinal_like
 		self.comparison = comparison
+		self.interrogative = interrogative
 	def __str__(self):
 		return self.baseform + "(" + self.word_class + ":" + self.form + ":" + self.number + ")"
 	def __repr__(self):
