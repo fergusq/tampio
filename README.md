@@ -308,6 +308,9 @@ These rules are the same in both method definitions and method calls.
 |`viereen`   |genitive     |
 |`yli`       |genitive     |
 |`ylitse`    |genitive     |
+|`yllä`      |genitive     |
+|`yltä`      |genitive     |
+|`ylle`      |genitive     |
 |`ympäri`    |genitive     |
 
 The passive past participles of intransitive verbs ending in `-uttu`/`-ytty` work similarly to postpositions.
@@ -443,6 +446,11 @@ There should be a comma before `jos`.
 The `niin` keyword can be used in place of `eikä muuta`, when there is only one condition.
 
     , jos [condition expression], niin [statement list]
+    , jos taas [condition expression], niin [statement list]
+    , jos kuitenkin [condition expression], niin [statement list]
+
+If either of `taas` or `kuitenkin` is present,
+the if statement will be evaluated only if the previous if statement was not evaluated (ie. it is an "else if" statement).
 
 For example, to iterate an array, one must write a recursive method.
 An if statement is used to end the recursion when the array is empty.

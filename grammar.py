@@ -46,6 +46,7 @@ POSTPOSITIONS = {
 		"ohella", "ohelta", "ohelle",
 		"seassa", "seasta", "sekaan",
 		"sisällä", "sisältä", "sisälle",
+		"yllä", "yltä", "ylle",
 		
 		"ali", "alitse",
 		"ohi", "ohitse",
@@ -468,19 +469,31 @@ def parseSentence(tokens, signature=False):
 	checkEof(tokens)
 	token = tokens.peek()
 	if not signature and token.token.lower() == "jos" or (token.token == "," and tokens.peek(2) and tokens.peek(2).token.lower() == "jos"):
+		# varmistetaan, että ennen "jos"-sanaa on pilkku
 		if token.token == ",":
 			tokens.next()
 		elif tokens.current().token != ",":
 			syntaxError("there must be a comma before \"jos\"", tokens)
+		# parsitaan "jos"
 		tokens.next()
 		tokens.setStyle("keyword")
+		# parsitaan "jos taas" ja "jos kuitenkin" (else-lohko) TODO: entä jos tähän ei voi tulla else-lohkoa?
+		if tokens.peek().token.lower() in ["taas", "kuitenkin"]:
+			tokens.next()
+			tokens.setStyle("keyword")
+			is_else = True
+		else:
+			is_else = False
+		# parsitaan ehto
 		conditions = parseOuterCondition(tokens, False, ["niin"])
+		# ehdon saattaa päättää niin-sana
 		if tokens.peek().token.lower() == "niin":
 			tokens.next()
 			tokens.setStyle("keyword")
+		# parsitaan lohko
 		block = parseList(parseSentence, tokens, do_format=True)
 		eatComma(tokens)
-		return IfStatement(conditions, block)
+		return IfStatement(conditions, block, is_else)
 	
 	pushFor("jokainen")
 	word = tokens.peek().toWord(

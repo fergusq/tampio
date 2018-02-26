@@ -429,9 +429,10 @@ class ForStatement(Recursive):
 			+ " "*indent + "}\n")
 
 class IfStatement(Recursive):
-	def __init__(self, condition, block):
+	def __init__(self, condition, block, is_else):
 		self.condition = condition
 		self.block = block
+		self.is_else = is_else
 	def subexpressions(self):
 		ans = []
 		ans += self.condition.subexpressions()
@@ -442,6 +443,7 @@ class IfStatement(Recursive):
 		ans = ""
 		self.condition.compileWheres()
 		return ans + (" "*indent
+			+ ("else " if self.is_else else "")
 			+ "if (" + self.condition.compile(indent+1) + ") {\n"
 			+ "".join([s.compile(indent=indent+1) for s in self.block])
 			+ " "*indent + "}\n")
