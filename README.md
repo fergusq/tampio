@@ -328,21 +328,28 @@ For example:
 
 _Boolean functions_ are functions that return boolean values.
 They can only be used inside other boolean functions, if statements and ternary expressions.
-Boolean functions can have either zero or one parameters.
 
-    [parameter/nominative] on [function name name], jos [condition list].
-    [parameter/nominative] on [adjective/comparative nominative] kuin [parameter/nominative], jos [condition list].
+    [parameter/nominative] on [function name], jos [condition expression].
+    [parameter/nominative] on [adjective/comparative nominative] kuin [parameter/nominative], jos [condition expression].
+    [object] [verb] [arguments], jos [condition expression]
 
-If the name of the function is a comparative adjective,
+The function can have either "olla" verb or any other verb.
+If the verb is olla, there must be a word after the verb.
+
+If the word is a comparative adjective,
 it must also be nominative and be followed by the `kuin` keyword.
 This kind of functions are called _comparison operators_.
 
 Otherwise, it can be any word that doesn't start a nominal phrase expression.
 
+If the verb is not olla, the boolean function looks like a method,
+consisting of one or more arguments that must all be in a different case or have a different postposition.
+
 For example:
 
     Lista on tyhjä, jos sen alkioiden määrä on nolla.
     Vektori on pidempi kuin lyhyt vektori, jos sen pituus on suurempi kuin lyhyen vektorin pituus.
+    Lista sisältää ihanan alkion, jos sen jokin alkio on sama kuin ihana alkio.
 
 ## Statements
 
@@ -461,7 +468,13 @@ A _condition expression_ is a list of conditions separated by logical connective
 |2.              |`sekä`    |`&&`                 |
 |2.              |`taikka`  |`||`                 |
 
-A _condition_ consists of two operands and a comparison operator.
+A _condition_ can be either a builtin operator or a boolean function.
+Boolean functions are described in a previous chapter.
+
+#### Builtin operators
+
+A condition can be a builtin operator.
+The condition consists of two operands and a comparison operator.
 
     [expression] on [operator] [expression]
     [expression] ei ole [operator] [expression]
@@ -484,7 +497,7 @@ Below is a table of available comparison operators.
 |`suurempi tai yhtä suuri kuin`|`>=`                 |
 |`vähintään`                   |`>=`                 |
 
-It is possible to define custom comparison operators for classes.
+#### Quantifiers
 
 It is possible to use `jokainen`, `mikään` and `jokin` quantifiers in conditions.
 They correspond to JavaScript methods `.every` and `.some`.
