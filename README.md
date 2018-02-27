@@ -1033,31 +1033,33 @@ Pseudodeclaration:
     Luku pyöristettynä annettuun tarkkuuteen on ...
     
     Luku merkkijonona on ...
+    Luvun merkkijonoesitys on ...
 
-|Member name     |Type    |Description|
-|:---------------|:------:|:----------|
-|`potenssit`     |Function|An infinite array of the powers of this number.
-|`neliö`         |Function|The square of this number (`this*this`).
-|`kuutio`        |Function|The cube of this number (`this*this*this`).
-|`neliöjuuri`    |Function|The square root of this number (`Math.sqrt(this)`).
-|`kuutiojuuri`   |Function|The cube root of this number (`Math.cbrt(this)`).
-|`vastaluku`     |Function|The opposite of this number (`-this`).
-|`käänteisluku`  |Function|The inverse of this number (`1/this`).
-|`edeltäjä`      |Function|The predecessor of this number (`this-1`).
-|`seuraaja`      |Function|The successor of this number (`this+1`).
-|`itseisarvo`    |Function|The absolute value of this number (`Math.abs(this)`).
-|`merkki`        |Function|The sign of this number (`Math.sign(this)`).
-|`sini`          |Function|The sine (`Math.sin(this)`).
-|`kosini`        |Function|The cosine (`Math.cos(this)`).
-|`tangentti`     |Function|The tangent (`Math.tan(this)`).
-|`logaritmi`     |Function|The natural logarithm (`Math.log(this)`).
-|`vastalogaritmi`|Function|The natural antilogarithm (`Math.exp(this)`).
-|`kertoma`       |Function|The factorial of this number.
-|`tekijät`       |Function|The factors of this number.
-|`alkutekijät`   |Function|The prime factors of this number.
-|`kokonaislukuna`|Function|Rounds this number (`Math.floor(this)`).
-|`pyöristettynä` |Function|Rounds this number (`Math.round(this)`).
-|`merkkijonona`  |Function|Converts this number to string (`this.toString()`).
+|Member name       |Type    |Description|
+|:-----------------|:------:|:----------|
+|`potenssit`       |Function|An infinite array of the powers of this number.
+|`neliö`           |Function|The square of this number (`this*this`).
+|`kuutio`          |Function|The cube of this number (`this*this*this`).
+|`neliöjuuri`      |Function|The square root of this number (`Math.sqrt(this)`).
+|`kuutiojuuri`     |Function|The cube root of this number (`Math.cbrt(this)`).
+|`vastaluku`       |Function|The opposite of this number (`-this`).
+|`käänteisluku`    |Function|The inverse of this number (`1/this`).
+|`edeltäjä`        |Function|The predecessor of this number (`this-1`).
+|`seuraaja`        |Function|The successor of this number (`this+1`).
+|`itseisarvo`      |Function|The absolute value of this number (`Math.abs(this)`).
+|`merkki`          |Function|The sign of this number (`Math.sign(this)`).
+|`sini`            |Function|The sine (`Math.sin(this)`).
+|`kosini`          |Function|The cosine (`Math.cos(this)`).
+|`tangentti`       |Function|The tangent (`Math.tan(this)`).
+|`logaritmi`       |Function|The natural logarithm (`Math.log(this)`).
+|`vastalogaritmi`  |Function|The natural antilogarithm (`Math.exp(this)`).
+|`kertoma`         |Function|The factorial of this number.
+|`tekijät`         |Function|The factors of this number.
+|`alkutekijät`     |Function|The prime factors of this number.
+|`kokonaislukuna`  |Function|Rounds this number (`Math.floor(this)`).
+|`pyöristettynä`   |Function|Rounds this number (`Math.round(this)`).
+|`merkkijonona`    |Function|Converts this number to string (`this.toString()`).
+|`merkkijonoesitys`|Function|Same as above (`this.toString()`).
 
 ### `merkkijono` class
 
@@ -1076,6 +1078,9 @@ Pseudodeclaration:
     
     Kun mukava merkkijono näytetään käyttäjälle, ...
     Kun mukava merkkijono tulostetaan lokiin, ...
+    
+    Merkkijono merkkijonona on se itse.
+    Merkkijonon merkkijonoesitys on se itse.
 
 |Member name            |Type    |Description|
 |:----------------------|:------:|:----------|
@@ -1086,6 +1091,8 @@ Pseudodeclaration:
 |`jaetaan`              |Method  |Splits this string and stores it to the given array. (`for (var s of this.split(sep)) list.push(s)`).
 |`siistittynä`          |Function|This string trimmed (`this.trim()`).
 |`näytetään käyttäjälle`|Method  |Displays this string to the user (`alert(this)`).
+|`merkkijonona`         |Function|The string representation of this string - itself (`this`).
+|`merkkijonoesitys`     |Function|The string representation of this string - itself (`this`).
 
 ### `muuttuja` class
 
