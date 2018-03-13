@@ -3,11 +3,12 @@ Salli kohdekoodi.
 # Object
 
 Sisällytä kohdekoodi "
-Object.prototype.t_prepend = function(x) { return [this].concat(x); };
 Object.prototype.t_assign = function(n, v) { this[n] = v; };
 ".
 
 Tulkitse kohdekoodiolio kohdekoodityyppinä "Object".
+
+Kohdekoodiolio liitettynä x:ään on "[this].concat(x)" kohdekoodina.
 
 Kun kiva kohdekoodiolio kirjataan lokiin,
 	suorita kohdekoodi "console.log(this);".
@@ -22,9 +23,18 @@ Tulkitse kohdekoodilista kohdekoodityyppinä "Array".
 
 Kohdekoodilistan määrä on "this.length" kohdekoodina.
 Kohdekoodilistan summa on "this.reduce((a,b) => a+b)" kohdekoodina.
+Kohdekoodilista järjestettynä on "Array.from(this.alkio).sort()" kohdekoodina.
+Kohdekoodilista järjestettynä järkevään järjestykseen on
+	"Array.from(this.alkio).sort(järkevä_järjestys.verrata_P_PSt_Mukaisesti.bind(järkevä_järjestys))" kohdekoodina.
 
 Kun kivaksi kohdekoodilistaksi lisätään kiva arvo,
 	suorita kohdekoodi "this.push(kiva_arvo);".
+
+Kun kiva kohdekoodilista järjestetään,
+	suorita kohdekoodi "this.sort();".
+
+Kun kiva kohdekoodilista järjestetään järkevään järjestykseen,
+	suorita kohdekoodi "this.sort(järkevä_järjestys.verrata_P_PSt_Mukaisesti.bind(järkevä_järjestys));".
 
 # Lista
 
@@ -35,7 +45,8 @@ Listan koko on "this.alkio.length" kohdekoodina
 Listan pituus on sen koko.
 Listan häntä on "new lista({alkio: this.alkio.slice(1)})" kohdekoodina
 	(eli uusi lista, jonka alkiot ovat sen alkiot toisesta alkaen).
-Lista järjestettynä on "new lista({alkio: Array.from(this.alkio).sort()})" kohdekoodina.
+Lista järjestettynä on uusi lista, jonka alkiot ovat sen alkiot järjestettynä.
+Lista järjestettynä järkevään järjestykseen on uusi lista, jonka alkiot ovat sen alkiot järjestettynä järkevään järjestykseen.
 Listan suurin alkio on "this.alkio.reduce((a, b) => Math.max(a, b), -Infinity)" kohdekoodina.
 Listan pisin alkio on "this.alkio.reduce((a, b) => a.f_pituus()<b.f_pituus()?b:a, {f_pituus(){return -Infinity;}})" kohdekoodina.
 
@@ -43,7 +54,10 @@ Kun kiva lista etsii indeksin kivalle arvolle,
 	suorita kohdekoodi "return this.alkio.indexOf(kiva_arvo);".
 
 Kun kiva lista järjestetään,
-	suorita kohdekoodi "this.alkio.sort();".
+	sen alkiot järjestetään.
+
+Kun kiva lista järjestetään järkevään järjestykseen,
+	sen alkiot järjestetään järkevään järjestykseen.
 
 Kun kivaan listaan lisätään kiva arvo,
 	suorita kohdekoodi "this.alkio.push(kiva_arvo);".
@@ -54,6 +68,19 @@ Kun kivasta listasta poistetaan kiva arvo,
 Kiva lista on tyhjä, jos sen alkioiden määrä on nolla.
 
 Olkoon tyhjä lista uusi lista.
+
+# Järjestys
+
+Järjestyksellä ei ole kenttiä.
+
+Suuruusjärjestys on järjestys, jolla on suunta.
+
+Kun selkeän suuruusjärjestyksen mukaisesti verrataan a:ta b:hen,
+	komento "(this.suunta?a<b:a>b)?-1:(a==b?0:1)" kohdekoodina palautetaan.
+
+Olkoon nouseva suuruusjärjestys suuruusjärjestys, jonka suunta on "true" kohdekoodina.
+Olkoon laskeva suuruusjärjestys suuruusjärjestys, jonka suunta on "false" kohdekoodina.
+Olkoon käänteinen suuruusjärjestys laskeva suuruusjärjestys.
 
 # Function
 

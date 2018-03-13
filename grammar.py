@@ -237,9 +237,16 @@ def parseDeclaration(tokens):
 		if word.isNoun() and word.form == "ulkoolento":
 			tokens.next()
 			tokens.setStyle("type")
-			accept(["on"], tokens)
+			kw = accept(["on", "ei"], tokens)
 			tokens.setStyle("keyword")
-			fields = parseList(parseFieldDecl, tokens)
+			if kw == "on":
+				fields = parseList(parseFieldDecl, tokens)
+			else:
+				accept(["ole"], tokens)
+				tokens.setStyle("keyword")
+				accept(["kenttiä"], tokens)
+				tokens.setStyle("keyword")
+				fields = []
 			stmts = parseAdditionalStatements(tokens)
 			eatPeriod(tokens)
 			tokens.addNewline()

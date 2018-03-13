@@ -776,7 +776,6 @@ ARI_OPERATORS = {
 	"ynnätty_E": ("sisatulento", "+", ["luku", "merkkijono"]),
 	"kasvatettu_E": ("ulkoolento", "+", ["luku", "merkkijono"]),
 	"yhdistetty_E": ("sisatulento", ".concat", []),
-	"liitetty_E": ("sisatulento", ".t_prepend", ["kohdekoodilista"]),
 	"vähennetty_E": ("ulkoolento", "-", ["luku"]),
 	"kerrottu_E": ("ulkoolento", "*", ["luku"]),
 	"jaettu_E": ("ulkoolento", "/", ["luku"]),

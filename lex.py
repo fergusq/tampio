@@ -209,8 +209,10 @@ def checkEof(tokens):
 
 def accept(accepted, tokens):
 	checkEof(tokens)
-	if tokens.next().token.lower() not in accepted:
+	token = tokens.next().token.lower()
+	if token not in accepted:
 		syntaxError("unexpected token, expected " + " or ".join(["\"" + t + "\"" for t in accepted]), tokens)
+	return token
 
 def afterCommaThereIs(word, tokens):
 	i = 1
