@@ -8,7 +8,7 @@ Object.prototype.t_assign = function(n, v) { this[n] = v; };
 
 Tulkitse kohdekoodiolio kohdekoodityyppinä "Object".
 
-Kohdekoodiolio liitettynä x:ään on "[this].concat(x)" kohdekoodina.
+Kohdekoodiolio liitettynä kivaan alkioon on "[this].concat(kiva_alkio)" kohdekoodina.
 
 Kun kiva kohdekoodiolio kirjataan lokiin,
 	suorita kohdekoodi "console.log(this);".
@@ -235,6 +235,13 @@ Kun tehdään määritellyn ajan kuluttua tehokas toiminto,
 
 Kun tulostetaan kiva viesti,
 	suorita kohdekoodi "console.log(kiva_viesti);".
+
+Tulkitse konsoli kohdekoodityyppinä "console.__proto__".
+
+Olkoon nykyinen konsoli "console" kohdekoodina.
+
+Kun tulostetaan kiva viesti kivaan konsoliin,
+	suorita kohdekoodi "kiva_konsoli.log(kiva_viesti);".
 
 # annetut argumentit
 
