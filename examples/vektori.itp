@@ -24,6 +24,12 @@ Veikeä vektori pistekerrottuna mahtavalla vektorilla on
 Kun lyhyeen vektoriin lisätään kiva komponentti,
 	lyhyen vektorin komponentiksi lisätään kiva komponentti.
 
+Kun lyhyt vektori järjestetään,
+	sen komponentit järjestetään.
+
+Kun lyhyt vektori järjestetään kivaan järjestykseen,
+	sen komponentit järjestetään kivaan järjestykseen.
+
 Kun lyhyt vektori painetaan nykyiselle sivulle,
 	nykyinen sivu näyttää tekstin "[",
 	lyhyt vektori painetaan sulutta nykyiselle sivulle
@@ -46,5 +52,11 @@ Kun nykyinen sivu avautuu,
 	nykyinen sivu näyttää villin vektorin summan,
 	nykyinen sivu näyttää tekstin "<br/>Pituus: ",
 	nykyinen sivu näyttää villin vektorin pituuden,
-	nykyinen sivu näyttää tekstin "<br/>Pistetulo: "
-ja	nykyinen sivu näyttää villin vektorin pistekerrottuna villillä vektorilla.
+	nykyinen sivu näyttää tekstin "<br/>Pistetulo: ",
+	nykyinen sivu näyttää villin vektorin pistekerrottuna villillä vektorilla,
+	nykyinen sivu näyttää tekstin "<br/>Järjestetty: ",
+	villi vektori järjestetään,
+	villi vektori painetaan nykyiselle sivulle,
+	nykyinen sivu näyttää tekstin "<br/>Käänteinen järjestys: ",
+	villi vektori järjestetään laskevaan suuruusjärjestykseen
+ja	villi vektori painetaan nykyiselle sivulle.
