@@ -236,8 +236,6 @@ Kun tehdään määritellyn ajan kuluttua tehokas toiminto,
 Kun tulostetaan kiva viesti,
 	suorita kohdekoodi "console.log(kiva_viesti);".
 
-Tulkitse konsoli kohdekoodityyppinä "console.__proto__".
-
 Olkoon nykyinen konsoli "console" kohdekoodina.
 
 Kun tulostetaan kiva viesti kivaan konsoliin,
