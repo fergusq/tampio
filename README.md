@@ -472,9 +472,9 @@ A _condition expression_ is a list of conditions separated by logical connective
 |Precedence level|Connective|JavaScript equivalent|
 |:--------------:|:---------|:--------------------|
 |1.              |`ja`      |`&&`                 |
-|1.              |`tai`     |`||`                 |
+|1.              |`tai`     |`\|\|`               |
 |2.              |`sekä`    |`&&`                 |
-|2.              |`taikka`  |`||`                 |
+|2.              |`taikka`  |`\|\|`               |
 
 A _condition_ can be either a builtin operator or a boolean function.
 Boolean functions are described in a previous chapter.
