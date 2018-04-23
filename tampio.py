@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Tampio Interpreter
+# Tampio Compiler
 # Copyright (C) 2018 Iikka Hauhio
 #
 # This program is free software: you can redistribute it and/or modify

@@ -1199,7 +1199,9 @@ In the table below, the verbs *lisätä* (to add) and *tulostaa* (to print) are 
 
 ## License
 
-The interpreter is licensed under the GNU General Public License, version 3 or later.
+The Tampio Compiler is licensed under the GNU General Public License, version 3 or later.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 See the LICENSE file for details.
+
+The examples are dual licensed under the MIT license and the Finnish translation of the MIT license (FTM license).
